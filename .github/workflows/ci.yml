@@ -238,7 +238,14 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type.name }} \
             -S .
 
-      - name: Build Tests
+      - name: Build Tests (Ubuntu)
+        if: matrix.os.name == 'ubuntu'
+        working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
+        run: |
+          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }}
+
+      - name: Build Tests (Windows)
+        if: matrix.os.name == 'windows'
         working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
         run: |
           cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }} -- "${{ matrix.compiler.builder_additional_args }}"

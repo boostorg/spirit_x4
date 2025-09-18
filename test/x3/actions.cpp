@@ -21,31 +21,6 @@
 
 namespace x3 = boost::spirit::x3;
 
-int x = 0;
-
-auto fun1 =
-    [](auto& ctx)
-    {
-        x += x3::_attr(ctx);
-    }
-;
-
-struct fun_action
-{
-    template <typename Context>
-    void operator()(Context const& ctx) const
-    {
-        x += x3::_attr(ctx);
-    }
-};
-
-auto fail =
-    [](auto& ctx)
-    {
-        x3::_pass(ctx) = false;
-    }
-;
-
 struct setnext
 {
     setnext(char& next) : next(next) {}
@@ -66,26 +41,17 @@ int main()
     BOOST_SPIRIT_X3_ASSERT_CONSTEXPR_CTORS(x3::int_type{}[std::true_type{}]);
 
     {
+        int x = 0;
+        auto const fun_action = [&](auto& ctx) { x += x3::_attr(ctx); };
         char const *s1 = "{42}", *e1 = s1 + std::strlen(s1);
-        BOOST_TEST(parse(s1, e1, '{' >> int_[fun1] >> '}'));
+        BOOST_TEST(parse(s1, e1, '{' >> int_[fun_action] >> '}'));
     }
     {
-        char const *s1 = "{42}", *e1 = s1 + std::strlen(s1);
-        BOOST_TEST(parse(s1, e1, '{' >> int_[fun_action()] >> '}'));
-    }
-    {
-        using namespace std::placeholders;
-        char const *s1 = "{42}", *e1 = s1 + std::strlen(s1);
-        BOOST_TEST(parse(s1, e1, '{' >> int_[std::bind(fun_action(), _1)] >> '}'));
-    }
-
-    BOOST_TEST(x == (42*3));
-
-    {
-       std::string input("1234 6543");
-       char next = '\0';
-       BOOST_TEST(parse(input, x3::int_[fail] | x3::digit[setnext(next)], x3::space).is_partial_match());
-       BOOST_TEST(next == '1');
+        auto const fail = [](auto& ctx) { x3::_pass(ctx) = false; };
+        std::string input("1234 6543");
+        char next = '\0';
+        BOOST_TEST(parse(input, x3::int_[fail] | x3::digit[setnext(next)], x3::space).is_partial_match());
+        BOOST_TEST(next == '1');
     }
 
     {

@@ -7,6 +7,11 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable: 6262) // Function uses 'XXXXX' bytes of stack
+#endif
+
 #include "test.hpp"
 
 #include <boost/spirit/home/x3.hpp>
@@ -682,3 +687,7 @@ int main()
 
     return boost::report_errors();
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif

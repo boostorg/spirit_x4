@@ -135,7 +135,7 @@ void test_unparsed_digits_are_not_consumed(char const* it, char const* end, int 
         BOOST_TEST_EQ(x, i);
     }
     else {
-        BOOST_TEST_EQ(end - it, len - 1 - has_sign);
+        BOOST_TEST_EQ(end - it, len - 1 - int(has_sign));
         BOOST_TEST_EQ(x, i / Base);
     }
 }

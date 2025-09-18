@@ -361,6 +361,8 @@ namespace boost::spirit::x3::detail
             bool parse_ok;
             {
             #ifdef BOOST_SPIRIT_X3_DEBUG
+                parse_ok = false;
+
                 // Create a scope to cause the dbg variable below (within
                 // the #if...#endif) to call it's DTOR before any
                 // modifications are made to the attribute, attr_ passed
