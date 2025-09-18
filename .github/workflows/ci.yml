@@ -5,7 +5,7 @@ on:
   push:
 
 concurrency:
-  group: ${{format('{0}:{1}', github.repository, github.ref)}}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -245,7 +245,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          cmake --build build --config ${{ matrix.build_type.name }} -j$BOOST_SPIRIT_X4_BUILD_JOBS
+          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }}
 
       - name: Build Tests (Windows)
         if: matrix.os.name == 'windows'
@@ -253,7 +253,7 @@ jobs:
           BOOST_ROOT: ${{ steps.env-info.outputs.BOOST_ROOT }}
         working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
         run: |
-          cmake --build build/test --verbose --config ${{ matrix.build_type.name }} -j%BOOST_SPIRIT_X4_BUILD_JOBS%
+          cmake --build build/test --verbose --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }}
 
       - name: Test (Ubuntu)
         if: matrix.os.name == 'ubuntu'
