@@ -72,6 +72,7 @@ jobs:
           - name: MSVC
             toolset: msvc
             version: 2022
+            builder_additional_args: -consoleLoggerParameters:ForceConsoleColor
             executable: cl
 
         spirit_component: ${{ fromJSON(needs.changes.outputs.spirit_component) }}
@@ -240,7 +241,7 @@ jobs:
       - name: Build Tests
         working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
         run: |
-          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }}
+          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }} -- "${{ matrix.compiler.builder_additional_args }}"
 
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         if: matrix.os.name == 'windows'
