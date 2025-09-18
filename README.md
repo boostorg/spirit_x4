@@ -36,36 +36,95 @@ Stay tuned!
 
 ## How to use Spirit
 
-Setup:
+### Step 1. Setup the Boost superproject
+
+#### For applications:
 
 ```console
 cd my_app
 
 git submodule add https://github.com/boostorg/boost.git modules/boost
+cd modules/boost
 
 # Not required after X4 is officially shipped
-git submodule add https://github.com/boostorg/spirit_x4.git modules/spirit_x4
-ln -s ../../spirit_x4 modules/boost/libs/
+git submodule add https://github.com/boostorg/spirit_x4.git libs/spirit_x4
 ```
 
-Edit your `CMakeLists.txt`:
-
-```cmake
-add_subdirectory(modules/spirit_x4)
-target_link_libraries(my_app PRIVATE Boost::spirit_x4)
-```
-
-## How to develop Spirit
+#### For Spirit development:
 
 ```console
 git clone https://github.com/boostorg/boost.git
 cd boost
-git submodule update --init --recursive
-cd libs
 
 # Not required after X4 is officially shipped
-git clone https://github.com/boostorg/spirit_x4.git
-cd spirit_x4
+git clone https://github.com/boostorg/spirit_x4.git libs/spirit_x4
+```
+
+### Step 2. Setup the dependent Boost libraries
+
+We're trying hard to reduce these dependencies. We aim to remove these entirely in the future.
+
+```console
+git submodule update --init --depth 1 --recursive -- \
+    tools/build \
+    tools/boost_install \
+    libs/assert \
+    libs/bind \
+    libs/config \
+    libs/container_hash \
+    libs/core \
+    libs/describe \
+    libs/detail \
+    libs/endian \
+    libs/function \
+    libs/function_types \
+    libs/functional \
+    libs/fusion \
+    libs/integer \
+    libs/io \
+    libs/mp11 \
+    libs/mpl \
+    libs/predef \
+    libs/preprocessor \
+    libs/static_assert \
+    libs/throw_exception \
+    libs/tuple \
+    libs/type_index \
+    libs/type_traits \
+    libs/typeof \
+    libs/utility \
+    libs/variant
+```
+
+#### Linux
+
+```console
+./bootstrap.sh --with-toolset=gcc
+./b2 headers
+```
+
+#### Windows
+
+```console
+.\bootstrap.bat
+.\b2 headers
+```
+
+### Step 3. Start using Spirit
+
+#### For applications:
+
+Edit your `CMakeLists.txt`:
+
+```cmake
+add_subdirectory(modules/boost/libs/spirit_x4)
+target_link_libraries(my_app PRIVATE Boost::spirit_x4)
+```
+
+#### For developing Spirit:
+
+```console
+cd libs/spirit_x4
 cmake -B build
 ```
 
