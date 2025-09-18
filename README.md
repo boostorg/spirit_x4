@@ -11,7 +11,7 @@ For background information, see:
 - <https://github.com/boostorg/spirit/pull/807>
 
 
-# ... Outdated README follows...
+# ... WIP content follows ...
 
 
 # Spirit.X4 [![Build Status](https://github.com/boostorg/spirit/actions/workflows/ci.yml/badge.svg)](https://github.com/boostorg/spirit/actions/workflows/ci.yml)
