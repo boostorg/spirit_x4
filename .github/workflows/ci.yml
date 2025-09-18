@@ -10,7 +10,7 @@ concurrency:
 
 env:
   BOOST_SPIRIT_BUILD_JOBS: 4
-  BOOST_SPIRIT_CACHED_UPSTREAM_LIBS: --with-regex --with-thread --with-atomic --with-chrono --with-container --with-date_time --with-exception --with-math
+  BOOST_SPIRIT_CACHED_UPSTREAM_LIBS: --with-fusion --with-variant --with-endian --with-preprocessor --with-core
 
 jobs:
   changes:
