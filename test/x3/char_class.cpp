@@ -181,7 +181,7 @@ int main()
     {   // test action
         using namespace boost::spirit::x3::standard;
         using boost::spirit::x3::_attr;
-        char ch;
+        char ch = '\0';
         auto f = [&](auto& ctx){ ch = _attr(ctx); };
 
         BOOST_TEST(parse("x", alnum[f]));

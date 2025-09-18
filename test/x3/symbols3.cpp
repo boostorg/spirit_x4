@@ -86,7 +86,7 @@ int main()
     { // unicode | construction from initializer-list
         x3::shared_symbols_parser<x3::char_encoding::unicode, int> foo = {{U"a1", 1}, {U"a2", 2}, {U"a3", 3}};
 
-        int r;
+        int r = 0;
         BOOST_TEST(parse(U"a3", foo, r));
         BOOST_TEST(r == 3);
     }

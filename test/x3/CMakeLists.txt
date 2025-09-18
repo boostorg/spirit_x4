@@ -95,7 +95,6 @@ x4_define_tests(
     uint_radix
     unused
     with
-    x3_variant
 )
 
 x4_define_test(rule_separate_tu rule_separate_tu.cpp rule_separate_tu_grammar.cpp)

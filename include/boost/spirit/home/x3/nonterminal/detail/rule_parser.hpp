@@ -94,7 +94,7 @@ namespace boost::spirit::x3::detail
             char const* rule_name,
             It const& first, Se const& last,
             Attribute const& attr,
-            bool const& parse_ok
+            bool const* parse_ok
         )
             : parse_ok(parse_ok)
             , rule_name(rule_name)
@@ -108,10 +108,10 @@ namespace boost::spirit::x3::detail
 
         ~scoped_debug()
         {
-            f(first, last, attr, parse_ok ? successful_parse : failed_parse, rule_name);
+            f(first, last, attr, *parse_ok ? successful_parse : failed_parse, rule_name);
         }
 
-        bool const& parse_ok;
+        bool const* parse_ok = nullptr;
         char const* rule_name = nullptr;
         It const& first;
         Se const& last;
@@ -368,7 +368,7 @@ namespace boost::spirit::x3::detail
                 // transform::post when, for example,
                 // Exposed is a recursive variant).
                 scoped_debug<It, Se, transform_attr>
-                dbg(rule_name, first, last, attr_, parse_ok);
+                dbg(rule_name, first, last, attr_, &parse_ok);
             #else
                 (void)rule_name;
             #endif

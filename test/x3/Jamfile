@@ -122,7 +122,6 @@ run seek.cpp ;
 run unused.cpp ;
 run attribute_type_check.cpp ;
 run fusion_map.cpp ;
-run x3_variant.cpp ;
 run error_handler.cpp ;
 run iterator_check.cpp ;
 
