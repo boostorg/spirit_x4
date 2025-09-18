@@ -27,12 +27,47 @@ executable.
 
 Stay tuned!
 
-### Supported environments
+### Supported Environments
 
 - C++23 and C++26
 - GCC 14
 - Clang 21
-- MSVC (2022)
+- MSVC 2022
+
+## How to use Spirit
+
+Setup:
+
+```console
+cd my_app
+
+git submodule add https://github.com/boostorg/boost.git modules/boost
+
+# Not required after X4 is officially shipped
+git submodule add https://github.com/boostorg/spirit_x4.git modules/spirit_x4
+ln -s ../../spirit_x4 modules/boost/libs/
+```
+
+Edit your `CMakeLists.txt`:
+
+```cmake
+add_subdirectory(modules/spirit_x4)
+target_link_libraries(my_app PRIVATE Boost::spirit_x4)
+```
+
+## How to develop Spirit
+
+```console
+git clone https://github.com/boostorg/boost.git
+cd boost
+git submodule update --init --recursive
+cd libs
+
+# Not required after X4 is officially shipped
+git clone https://github.com/boostorg/spirit_x4.git
+cd spirit_x4
+cmake -B build
+```
 
 
 ## Brief History
