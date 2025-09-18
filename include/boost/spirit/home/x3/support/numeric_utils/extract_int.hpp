@@ -11,10 +11,11 @@
 
 #include <boost/spirit/home/x3/support/traits/move_to.hpp>
 #include <boost/spirit/home/x3/support/numeric_utils/detail/extract_int_impl.hpp>
-#include <boost/assert.hpp>
 
 #include <iterator>
 #include <type_traits>
+
+#include <cassert>
 
 namespace boost::spirit::x3
 {
@@ -30,7 +31,7 @@ namespace boost::spirit::x3
             )
         {
             (void)last;
-            BOOST_ASSERT(first != last); // precondition
+            assert(first != last); // precondition
 
             // Extract the sign
             bool const neg = *first == '-';

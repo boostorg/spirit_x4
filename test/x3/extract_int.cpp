@@ -95,8 +95,12 @@ void test_overflow_handling(char const* begin, char const* end, int i)
 {
     // Check that parser fails on overflow
     static_assert(std::numeric_limits<T>::is_bounded, "tests prerequest");
-    BOOST_ASSERT_MSG(MaxDigits == -1 || static_cast<int>(std::pow(float(Base), MaxDigits)) > T::max,
-                     "test prerequest");
+
+    if constexpr (MaxDigits != -1)
+    {
+        assert(static_cast<int>(std::pow(float(Base), MaxDigits)) > T::max && "tests prerequest");
+    }
+
     int initial = Base - i % Base; // just a 'random' non-equal to i number
     T x { initial };
     char const* it = begin;

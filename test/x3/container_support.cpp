@@ -11,9 +11,6 @@
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
-
 #include <iostream>
 #include <map>
 #include <set>
@@ -207,16 +204,12 @@ int main()
 
     static_assert(is_associative_v<std::set<int>>, "is_associative problem");
     static_assert(is_associative_v<std::unordered_set<int>>, "is_associative problem");
-    static_assert(is_associative_v<boost::unordered_set<int>>, "is_associative problem");
     static_assert(is_associative_v<std::multiset<int>>, "is_associative problem");
     static_assert(is_associative_v<std::unordered_multiset<int>>, "is_associative problem");
-    static_assert(is_associative_v<boost::unordered_multiset<int>>, "is_associative problem");
     static_assert(is_associative_v<std::map<int,int>>, "is_associative problem");
     static_assert(is_associative_v<std::unordered_map<int,int>>, "is_associative problem");
-    static_assert(is_associative_v<boost::unordered_map<int,int>>, "is_associative problem");
     static_assert(is_associative_v<std::multimap<int,int>>, "is_associative problem");
     static_assert(is_associative_v<std::unordered_multimap<int,int>>, "is_associative problem");
-    static_assert(is_associative_v<boost::unordered_multimap<int,int>>, "is_associative problem");
 
     static_assert(!is_associative_v<std::vector<int>>, "is_associative problem");
     static_assert(!is_associative_v<std::string>, "is_associative problem");
@@ -233,19 +226,15 @@ int main()
 
     test_set_support<std::set<std::string>>();
     test_set_support<std::unordered_set<std::string>>();
-    test_set_support<boost::unordered_set<std::string>>();
 
     test_multiset_support<std::multiset<std::string>>();
     test_multiset_support<std::unordered_multiset<std::string>>();
-    test_multiset_support<boost::unordered_multiset<std::string>>();
 
     test_map_support<std::map<std::string,std::string>>();
     test_map_support<std::unordered_map<std::string,std::string>>();
-    test_map_support<boost::unordered_map<std::string,std::string>>();
 
     test_multimap_support<std::multimap<std::string,std::string>>();
     test_multimap_support<std::unordered_multimap<std::string,std::string>>();
-    test_multimap_support<boost::unordered_multimap<std::string,std::string>>();
 
     return boost::report_errors();
 }

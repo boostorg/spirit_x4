@@ -12,7 +12,6 @@
 #include <boost/spirit/home/x3/support/unused.hpp>
 #include <boost/spirit/home/x3/support/context.hpp>
 #include <boost/spirit/home/x3/support/traits/has_attribute.hpp>
-#include <boost/assert.hpp>
 
 #include <iterator>
 #include <string>

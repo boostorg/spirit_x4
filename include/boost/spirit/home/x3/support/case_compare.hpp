@@ -45,20 +45,21 @@ namespace boost::spirit::x3
         template <typename Char, typename CharSet>
         [[nodiscard]] bool in_set(Char ch_, CharSet const& set) noexcept // TODO: constexpr
         {
-            using char_type = typename Encoding::classify_type;
-            auto ch = char_type(ch_);
+            using classify_type = typename Encoding::classify_type;
+            auto ch = classify_type(ch_);
             static_assert(noexcept(set.test(ch)));
             return set.test(ch)
-                || set.test(Encoding::islower(ch)
-                    ? Encoding::toupper(ch) : Encoding::tolower(ch));
+                || set.test(static_cast<classify_type>(
+                    Encoding::islower(ch) ? Encoding::toupper(ch) : Encoding::tolower(ch))
+                );
         }
 
         template <typename Char>
         [[nodiscard]] std::int32_t operator()(Char lc_, Char const rc_) const noexcept // TODO: constexpr
         {
-            using char_type = typename Encoding::classify_type;
-            auto lc = char_type(lc_);
-            auto rc = char_type(rc_);
+            using classify_type = typename Encoding::classify_type;
+            auto lc = classify_type(lc_);
+            auto rc = classify_type(rc_);
             return Encoding::islower(rc)
                 ? Encoding::tolower(lc) - rc : Encoding::toupper(lc) - rc;
         }

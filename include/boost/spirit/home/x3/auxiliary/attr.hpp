@@ -2,6 +2,7 @@
     Copyright (c) 2001-2011 Hartmut Kaiser
     Copyright (c) 2001-2014 Joel de Guzman
     Copyright (c) 2013 Agustin Berge
+    Copyright (c) 2025 Nana Sakisaka
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -13,108 +14,90 @@
 #include <boost/spirit/home/x3/support/unused.hpp>
 #include <boost/spirit/home/x3/support/traits/container_traits.hpp>
 #include <boost/spirit/home/x3/support/traits/move_to.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/type_traits/remove_cv.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <cstddef>
+#include <boost/spirit/home/x3/support/traits/string_traits.hpp>
+
 #include <string>
+#include <iterator>
+#include <type_traits>
 #include <utility>
 
-namespace boost { namespace spirit { namespace x3
+namespace boost::spirit::x3
 {
-
-namespace detail
-{
-    template <typename Value, std::size_t N
-      , typename = std::make_index_sequence<N>>
-    struct array_helper;
-
-    template <typename Value, std::size_t N, std::size_t... Is>
-    struct array_helper<Value, N, std::index_sequence<Is...>>
+    template <typename T>
+    struct attr_parser : parser<attr_parser<T>>
     {
-        constexpr array_helper(Value const (&value)[N])
-            : value_{ value[Is]... } {}
+        static_assert(X3Attribute<T>);
+        using attribute_type = T;
 
-        constexpr array_helper(Value (&&value)[N])
-            : value_{ static_cast<Value&&>(value[Is])... } {}
+        static constexpr bool has_attribute = !std::is_same_v<T, unused_type>;
+        static constexpr bool handles_container = traits::is_container_v<T>;
 
-        Value value_[N];
-    };
-}
+        template <typename U>
+            requires
+                (!std::is_same_v<std::remove_cvref_t<U>, attr_parser>) &&
+                std::is_constructible_v<T, U>
+        constexpr attr_parser(U&& value)
+            noexcept(std::is_nothrow_constructible_v<T, U>)
+            : value_(std::forward<U>(value))
+        {}
 
-    template <typename Value>
-    struct attr_parser : parser<attr_parser<Value>>
-    {
-        typedef Value attribute_type;
-
-        static bool const has_attribute =
-            !is_same<unused_type, attribute_type>::value;
-        static bool const handles_container =
-            traits::is_container<attribute_type>::value;
-        
-        constexpr attr_parser(Value const& value)
-          : value_(value) {}
-        constexpr attr_parser(Value&& value)
-          : value_(std::move(value)) {}
-
-        template <typename Iterator, typename Context
-          , typename RuleContext, typename Attribute>
-        bool parse(Iterator& /* first */, Iterator const& /* last */
-          , Context const& /* context */, RuleContext&, Attribute& attr_) const
+        template <std::forward_iterator It, std::sentinel_for<It> Se, typename Context, typename RContext, typename Attribute>
+        [[nodiscard]] constexpr bool
+        parse(It&, Se const&, Context const&, RContext const&, Attribute& attr_) const
+            noexcept(noexcept(traits::move_to(std::as_const(value_), attr_)))
         {
-            // $$$ Change to copy_to once we have it $$$
-            traits::move_to(value_, attr_);
+            // Always copy (need reuse in repetitive invocations)
+            traits::move_to(std::as_const(value_), attr_);
             return true;
         }
 
-        Value value_;
+    private:
+        T value_;
     };
-    
-    template <typename Value, std::size_t N>
-    struct attr_parser<Value[N]> : parser<attr_parser<Value[N]>>
-      , detail::array_helper<Value, N>
+
+    template <traits::CharArray R>
+    attr_parser(R const&) -> attr_parser<std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>>;
+
+    template <typename T>
+    struct get_info<attr_parser<T>>
     {
-        using detail::array_helper<Value, N>::array_helper;
-
-        typedef Value attribute_type[N];
-
-        static bool const has_attribute =
-            !is_same<unused_type, attribute_type>::value;
-        static bool const handles_container = true;
-
-        template <typename Iterator, typename Context
-          , typename RuleContext, typename Attribute>
-        bool parse(Iterator& /* first */, Iterator const& /* last */
-          , Context const& /* context */, RuleContext&, Attribute& attr_) const
-        {
-            // $$$ Change to copy_to once we have it $$$
-            traits::move_to(this->value_ + 0, this->value_ + N, attr_);
-            return true;
-        }
-    };
-    
-    template <typename Value>
-    struct get_info<attr_parser<Value>>
-    {
-        typedef std::string result_type;
-        std::string operator()(attr_parser<Value> const& /*p*/) const
+        using result_type = std::string;
+        [[nodiscard]] constexpr std::string
+        operator()(attr_parser<T> const&) const
         {
             return "attr";
         }
     };
 
-    struct attr_gen
+    namespace detail
     {
-        template <typename Value>
-        constexpr attr_parser<typename remove_cv<
-            typename remove_reference<Value>::type>::type>
-        operator()(Value&& value) const
+        struct attr_gen
         {
-            return { std::forward<Value>(value) };
-        }
-    };
+            template <typename T>
+            [[nodiscard]] static constexpr attr_parser<std::remove_cvref_t<T>>
+            operator()(T&& value)
+                noexcept(std::is_nothrow_constructible_v<attr_parser<std::remove_cvref_t<T>>, T>)
+            {
+                return { std::forward<T>(value) };
+            }
 
-    constexpr auto attr = attr_gen{};
-}}}
+            template <traits::CharArray R>
+            [[nodiscard]] static constexpr attr_parser<std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>>
+            operator()(R&& value)
+                noexcept(std::is_nothrow_constructible_v<attr_parser<std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>>, R>)
+            {
+                return { std::forward<R>(value) };
+            }
+        };
+
+    } // detail
+
+    inline namespace cpos
+    {
+        inline constexpr detail::attr_gen attr{};
+
+    } // cpos
+
+} // boost::spirit::x3
 
 #endif

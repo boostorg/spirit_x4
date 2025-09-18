@@ -12,12 +12,12 @@
 #include <boost/spirit/home/x3/support/unused.hpp>
 #include <boost/spirit/home/x3/support/numeric_utils/pow10.hpp>
 #include <boost/spirit/home/x3/support/traits/move_to.hpp>
-#include <boost/assert.hpp>
 
 #include <iterator>
 #include <type_traits>
 #include <limits>
 
+#include <cassert>
 #include <cmath>
 
 // TODO: fix this
@@ -192,7 +192,7 @@ namespace boost::spirit::x3
                     {
                         frac_digits = static_cast<int>(std::distance(savef, first));
                     }
-                    BOOST_ASSERT(frac_digits >= 0);
+                    assert(frac_digits >= 0);
                 }
                 else if (!got_a_number || !p.allow_trailing_dot)
                 {

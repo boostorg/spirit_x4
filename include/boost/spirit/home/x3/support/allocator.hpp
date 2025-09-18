@@ -4,14 +4,14 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-#if !defined(BOOST_SPIRIT_X3_SUPPORT_ALLOCATOR_HPP)
+#ifndef BOOST_SPIRIT_X3_SUPPORT_ALLOCATOR_HPP
 #define BOOST_SPIRIT_X3_SUPPORT_ALLOCATOR_HPP
-
-#include <boost/assert.hpp>
 
 #include <memory>
 #include <type_traits>
 #include <utility>
+
+#include <cassert>
 
 namespace boost::spirit::x3::detail {
 
@@ -49,7 +49,7 @@ struct allocator_ops
     template <auto AllocMem, auto... Mems>
     static constexpr void copy_assign(Klass& self, Klass const& other)
     {
-        BOOST_ASSERT(std::addressof(self) != std::addressof(other));
+        assert(std::addressof(self) != std::addressof(other));
 
         (allocator_ops::copy_assign_impl<AllocMem, Mems>(self, other), ...);
 
@@ -65,7 +65,7 @@ struct allocator_ops
     static constexpr void move_assign(Klass& self, Klass&& other)
         noexcept(move_assign_noexcept<decltype(self.*AllocMem)>)
     {
-        BOOST_ASSERT(std::addressof(self) != std::addressof(other));
+        assert(std::addressof(self) != std::addressof(other));
 
         (allocator_ops::move_assign_impl<AllocMem, Mems>(self, std::move(other)), ...);
 

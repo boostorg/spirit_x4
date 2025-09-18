@@ -1,19 +1,21 @@
 /*=============================================================================
     Copyright (c) 2001-2014 Joel de Guzman
     Copyright (c) 2001-2011 Hartmut Kaiser
+    Copyright (c) 2025 Nana Sakisaka
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-#if !defined(BOOST_SPIRIT_X3_SIMPLE_TRACE_DECEMBER_06_2008_1102AM)
+#ifndef BOOST_SPIRIT_X3_SIMPLE_TRACE_DECEMBER_06_2008_1102AM
 #define BOOST_SPIRIT_X3_SIMPLE_TRACE_DECEMBER_06_2008_1102AM
 
 #include <boost/spirit/home/x3/support/unused.hpp>
 #include <boost/spirit/home/x3/support/traits/print_token.hpp>
 #include <boost/spirit/home/x3/support/traits/print_attribute.hpp>
 #include <boost/spirit/home/x3/nonterminal/debug_handler_state.hpp>
-#include <boost/type_traits/is_same.hpp>
+
 #include <iostream>
+#include <type_traits>
 
 //  The stream to use for debug output
 #if !defined(BOOST_SPIRIT_X3_DEBUG_OUT)
@@ -30,7 +32,7 @@
 #define BOOST_SPIRIT_X3_DEBUG_INDENT 2
 #endif
 
-namespace boost { namespace spirit { namespace x3
+namespace boost::spirit::x3
 {
     namespace detail
     {
@@ -91,7 +93,7 @@ namespace boost { namespace spirit { namespace x3
 
                 case successful_parse:
                     print_some("success", first, last);
-                    if (!is_same<Attribute, unused_type>::value)
+                    if constexpr (!std::is_same_v<Attribute, unused_type>)
                     {
                         print_indent(indent);
                         out
@@ -135,6 +137,7 @@ namespace boost { namespace spirit { namespace x3
             return tracer;
         }
     }
-}}}
+
+} // boost::spirit::x3
 
 #endif

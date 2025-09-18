@@ -12,7 +12,7 @@
 #include <cstddef>
 
 #if _MSC_VER
-# include <CppCoreCheck/Warnings.h>
+# include <CodeAnalysis/CppCoreCheck/warnings.h>
 # pragma warning(default: CPPCORECHECK_LIFETIME_WARNINGS)
 #endif
 

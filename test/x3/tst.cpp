@@ -9,7 +9,6 @@
 #include "test.hpp"
 
 #include <boost/spirit/home/x3/string/tst.hpp>
-#include <boost/spirit/home/x3/string/tst_map.hpp>
 #include <boost/spirit/home/x3/support/case_compare.hpp>
 #include <boost/spirit/home/x3/char_encoding/standard.hpp>
 #include <boost/spirit/home/x3/char_encoding/standard_wide.hpp>
@@ -334,10 +333,8 @@ void tests()
 int main()
 {
     using x3::tst;
-    using x3::tst_map;
 
     tests<tst<char, int>, tst<wchar_t, int> >();
-//~    tests<tst_map<char, int>, tst_map<wchar_t, int> >();
 
     return boost::report_errors();
 }

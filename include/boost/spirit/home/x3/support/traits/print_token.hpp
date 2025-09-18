@@ -1,25 +1,24 @@
 /*=============================================================================
     Copyright (c) 2001-2014 Joel de Guzman
     Copyright (c) 2001-2011 Hartmut Kaiser
+    Copyright (c) 2025 Nana Sakisaka
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ================================================_==============================*/
-#if !defined(BOOST_SPIRIT_X3_PRINT_TOKEN_JANUARY_20_2013_0814AM)
+#ifndef BOOST_SPIRIT_X3_PRINT_TOKEN_JANUARY_20_2013_0814AM
 #define BOOST_SPIRIT_X3_PRINT_TOKEN_JANUARY_20_2013_0814AM
 
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
-#include <boost/type_traits/is_convertible.hpp>
-#include <cctype>
+#include <type_traits>
 #include <ios>
 
-namespace boost { namespace spirit { namespace x3 { namespace traits
+#include <cctype>
+
+namespace boost::spirit::x3::traits
 {
-    ///////////////////////////////////////////////////////////////////////////
-    // generate debug output for lookahead token (character) stream
     namespace detail
     {
+        // generate debug output for lookahead token (character) stream
         struct token_printer_debug_for_chars
         {
             template<typename Out, typename Char>
@@ -61,23 +60,25 @@ namespace boost { namespace spirit { namespace x3 { namespace traits
                 o << val;
             }
         };
-    }
+
+    } // detail
 
     template <typename T, typename Enable = void>
     struct token_printer_debug
-      : mpl::if_<
-            mpl::and_<
-                is_convertible<T, char>, is_convertible<char, T> >
-          , detail::token_printer_debug_for_chars
-          , detail::token_printer_debug>::type
+        : std::conditional_t<
+            std::is_convertible_v<T, char> && std::is_convertible_v<char, T>,
+            detail::token_printer_debug_for_chars,
+            detail::token_printer_debug
+        >
     {};
 
     template <typename Out, typename T>
-    inline void print_token(Out& out, T const& val)
+    void print_token(Out& out, T const& val)
     {
         // allow to customize the token printer routine
         token_printer_debug<T>::print(out, val);
     }
-}}}}
+
+} // boost::spirit::x3::traits
 
 #endif

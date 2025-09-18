@@ -5,18 +5,20 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-#if !defined(BOOST_SPIRIT_X3_TST_JUNE_03_2007_1031AM)
+#ifndef BOOST_SPIRIT_X3_TST_JUNE_03_2007_1031AM
 #define BOOST_SPIRIT_X3_TST_JUNE_03_2007_1031AM
 
 #include <boost/spirit/home/x3/core/config.hpp>
 #include <boost/spirit/home/x3/string/detail/tst_node.hpp>
 #include <boost/spirit/home/x3/support/allocator.hpp>
-#include <boost/assert.hpp>
 
 #include <iterator>
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
+
+#include <cassert>
 
 namespace boost::spirit::x3
 {
@@ -127,8 +129,8 @@ namespace boost::spirit::x3
         [[nodiscard]] constexpr T*
         add(node* root, Iterator first, Iterator last, Val&& val)
         {
-            BOOST_ASSERT(root != nullptr);
-            BOOST_ASSERT(first != last);
+            assert(root != nullptr);
+            assert(first != last);
 
             node** pp = &root;
             auto c = *first;

@@ -6,14 +6,13 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
-#if !defined(BOOST_SPIRIT_X3_MOVE_TO_JAN_17_2013_0859PM)
+#ifndef BOOST_SPIRIT_X3_MOVE_TO_JAN_17_2013_0859PM
 #define BOOST_SPIRIT_X3_MOVE_TO_JAN_17_2013_0859PM
 
 #include <boost/spirit/home/x3/support/traits/attribute_category.hpp>
 #include <boost/spirit/home/x3/support/traits/tuple_traits.hpp>
 #include <boost/spirit/home/x3/support/traits/variant_has_substitute.hpp>
 
-#include <boost/assert.hpp>
 #include <boost/fusion/include/is_sequence.hpp>
 #include <boost/fusion/include/front.hpp>
 #include <boost/fusion/include/move.hpp>

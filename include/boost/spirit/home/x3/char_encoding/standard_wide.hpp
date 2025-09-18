@@ -9,8 +9,6 @@
 #ifndef BOOST_SPIRIT_X3_CHAR_ENCODING_STANDARD_WIDE_HPP
 #define BOOST_SPIRIT_X3_CHAR_ENCODING_STANDARD_WIDE_HPP
 
-#include <boost/assert.hpp>
-
 #include <string>
 #include <type_traits>
 

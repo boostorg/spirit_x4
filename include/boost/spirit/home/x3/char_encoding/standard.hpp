@@ -9,8 +9,7 @@
 #ifndef BOOST_SPIRIT_X3_CHAR_ENCODING_STANDARD_HPP
 #define BOOST_SPIRIT_X3_CHAR_ENCODING_STANDARD_HPP
 
-#include <boost/assert.hpp>
-
+#include <cassert>
 #include <cstdint>
 #include <cctype>
 #include <climits>
@@ -53,84 +52,84 @@ namespace boost::spirit::x3::char_encoding
         [[nodiscard]] static bool // TODO: constexpr
         isalnum(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isalnum(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isalpha(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isalpha(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isdigit(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isdigit(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isxdigit(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isxdigit(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         iscntrl(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::iscntrl(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isgraph(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isgraph(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         islower(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::islower(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isprint(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isprint(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         ispunct(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::ispunct(ch) != 0;
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isspace(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isspace(ch) != 0;
         }
 
         [[nodiscard]] static constexpr bool
         (isblank)(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return (ch == ' ' || ch == '\t');
         }
 
         [[nodiscard]] static bool // TODO: constexpr
         isupper(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::isupper(ch) != 0;
         }
 
@@ -139,21 +138,21 @@ namespace boost::spirit::x3::char_encoding
         [[nodiscard]] static int // TODO: constexpr
         tolower(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::tolower(ch);
         }
 
         [[nodiscard]] static int // TODO: constexpr
         toupper(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return std::toupper(ch);
         }
 
         [[nodiscard]] static constexpr std::uint32_t
         toucs4(int ch) noexcept
         {
-            BOOST_ASSERT(standard::strict_ischar(ch));
+            assert(standard::strict_ischar(ch));
             return static_cast<std::uint32_t>(ch);
         }
     };

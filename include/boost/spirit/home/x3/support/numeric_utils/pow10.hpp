@@ -14,6 +14,7 @@
 
 #include <concepts>
 
+#include <cassert>
 #include <cfloat>
 #include <cmath>
 
@@ -95,7 +96,7 @@ namespace boost::spirit::x3::traits
 
         [[nodiscard]] static constexpr double call(unsigned dim) noexcept
         {
-            BOOST_ASSERT(dim < sizeof(exponents)/sizeof(double));
+            assert(dim < sizeof(exponents)/sizeof(double));
             return exponents[dim];
         }
     };

@@ -11,13 +11,13 @@
 #include <boost/spirit/home/x3/char/detail/char_range.hpp>
 #include <boost/spirit/home/x3/char/detail/char_range_functions.hpp>
 
-#include <boost/assert.hpp>
-
 #include <algorithm>
 #include <vector>
 #include <iterator>
 #include <ranges>
 #include <utility>
+
+#include <cassert>
 
 namespace boost::spirit::x3::detail
 {
@@ -88,7 +88,7 @@ namespace boost::spirit::x3::detail
 
         constexpr void set(range_type const& range)
         {
-            BOOST_ASSERT(detail::is_valid(range));
+            assert(detail::is_valid(range));
             if (run_.empty())
             {
                 // the vector is empty, insert 'range'
@@ -124,7 +124,7 @@ namespace boost::spirit::x3::detail
 
         constexpr void clear(range_type const& range)
         {
-            BOOST_ASSERT(detail::is_valid(range));
+            assert(detail::is_valid(range));
             if (run_.empty()) return;
 
             // search the ranges for one that potentially includes 'range'
