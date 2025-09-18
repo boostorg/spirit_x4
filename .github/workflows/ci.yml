@@ -10,7 +10,6 @@ concurrency:
 
 env:
   BOOST_SPIRIT_BUILD_JOBS: 4
-  BOOST_SPIRIT_CACHED_UPSTREAM_LIBS: --with-fusion --with-variant --with-endian --with-preprocessor --with-core
 
 jobs:
   changes:
@@ -152,7 +151,41 @@ jobs:
       - name: Clone upstream Boost libraries
         if: steps.cache-boost.outputs.cache-hit != 'true'
         run: |
-          git -c advice.detachedHead=false clone --no-tags --single-branch --branch=${{ steps.env-info.outputs.BOOST_RELEASE_VERSION_NAME }} --depth=1 --quiet --recurse-submodules=":(exclude)libs/spirit" --shallow-submodules https://github.com/boostorg/boost.git ${{ steps.env-info.outputs.BOOST_ROOT }}
+          git -c advice.detachedHead=false clone --no-tags \
+            --single-branch --branch=${{ steps.env-info.outputs.BOOST_RELEASE_VERSION_NAME }} \
+            --depth=1 --filter=blob:none --quiet https://github.com/boostorg/boost.git \
+            ${{ steps.env-info.outputs.BOOST_ROOT }}
+
+          cd ${{ steps.env-info.outputs.BOOST_ROOT }}
+          git submodule update --init --depth 1 --recursive -- \
+            tools/build \
+            tools/boost_install \
+            libs/assert \
+            libs/bind \
+            libs/config \
+            libs/container_hash \
+            libs/core \
+            libs/describe \
+            libs/detail \
+            libs/endian \
+            libs/function \
+            libs/function_types \
+            libs/functional \
+            libs/fusion \
+            libs/integer \
+            libs/io \
+            libs/mp11 \
+            libs/mpl \
+            libs/predef \
+            libs/preprocessor \
+            libs/static_assert \
+            libs/throw_exception \
+            libs/tuple \
+            libs/type_index \
+            libs/type_traits \
+            libs/typeof \
+            libs/utility \
+            libs/variant
 
       - name: Build upstream Boost libraries (Ubuntu)
         if: matrix.os.name == 'ubuntu' && steps.cache-boost.outputs.cache-hit != 'true'
@@ -165,7 +198,6 @@ jobs:
           rm -rf libs/spirit
           ./bootstrap.sh --with-toolset=${{ matrix.compiler.toolset }}
           ./b2 -d0 headers
-          ./b2 -d1 -j$BOOST_SPIRIT_BUILD_JOBS $BOOST_SPIRIT_CACHED_UPSTREAM_LIBS link=shared threading=multi variant=${{ matrix.build_type.lowercase }} toolset=${{ matrix.compiler.toolset }}-${{ matrix.compiler.version }} cxxstd=${{ matrix.cpp_version.number }} cxxflags="${{ matrix.compiler.cxxflags }}" $BOOST_SPIRIT_STDLIB warnings=extra warnings-as-errors=off
 
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         if: matrix.os.name == 'windows'
@@ -182,7 +214,6 @@ jobs:
           rd /s /q libs\spirit
           .\bootstrap.bat --with-toolset=${{ matrix.compiler.toolset }}
           .\b2 -d0 headers
-          .\b2 -d1 -j%BOOST_SPIRIT_BUILD_JOBS% %BOOST_SPIRIT_CACHED_UPSTREAM_LIBS% link=shared threading=multi variant=${{ matrix.build_type.lowercase }} toolset=${{ matrix.compiler.toolset }} cxxflags="${{ matrix.cpp_version.msvc_std }} ${{matrix.compiler.cxxflags}}" warnings=extra warnings-as-errors=off
 
       - name: Cache upstream Boost libraries
         if: steps.cache-boost.outputs.cache-hit != 'true'
