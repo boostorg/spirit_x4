@@ -253,7 +253,7 @@ jobs:
           BOOST_ROOT: ${{ steps.env-info.outputs.BOOST_ROOT }}
         working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
         run: |
-          cmake --build build/test --verbose --config ${{ matrix.build_type.name }} -j$BOOST_SPIRIT_X4_BUILD_JOBS
+          cmake --build build/test --verbose --config ${{ matrix.build_type.name }} -j%BOOST_SPIRIT_X4_BUILD_JOBS%
 
       - name: Test (Ubuntu)
         if: matrix.os.name == 'ubuntu'
