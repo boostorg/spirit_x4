@@ -9,7 +9,6 @@
 #define BOOST_SPIRIT_X4_NO_CASE_SEPT_16_2014_0912PM
 
 #include <boost/spirit/x4/core/context.hpp>
-#include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 
 #include <boost/spirit/x4/string/case_compare.hpp>

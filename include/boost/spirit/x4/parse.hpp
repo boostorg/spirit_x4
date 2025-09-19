@@ -28,7 +28,7 @@
 
 namespace boost::spirit::x4
 {
-    enum class root_skipper_flag
+    enum class root_skipper_flag : char
     {
         do_post_skip, // force post-skipping
         post_skip [[deprecated("Use `do_post_skip`")]] = do_post_skip,
@@ -66,7 +66,7 @@ namespace boost::spirit::x4
             static constexpr parse_result<It, Se>
             operator()(It first, Se last, Parser&& p, X4Attribute auto& attr)
             {
-                std::optional<x4::expectation_failure<It>> expect_failure;
+                std::optional<expectation_failure<It>> expect_failure;
                 auto failure_ctx = x4::make_context<expectation_failure_tag>(expect_failure);
 
                 bool const ok = as_parser(std::forward<Parser>(p)).parse(first, last, failure_ctx, unused, attr);
@@ -96,12 +96,12 @@ namespace boost::spirit::x4
             template <std::ranges::forward_range R, X4RangeParseParser<R> Parser>
                 requires (!traits::CharArray<R>)
             static constexpr parse_result_for<R>
-            operator()(R&& range, Parser&& p, X4Attribute auto& attr)
+            operator()(R const& range, Parser&& p, X4Attribute auto& attr)
             {
-                using It = std::ranges::iterator_t<R>;
-                using Se = std::ranges::sentinel_t<R>;
+                using It = std::ranges::iterator_t<R const>;
+                using Se = std::ranges::sentinel_t<R const>;
 
-                std::optional<x4::expectation_failure<It>> expect_failure;
+                std::optional<expectation_failure<It>> expect_failure;
                 auto failure_ctx = x4::make_context<expectation_failure_tag>(expect_failure);
 
                 It first = std::ranges::begin(range);
@@ -126,10 +126,10 @@ namespace boost::spirit::x4
             template <std::ranges::forward_range R, X4RangeParseParser<R> Parser>
                 requires (!traits::CharArray<R>)
             static constexpr void
-            operator()(parse_result_for<R>& res, R&& range, Parser&& p, X4Attribute auto& attr)
+            operator()(parse_result_for<R>& res, R const& range, Parser&& p, X4Attribute auto& attr)
             {
-                using It = std::ranges::iterator_t<R>;
-                using Se = std::ranges::sentinel_t<R>;
+                using It = std::ranges::iterator_t<R const>;
+                using Se = std::ranges::sentinel_t<R const>;
 
                 res.expect_failure.reset();
                 auto failure_ctx = x4::make_context<expectation_failure_tag>(res.expect_failure);
@@ -158,13 +158,14 @@ namespace boost::spirit::x4
             {
                 auto skipper_ctx = x4::make_context<skipper_tag>(s);
 
-                std::optional<x4::expectation_failure<It>> expect_failure;
+                std::optional<expectation_failure<It>> expect_failure;
                 auto ctx = x4::make_context<expectation_failure_tag>(expect_failure, skipper_ctx);
 
                 bool ok = as_parser(std::forward<Parser>(p)).parse(first, last, ctx, unused, attr);
                 if (ok && flag == root_skipper_flag::do_post_skip)
                 {
                     x4::skip_over(first, last, ctx);
+                    // ReSharper disable once CppAssignedValueIsNeverUsed
                     if (expect_failure) [[unlikely]] ok = false;
                 }
                 return parse_result<It, Se>{
@@ -200,14 +201,14 @@ namespace boost::spirit::x4
             template <std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper>
                 requires (!traits::CharArray<R>)
             static constexpr parse_result_for<R>
-            operator()(R&& range, Parser&& p, X4Attribute auto& attr, Skipper const& s, root_skipper_flag flag = root_skipper_flag::do_post_skip)
+            operator()(R const& range, Parser&& p, X4Attribute auto& attr, Skipper const& s, root_skipper_flag flag = root_skipper_flag::do_post_skip)
             {
-                using It = std::ranges::iterator_t<R>;
-                using Se = std::ranges::sentinel_t<R>;
+                using It = std::ranges::iterator_t<R const>;
+                using Se = std::ranges::sentinel_t<R const>;
 
                 auto skipper_ctx = x4::make_context<skipper_tag>(s);
 
-                std::optional<x4::expectation_failure<It>> expect_failure;
+                std::optional<expectation_failure<It>> expect_failure;
                 auto ctx = x4::make_context<expectation_failure_tag>(expect_failure, skipper_ctx);
 
                 It first = std::ranges::begin(range);
@@ -216,6 +217,7 @@ namespace boost::spirit::x4
                 if (ok && flag == root_skipper_flag::do_post_skip)
                 {
                     x4::skip_over(first, last, ctx);
+                    // ReSharper disable once CppAssignedValueIsNeverUsed
                     if (expect_failure) [[unlikely]] ok = false;
                 }
                 return parse_result_for<R>{
@@ -237,10 +239,10 @@ namespace boost::spirit::x4
             template <std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper>
                 requires (!traits::CharArray<R>)
             static constexpr void
-            operator()(parse_result_for<R>& res, R&& range, Parser&& p, X4Attribute auto& attr, Skipper const& s, root_skipper_flag flag = root_skipper_flag::do_post_skip)
+            operator()(parse_result_for<R>& res, R const& range, Parser&& p, X4Attribute auto& attr, Skipper const& s, root_skipper_flag flag = root_skipper_flag::do_post_skip)
             {
-                using It = std::ranges::iterator_t<R>;
-                using Se = std::ranges::sentinel_t<R>;
+                using It = std::ranges::iterator_t<R const>;
+                using Se = std::ranges::sentinel_t<R const>;
 
                 auto skipper_ctx = x4::make_context<skipper_tag>(s);
 
@@ -353,7 +355,7 @@ namespace boost::spirit::x4
 
         template <typename Skipper, std::ranges::forward_range R>
         struct phrase_parse_context_for_impl<Skipper, R>
-            : phrase_parse_context_for_impl<Skipper, std::ranges::iterator_t<R>, std::ranges::sentinel_t<R>>
+            : phrase_parse_context_for_impl<Skipper, std::ranges::iterator_t<R const>, std::ranges::sentinel_t<R const>>
         {};
 
     } // detail
@@ -377,7 +379,7 @@ namespace boost::spirit::x4
 
         template <std::ranges::forward_range R>
         struct parse_context_for_impl<R>
-            : parse_context_for_impl<std::ranges::iterator_t<R>>
+            : parse_context_for_impl<std::ranges::iterator_t<R const>>
         {};
 
     } // detail

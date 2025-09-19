@@ -9,8 +9,6 @@
 #ifndef BOOST_SPIRIT_X4_BINARY_MAY_08_2007_0808AM
 #define BOOST_SPIRIT_X4_BINARY_MAY_08_2007_0808AM
 
-#include <boost/config.hpp>
-
 #include <boost/spirit/x4/core/parser.hpp>
 #include <boost/spirit/x4/core/skip_over.hpp>
 #include <boost/spirit/x4/core/move_to.hpp>

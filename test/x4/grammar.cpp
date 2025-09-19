@@ -10,6 +10,8 @@
 
 #include "grammar.hpp"
 
+#include <boost/spirit/x4/numeric/int.hpp>
+
 auto const grammar_def = x4::int_;
 
 BOOST_SPIRIT_X4_DEFINE(grammar)

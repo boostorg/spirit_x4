@@ -7,8 +7,6 @@
 #ifndef BOOST_SPIRIT_X4_CORE_CONFIG_HPP
 #define BOOST_SPIRIT_X4_CORE_CONFIG_HPP
 
-#include <boost/config.hpp>
-
 #include <cstddef>
 
 #if _MSC_VER
@@ -33,9 +31,9 @@
 #endif
 
 #ifndef BOOST_SPIRIT_X4_LIFETIMEBOUND
-# if defined(__clang__)
+# ifdef __clang__
 #  define BOOST_SPIRIT_X4_LIFETIMEBOUND [[clang::lifetimebound]]
-# elif defined(_MSC_VER)
+# elifdef _MSC_VER
 #  define BOOST_SPIRIT_X4_LIFETIMEBOUND [[msvc::lifetimebound]]
 # else
 #  define BOOST_SPIRIT_X4_LIFETIMEBOUND

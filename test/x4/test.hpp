@@ -17,11 +17,8 @@
 #include <boost/core/lightweight_test.hpp>
 
 #include <iterator>
-#include <optional>
 #include <string_view>
-#include <iostream>
 #include <type_traits>
-#include <concepts>
 #include <utility>
 #include <print>
 
@@ -55,17 +52,17 @@ namespace spirit_test
             // R + Parser
             template <std::ranges::forward_range R, x4::detail::X4RangeParseParser<R> Parser>
             static constexpr x4::parse_result_for<R>
-            operator()(R&& r, Parser&& p)
+            operator()(R const& r, Parser&& p)
             {
-                return x4::parse(std::forward<R>(r), std::forward<Parser>(p), x4::unused);
+                return x4::parse(r, std::forward<Parser>(p), x4::unused);
             }
 
             // parse_result + R + Parser
             template <std::ranges::forward_range R, x4::detail::X4RangeParseParser<R> Parser>
             static constexpr void
-            operator()(x4::parse_result_for<R>& res, R&& r, Parser&& p)
+            operator()(x4::parse_result_for<R>& res, R const& r, Parser&& p)
             {
-                return x4::parse(res, std::forward<R>(r), std::forward<Parser>(p), x4::unused);
+                return x4::parse(res, r, std::forward<Parser>(p), x4::unused);
             }
 
             // It/Se + Parser + Skipper
@@ -91,9 +88,9 @@ namespace spirit_test
                 x4::detail::X4RangeParseSkipper<R> Skipper
             >
             static constexpr x4::parse_result_for<R>
-            operator()(R&& r, Parser&& p, Skipper&& s, x4::root_skipper_flag flag = x4::root_skipper_flag::do_post_skip)
+            operator()(R const& r, Parser&& p, Skipper&& s, x4::root_skipper_flag flag = x4::root_skipper_flag::do_post_skip)
             {
-                return x4::parse(std::forward<R>(r), std::forward<Parser>(p), x4::unused, std::forward<Skipper>(s), flag);
+                return x4::parse(r, std::forward<Parser>(p), x4::unused, std::forward<Skipper>(s), flag);
             }
 
             // parse_result + R + Parser + Skipper
@@ -103,9 +100,9 @@ namespace spirit_test
                 x4::detail::X4RangeParseSkipper<R> Skipper
             >
             static constexpr void
-            operator()(x4::parse_result_for<R>& res, R&& r, Parser&& p, Skipper&& s, x4::root_skipper_flag flag = x4::root_skipper_flag::do_post_skip)
+            operator()(x4::parse_result_for<R>& res, R const& r, Parser&& p, Skipper&& s, x4::root_skipper_flag flag = x4::root_skipper_flag::do_post_skip)
             {
-                return x4::parse(res, std::forward<R>(r), std::forward<Parser>(p), x4::unused, std::forward<Skipper>(s), flag);
+                return x4::parse(res, r, std::forward<Parser>(p), x4::unused, std::forward<Skipper>(s), flag);
             }
         }; // parse_overload
 
@@ -146,7 +143,7 @@ namespace spirit_test
     };
 
     template <typename T>
-    struct synth_parser : boost::spirit::x4::parser<synth_parser<T>>
+    struct synth_parser : x4::parser<synth_parser<T>>
     {
         using attribute_type = T;
 
@@ -161,7 +158,7 @@ namespace spirit_test
         {
             if (iter != last && *iter == 's') {
                 ++iter;
-                boost::spirit::x4::move_to(attribute_type{}, attr);
+                x4::move_to(attribute_type{}, attr);
                 return true;
             }
             return false;

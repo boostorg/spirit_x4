@@ -9,14 +9,9 @@
 #ifndef BOOST_SPIRIT_X4_UC_TYPES_NOVEMBER_23_2008_0840PM
 #define BOOST_SPIRIT_X4_UC_TYPES_NOVEMBER_23_2008_0840PM
 
-#include <boost/config.hpp>
-
-#include <ranges>
 #include <type_traits>
 #include <string>
 #include <string_view>
-
-#include <cassert>
 
 namespace boost::spirit::x4
 {

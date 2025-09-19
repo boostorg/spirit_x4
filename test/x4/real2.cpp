@@ -49,19 +49,19 @@ void basic_real_parser_test(P parser)
 
 int main()
 {
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(boost::spirit::x4::float_);
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(boost::spirit::x4::double_);
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(boost::spirit::x4::long_double);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::float_);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::double_);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::long_double);
 
     // signed real number tests
     {
-        basic_real_parser_test<float>(boost::spirit::x4::float_);
-        basic_real_parser_test<double>(boost::spirit::x4::double_);
-        basic_real_parser_test<long double>(boost::spirit::x4::long_double);
+        basic_real_parser_test<float>(x4::float_);
+        basic_real_parser_test<double>(x4::double_);
+        basic_real_parser_test<long double>(x4::long_double);
     }
 
     {
-        using boost::spirit::x4::double_;
+        using x4::double_;
         double  d;
 
 #if defined(BOOST_SPIRIT_TEST_REAL_PRECISION)

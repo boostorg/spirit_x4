@@ -5,18 +5,23 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/operator/difference.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
 
 #include <string>
-#include <iostream>
 
 int main()
 {
-    using boost::spirit::x4::standard::char_;
-    using boost::spirit::x4::standard::space;
-    using boost::spirit::x4::lit;
+    using x4::standard::char_;
+    using x4::standard::space;
+    using x4::lit;
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ - 'a');
 
     // Basic tests
@@ -42,7 +47,7 @@ int main()
     }
 
     {
-        using boost::spirit::x4::_attr;
+        using x4::_attr;
 
         std::string s;
 

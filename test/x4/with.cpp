@@ -8,7 +8,12 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/directive/with.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
 
 #include <concepts>
 #include <iterator>
@@ -36,10 +41,10 @@ struct my_rule_class
 
 namespace
 {
-    using boost::spirit::x4::rule;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::with;
-    using boost::spirit::x4::_pass;
+    using x4::rule;
+    using x4::int_;
+    using x4::with;
+    using x4::_pass;
 
     template<class T>
     constexpr auto value_equals = int_[([](auto& ctx) {
@@ -126,12 +131,9 @@ int main()
         // injecting data into the context in the grammar
         int val = 0;
         auto r = rule<my_rule_class, char const*>() =
-            '(' > int_ > ',' > int_ > ')'
-            ;
+            '(' > int_ > ',' > int_ > ')';
 
-        auto start =
-            with<my_tag>(std::ref(val)) [ r ]
-            ;
+        auto start = with<my_tag>(std::ref(val)) [ r ];
 
         BOOST_TEST(parse("(123,456)", start));
         BOOST_TEST(!parse("(abc,def)", start));

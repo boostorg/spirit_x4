@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_SUPPORT_EXPECTATION_HPP
 #define BOOST_SPIRIT_X4_SUPPORT_EXPECTATION_HPP
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/parser.hpp> // for `x4::what`
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/context.hpp>

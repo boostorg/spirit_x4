@@ -9,12 +9,13 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/directive/no_case.hpp>
+#include <boost/spirit/x4/numeric/bool.hpp>
 
 #include <string_view>
 #include <iterator>
 
-struct backwards_bool_policies : boost::spirit::x4::bool_policies<>
+struct backwards_bool_policies : x4::bool_policies<>
 {
     // we want to interpret a 'true' spelled backwards as 'false'
     template <std::forward_iterator It, std::sentinel_for<It> Se, typename Attribute, typename CaseCompare>
@@ -36,8 +37,10 @@ struct backwards_bool_policies : boost::spirit::x4::bool_policies<>
 
 int main()
 {
-    using spirit_test::parse;
-    using boost::spirit::x4::bool_;
+    using x4::bool_;
+    using x4::true_;
+    using x4::false_;
+    using x4::no_case;
 
     {
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(bool_);
@@ -48,9 +51,6 @@ int main()
     }
 
     {
-        using boost::spirit::x4::true_;
-        using boost::spirit::x4::false_;
-
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(true_);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(false_);
 
@@ -61,10 +61,6 @@ int main()
     }
 
     {
-        using boost::spirit::x4::true_;
-        using boost::spirit::x4::false_;
-        using boost::spirit::x4::no_case;
-
         BOOST_TEST(parse("True", no_case[bool_]));
         BOOST_TEST(parse("False", no_case[bool_]));
         BOOST_TEST(parse("True", no_case[true_]));
@@ -79,7 +75,7 @@ int main()
     }
 
     {
-        using backwards_bool_type = boost::spirit::x4::bool_parser<bool, boost::spirit::x4::char_encoding::standard, backwards_bool_policies>;
+        using backwards_bool_type = x4::bool_parser<bool, x4::char_encoding::standard, backwards_bool_policies>;
         constexpr backwards_bool_type backwards_bool{};
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(backwards_bool);
@@ -99,11 +95,11 @@ int main()
     {
         struct test_bool_type
         {
-            test_bool_type(bool b = false) : b(b) {}    // provide conversion
+            test_bool_type(bool b = false) : b(b) {} // provide conversion
             bool b;
         };
 
-        using bool_test_type = boost::spirit::x4::bool_parser<test_bool_type, boost::spirit::x4::char_encoding::standard>;
+        using bool_test_type = x4::bool_parser<test_bool_type, x4::char_encoding::standard>;
         constexpr bool_test_type test_bool{};
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(test_bool);

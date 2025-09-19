@@ -9,14 +9,13 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
-
-#include <iostream>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/directive/matches.hpp>
 
 int main()
 {
-    using boost::spirit::x4::matches;
-    using boost::spirit::x4::char_;
+    using x4::matches;
+    using x4::char_;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(matches['x']);
 

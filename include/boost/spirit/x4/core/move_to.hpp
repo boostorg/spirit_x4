@@ -9,6 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_MOVE_TO_JAN_17_2013_0859PM
 #define BOOST_SPIRIT_X4_MOVE_TO_JAN_17_2013_0859PM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/traits/attribute_category.hpp>
 #include <boost/spirit/x4/traits/tuple_traits.hpp>
 #include <boost/spirit/x4/traits/variant_traits.hpp>

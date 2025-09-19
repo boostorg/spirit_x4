@@ -12,13 +12,8 @@
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/traits/transform_attribute.hpp>
 #include <boost/spirit/x4/operator/kleene.hpp>
-#include <boost/spirit/x4/operator/plus.hpp>
-#include <boost/spirit/x4/operator/list.hpp>
-#include <boost/spirit/x4/string/string.hpp>
 #include <boost/spirit/x4/rule.hpp>
-#include <boost/spirit/x4.hpp> // TODO
 
-#include <iostream>
 #include <type_traits>
 #include <concepts>
 
@@ -57,7 +52,7 @@ int main()
     static_assert(std::is_same_v<decltype(unused_mut = unused_mut), unused_type&>);
 
     {
-        constexpr auto test_use = [](boost::spirit::x4::unused_type) { return true; };
+        constexpr auto test_use = [](x4::unused_type) { return true; };
         // static_assert(test_use(0));
         static_assert(test_use(unused));
         (void)test_use(unused_mut);
@@ -69,10 +64,6 @@ int main()
 
     static_assert(x4::X4Attribute<unused_container_type>);
     static_assert(x4::X4Attribute<unused_container_type const>);
-
-    std::cout << unused;
-    std::cout << unused_mut;
-    std::cin >> unused_mut;
 
     // unused => unused
     {

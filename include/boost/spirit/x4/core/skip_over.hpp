@@ -9,11 +9,10 @@
 #ifndef BOOST_SPIRIT_X4_SKIP_APRIL_16_2006_0625PM
 #define BOOST_SPIRIT_X4_SKIP_APRIL_16_2006_0625PM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/context.hpp>
-#include <boost/spirit/x4/traits/attribute_category.hpp>
-
 #include <boost/spirit/x4/core/parser.hpp>
 
 #include <iterator>

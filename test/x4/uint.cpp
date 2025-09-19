@@ -10,9 +10,11 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/numeric/uint.hpp>
 
 #include <string_view>
+
 #include <cstring>
 #include <climits>
 #include <cstdint>
@@ -57,7 +59,7 @@ int main()
 {
     // unsigned tests
     {
-        using boost::spirit::x4::uint_;
+        using x4::uint_;
         unsigned u;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(uint_);
@@ -76,7 +78,7 @@ int main()
 
     // binary tests
     {
-        using boost::spirit::x4::bin;
+        using x4::bin;
         unsigned u;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(bin);
@@ -95,7 +97,7 @@ int main()
 
     // octal tests
     {
-        using boost::spirit::x4::oct;
+        using x4::oct;
         unsigned u;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(oct);
@@ -114,7 +116,7 @@ int main()
 
     // hex tests
     {
-        using boost::spirit::x4::hex;
+        using x4::hex;
         unsigned u;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(hex);
@@ -137,7 +139,7 @@ int main()
 
     // limited fieldwidth
     {
-        using boost::spirit::x4::uint_parser;
+        using x4::uint_parser;
 
         {
             constexpr uint_parser<unsigned, 10, 1, 3> uint3{};
@@ -189,9 +191,9 @@ int main()
 
     // action tests
     {
-        using boost::spirit::x4::_attr;
-        using boost::spirit::x4::uint_;
-        using boost::spirit::x4::standard::space;
+        using x4::_attr;
+        using x4::uint_;
+        using x4::standard::space;
 
         int n = 0;
         auto f = [&](auto& ctx){ n = _attr(ctx); };
@@ -204,28 +206,28 @@ int main()
 
     // Check overflow is parse error
     {
-        boost::spirit::x4::uint_parser<std::uint8_t> uint8_;
+        x4::uint_parser<std::uint8_t> uint8_;
         std::uint8_t u8;
 
         BOOST_TEST(!parse("999", uint8_, u8));
         BOOST_TEST(!parse("256", uint8_, u8));
         BOOST_TEST(parse("255", uint8_, u8));
 
-        boost::spirit::x4::uint_parser<std::uint16_t> uint16_;
+        x4::uint_parser<std::uint16_t> uint16_;
         std::uint16_t u16;
 
         BOOST_TEST(!parse("99999", uint16_, u16));
         BOOST_TEST(!parse("65536", uint16_, u16));
         BOOST_TEST(parse("65535", uint16_, u16));
 
-        boost::spirit::x4::uint_parser<std::uint32_t> uint32_;
+        x4::uint_parser<std::uint32_t> uint32_;
         std::uint32_t u32;
 
         BOOST_TEST(!parse("9999999999", uint32_, u32));
         BOOST_TEST(!parse("4294967296", uint32_, u32));
         BOOST_TEST(parse("4294967295", uint32_, u32));
 
-        boost::spirit::x4::uint_parser<boost::int8_t> u_int8_;
+        x4::uint_parser<std::int8_t> u_int8_;
 
         BOOST_TEST(!parse("999", u_int8_, u8));
         BOOST_TEST(!parse("-1", u_int8_, u8));
@@ -233,7 +235,7 @@ int main()
         BOOST_TEST(parse("127", u_int8_, u8));
         BOOST_TEST(parse("0", u_int8_, u8));
 
-        boost::spirit::x4::uint_parser<boost::int16_t> u_int16_;
+        x4::uint_parser<std::int16_t> u_int16_;
 
         BOOST_TEST(!parse("99999", u_int16_, u16));
         BOOST_TEST(!parse("-1", u_int16_, u16));
@@ -241,7 +243,7 @@ int main()
         BOOST_TEST(parse("32767", u_int16_, u16));
         BOOST_TEST(parse("0", u_int16_, u16));
 
-        boost::spirit::x4::uint_parser<boost::int32_t> u_int32_;
+        x4::uint_parser<std::int32_t> u_int32_;
 
         BOOST_TEST(!parse("9999999999", u_int32_, u32));
         BOOST_TEST(!parse("-1", u_int32_, u32));
@@ -252,8 +254,8 @@ int main()
 
     // custom uint tests
     {
-        using boost::spirit::x4::uint_;
-        using boost::spirit::x4::uint_parser;
+        using x4::uint_;
+        using x4::uint_parser;
         custom_uint u;
 
         BOOST_TEST(parse("123456", uint_, u));

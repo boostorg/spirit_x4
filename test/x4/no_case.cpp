@@ -8,18 +8,19 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
-
-#include <iostream>
+#include <boost/spirit/x4/directive/no_case.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/string/string.hpp>
 
 int main()
 {
-    using boost::spirit::x4::no_case;
+    using x4::no_case;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(no_case['x']);
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("x", no_case[char_]));
         BOOST_TEST(parse("X", no_case[char_('x')]));
         BOOST_TEST(parse("X", no_case[char_('X')]));
@@ -33,7 +34,7 @@ int main()
         BOOST_TEST(!parse("z", no_case[char_('a', 'y')]));
     }
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("X", no_case['x']));
         BOOST_TEST(parse("X", no_case['X']));
         BOOST_TEST(parse("x", no_case['X']));
@@ -43,13 +44,13 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("X", no_case[char_("a-z")]));
         BOOST_TEST(!parse("1", no_case[char_("a-z")]));
     }
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("Bochi Bochi", no_case[lit("bochi bochi")]));
         BOOST_TEST(parse("BOCHI BOCHI", no_case[lit("bochi bochi")]));
         BOOST_TEST(!parse("Vavoo", no_case[lit("bochi bochi")]));
@@ -57,14 +58,14 @@ int main()
 
     {
         // should work!
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("x", no_case[no_case[char_]]));
         BOOST_TEST(parse("x", no_case[no_case[char_('x')]]));
         BOOST_TEST(parse("yabadabadoo", no_case[no_case[lit("Yabadabadoo")]]));
     }
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_TEST(parse("X", no_case[alnum]));
         BOOST_TEST(parse("6", no_case[alnum]));
         BOOST_TEST(!parse(":", no_case[alnum]));
@@ -79,8 +80,8 @@ int main()
 
     {
         // chsets
-        namespace standard = boost::spirit::x4::standard;
-        namespace standard_wide = boost::spirit::x4::standard_wide;
+        namespace standard = x4::standard;
+        namespace standard_wide = x4::standard_wide;
 
         BOOST_TEST(parse("x", no_case[standard::char_("a-z")]));
         BOOST_TEST(parse("X", no_case[standard::char_("a-z")]));
@@ -89,7 +90,7 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         std::string s("bochi bochi");
         BOOST_TEST(parse("Bochi Bochi", no_case[lit(s.c_str())]));
         BOOST_TEST(parse("Bochi Bochi", no_case[lit(s)]));
@@ -99,7 +100,7 @@ int main()
 
     {
         {
-            using namespace boost::spirit::x4::standard;
+            using namespace x4::standard;
             BOOST_TEST(!parse("ą", no_case['a']));
         }
     }

@@ -9,7 +9,6 @@
 #ifndef BOOST_SPIRIT_X4_EXPECT_MARCH_16_2012_1024PM
 #define BOOST_SPIRIT_X4_EXPECT_MARCH_16_2012_1024PM
 
-#include <boost/spirit/x4/core/context.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 #include <boost/spirit/x4/core/detail/parse_into_container.hpp>

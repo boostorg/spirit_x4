@@ -22,8 +22,6 @@
 # include <boost/spirit/x4/char_encoding/unicode.hpp>
 #endif
 
-#include <type_traits>
-
 namespace boost::spirit::x4
 {
     namespace standard

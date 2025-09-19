@@ -8,12 +8,17 @@
     http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
+#ifndef BOOST_SPIRIT_TEST_X4_GRAMMAR_HPP
+#define BOOST_SPIRIT_TEST_X4_GRAMMAR_HPP
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
 
 namespace x4 = boost::spirit::x4;
 
 x4::rule<struct grammar_r, int> const grammar;
 using grammar_type = decltype(grammar);
 BOOST_SPIRIT_X4_DECLARE(grammar_type)
+
+#endif

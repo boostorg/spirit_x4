@@ -8,15 +8,13 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
 #include <boost/spirit/x4/symbols.hpp>
-
-#include <iostream>
 
 int main()
 {
-    using boost::spirit::x4::shared_symbols;
-    using boost::spirit::x4::rule;
+    using x4::shared_symbols;
+    using x4::rule;
 
     {
         // construction from symbol array

@@ -12,60 +12,59 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4/char.hpp>
-#include <boost/spirit/x4/numeric.hpp>
-#include <boost/spirit/x4/operator.hpp>
+#include <boost/spirit/x4/numeric/real.hpp>
+#include <boost/spirit/x4/numeric/uint.hpp>
+#include <boost/spirit/x4/char/char.hpp>
 
-#include <climits>
-
+#include <iterator>
 #include <type_traits>
 
 // These policies can be used to parse thousand separated
 // numbers with at most 2 decimal digits after the decimal
 // point. e.g. 123,456,789.01
 template <typename T>
-struct ts_real_policies : boost::spirit::x4::ureal_policies<T>
+struct ts_real_policies : x4::ureal_policies<T>
 {
     //  2 decimal places Max
-    template <typename Iterator, typename Attribute>
+    template <std::forward_iterator It, std::sentinel_for<It> Se, typename Attribute>
     static bool
-    parse_frac_n(Iterator& first, Iterator const& last, Attribute& attr)
+    parse_frac_n(It& first, Se const& last, Attribute& attr)
     {
         namespace x4 = boost::spirit::x4;
-        return boost::spirit::x4::extract_uint<T, 10, 1, 2, true>::call(first, last, attr);
+        return x4::extract_uint<T, 10, 1, 2, true>::call(first, last, attr);
     }
 
     //  No exponent
-    template <typename Iterator>
+    template <std::forward_iterator It, std::sentinel_for<It> Se>
     static bool
-    parse_exp(Iterator&, Iterator const&)
+    parse_exp(It&, Se const&)
     {
         return false;
     }
 
     //  No exponent
-    template <typename Iterator, typename Attribute>
+    template <std::forward_iterator It, std::sentinel_for<It> Se, typename Attribute>
     static bool
-    parse_exp_n(Iterator&, Iterator const&, Attribute&)
+    parse_exp_n(It&, Se const&, Attribute&)
     {
         return false;
     }
 
     //  Thousands separated numbers
-    template <typename Iterator, typename Accumulator>
+    template <std::forward_iterator It, std::sentinel_for<It> Se, typename Accumulator>
     static bool
-    parse_n(Iterator& first, Iterator const& last, Accumulator& result)
+    parse_n(It& first, Se const& last, Accumulator& result)
     {
-        using boost::spirit::x4::uint_parser;
+        using x4::uint_parser;
         namespace x4 = boost::spirit::x4;
 
-        uint_parser<unsigned, 10, 1, 3> uint3;
-        uint_parser<unsigned, 10, 3, 3> uint3_3;
+        constexpr uint_parser<unsigned, 10, 1, 3> uint3;
+        constexpr uint_parser<unsigned, 10, 3, 3> uint3_3;
 
         if (auto res = parse(first, last, uint3, result); res.ok)
         {
             Accumulator n;
-            Iterator iter = res.remainder.begin();
+            It iter = res.remainder.begin();
             first = iter;
 
             while (true)
@@ -89,15 +88,15 @@ struct ts_real_policies : boost::spirit::x4::ureal_policies<T>
 };
 
 template <typename T>
-struct no_trailing_dot_policy : boost::spirit::x4::real_policies<T>
+struct no_trailing_dot_policy : x4::real_policies<T>
 {
-    static bool const allow_trailing_dot = false;
+    static constexpr bool allow_trailing_dot = false;
 };
 
 template <typename T>
-struct no_leading_dot_policy : boost::spirit::x4::real_policies<T>
+struct no_leading_dot_policy : x4::real_policies<T>
 {
-    static bool const allow_leading_dot = false;
+    static constexpr bool allow_leading_dot = false;
 };
 
 template <typename T>

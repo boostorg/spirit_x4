@@ -14,20 +14,46 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/string/string.hpp>
 #include <boost/spirit/x4/symbols.hpp>
 #include <boost/spirit/x4/binary.hpp>
+#include <boost/spirit/x4/auxiliary/attr.hpp>
+#include <boost/spirit/x4/auxiliary/eoi.hpp>
+#include <boost/spirit/x4/auxiliary/eol.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
 #include <boost/spirit/x4/directive/with.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
+#include <boost/spirit/x4/directive/confix.hpp>
+#include <boost/spirit/x4/directive/expect.hpp>
+#include <boost/spirit/x4/directive/lexeme.hpp>
+#include <boost/spirit/x4/directive/matches.hpp>
+#include <boost/spirit/x4/directive/no_case.hpp>
+#include <boost/spirit/x4/directive/no_skip.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/directive/raw.hpp>
+#include <boost/spirit/x4/directive/repeat.hpp>
+#include <boost/spirit/x4/directive/seek.hpp>
+#include <boost/spirit/x4/directive/skip.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+#include <boost/spirit/x4/operator/and_predicate.hpp>
+#include <boost/spirit/x4/operator/difference.hpp>
+#include <boost/spirit/x4/operator/not_predicate.hpp>
+#include <boost/spirit/x4/operator/optional.hpp>
+
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/at.hpp>
 #include <boost/preprocessor/facilities/overload.hpp>
 #include <boost/preprocessor/facilities/expand.hpp>
 
 #include <optional>
 #include <string>
 #include <string_view>
-#include <iostream>
 #include <utility>
 #include <type_traits>
 

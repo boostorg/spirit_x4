@@ -16,7 +16,7 @@
 
 #include <boost/spirit/x4/traits/transform_attribute.hpp>
 
-#if defined(BOOST_SPIRIT_X4_DEBUG)
+#ifdef BOOST_SPIRIT_X4_DEBUG
 #include <boost/spirit/x4/debug/simple_trace.hpp>
 #endif
 
@@ -27,7 +27,6 @@
 
 #include <iterator>
 #include <type_traits>
-#include <concepts>
 #include <utility>
 
 #ifndef BOOST_SPIRIT_X4_NO_RTTI
@@ -274,7 +273,7 @@ namespace boost::spirit::x4
             {
                 It start = first;
 
-                // See if the user has a BOOST_SPIRIT_DEFINE for this rule
+                // See if the user has a BOOST_SPIRIT_X4_DEFINE for this rule
                 using parse_rule_result_type = decltype(
                     parse_rule( // ADL
                         std::declval<detail::rule_id<ID>>(), first, last,
@@ -293,7 +292,7 @@ namespace boost::spirit::x4
                 }
                 else
                 {
-                    // If there is no BOOST_SPIRIT_DEFINE for this rule,
+                    // If there is no BOOST_SPIRIT_X4_DEFINE for this rule,
                     // we'll make a context for this rule tagged by its ID
                     // so we can extract the rule later on in the default
                     // parse_rule function.
@@ -655,7 +654,7 @@ namespace boost::spirit::x4
 
 // NB: This can't be `constexpr`, because a constexpr declaration
 // cannot be used with explicit template instantiation. We simply
-// can't drop (legit) use cases of `BOOST_SPIRIT_INSTANTIATE`, so
+// can't drop (legit) use cases of `BOOST_SPIRIT_X4_INSTANTIATE`, so
 // this is a pure technical limitation. If you need `constexpr`
 // support in your rule, use `BOOST_SPIRIT_X4_DECLARE_CONSTEXPR`.
 #define BOOST_SPIRIT_DECLARE(...) \

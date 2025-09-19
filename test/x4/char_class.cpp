@@ -12,17 +12,19 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/char/negated_char.hpp>
+#include <boost/spirit/x4/char/unicode.hpp>
 
 #include <type_traits>
-#include <iostream>
 
 int main()
 {
-    using boost::spirit::x4::unused_type;
+    using x4::unused_type;
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alnum);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alpha);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(digit);
@@ -61,7 +63,7 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::standard_wide;
+        using namespace x4::standard_wide;
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alnum);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alpha);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(digit);
@@ -99,7 +101,7 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::unicode;
+        using namespace x4::unicode;
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alnum);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alpha);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(digit);
@@ -144,7 +146,7 @@ int main()
     }
 
     {   // test invalid unicode literals
-        using namespace boost::spirit::x4::unicode;
+        using namespace x4::unicode;
 
         auto const invalid_unicode = char32_t{0x7FFFFFFF};
         auto const input           = std::u32string_view(&invalid_unicode, 1);
@@ -159,9 +161,9 @@ int main()
     }
 
     {   // test attribute extraction
-        using boost::spirit::x4::traits::attribute_of_t;
-        using boost::spirit::x4::standard::alpha;
-        using boost::spirit::x4::standard::alpha_type;
+        using x4::traits::attribute_of_t;
+        using x4::standard::alpha;
+        using x4::standard::alpha_type;
 
         static_assert(std::is_same_v<attribute_of_t<alpha_type, unused_type>, char>);
 
@@ -171,16 +173,16 @@ int main()
     }
 
     {   // test attribute extraction
-        using boost::spirit::x4::standard::alpha;
-        using boost::spirit::x4::standard::space;
+        using x4::standard::alpha;
+        using x4::standard::space;
         char attr = 0;
         BOOST_TEST(parse("     a", alpha, attr, space));
         BOOST_TEST(attr == 'a');
     }
 
     {   // test action
-        using namespace boost::spirit::x4::standard;
-        using boost::spirit::x4::_attr;
+        using namespace x4::standard;
+        using x4::_attr;
         char ch = '\0';
         auto f = [&](auto& ctx){ ch = _attr(ctx); };
 

@@ -9,20 +9,26 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/auxiliary/eoi.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/raw.hpp>
+#include <boost/spirit/x4/directive/repeat.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
 
 #include <ranges>
 #include <algorithm>
-#include <iostream>
 #include <string>
 
 int main()
 {
-    using boost::spirit::x4::raw;
-    using boost::spirit::x4::eps;
-    using boost::spirit::x4::eoi;
-    using boost::spirit::x4::standard::upper;
-    using boost::spirit::x4::repeat;
+    using x4::raw;
+    using x4::eps;
+    using x4::eoi;
+    using x4::standard::upper;
+    using x4::repeat;
 
     std::string input = "abcde";
     auto const rng = input | std::views::transform([](char c) {

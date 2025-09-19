@@ -10,14 +10,15 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
 
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/at.hpp>
 
 #include <string_view>
 
 #include <climits>
+#include <cstdint>
 
 //
 // BEWARE PLATFORM DEPENDENT!!!
@@ -64,7 +65,7 @@ int main()
 {
     // signed integer tests
     {
-        using boost::spirit::x4::int_;
+        using x4::int_;
         int i;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int_);
@@ -111,7 +112,7 @@ int main()
 
     // long long tests
     {
-        using boost::spirit::x4::long_long;
+        using x4::long_long;
         boost::long_long_type ll;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(long_long);
@@ -140,8 +141,8 @@ int main()
 
     // short_ and long_ tests
     {
-        using boost::spirit::x4::short_;
-        using boost::spirit::x4::long_;
+        using x4::short_;
+        using x4::long_;
         int i;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(short_);
@@ -158,7 +159,7 @@ int main()
 
     // Check overflow is parse error
     {
-        constexpr boost::spirit::x4::int_parser<boost::int8_t> int8_{};
+        constexpr x4::int_parser<std::int8_t> int8_{};
         char c;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int8_);
@@ -166,15 +167,15 @@ int main()
         BOOST_TEST(!parse("999", int8_, c));
 
         int i;
-        using boost::spirit::x4::short_;
+        using x4::short_;
         BOOST_TEST(!parse("32769", short_, i).is_partial_match());
         BOOST_TEST(!parse("41234", short_, i).is_partial_match());
     }
 
     // int_parser<unused_type> tests
     {
-        using boost::spirit::x4::int_parser;
-        using boost::spirit::x4::unused_type;
+        using x4::int_parser;
+        using x4::unused_type;
         constexpr int_parser<unused_type> any_int{};
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(any_int);
@@ -186,9 +187,9 @@ int main()
 
     // action tests
     {
-        using boost::spirit::x4::_attr;
-        using boost::spirit::x4::standard::space;
-        using boost::spirit::x4::int_;
+        using x4::_attr;
+        using x4::standard::space;
+        using x4::int_;
         int n = 0, m = 0;
 
         auto f = [&](auto& ctx){ n = _attr(ctx); };
@@ -203,8 +204,8 @@ int main()
 
     // custom int tests
     {
-        using boost::spirit::x4::int_;
-        using boost::spirit::x4::int_parser;
+        using x4::int_;
+        using x4::int_parser;
         custom_int i;
 
         BOOST_TEST(parse("-123456", int_, i));
@@ -214,8 +215,8 @@ int main()
 
     // single-element fusion vector tests
     {
-        using boost::spirit::x4::int_;
-        using boost::spirit::x4::int_parser;
+        using x4::int_;
+        using x4::int_parser;
         boost::fusion::vector<int> i;
 
         BOOST_TEST(parse("-123456", int_, i));

@@ -9,10 +9,10 @@
 #ifndef BOOST_SPIRIT_X4_PRINT_ATTRIBUTE_JANUARY_20_2013_0814AM
 #define BOOST_SPIRIT_X4_PRINT_ATTRIBUTE_JANUARY_20_2013_0814AM
 
-#include <boost/fusion/include/is_sequence.hpp>
-#include <boost/fusion/include/for_each.hpp>
 #include <boost/spirit/x4/traits/attribute_category.hpp>
 #include <boost/spirit/x4/traits/variant_traits.hpp>
+
+#include <boost/fusion/include/for_each.hpp>
 
 #include <boost/variant.hpp>
 #include <boost/variant/apply_visitor.hpp> // TODO: remove this

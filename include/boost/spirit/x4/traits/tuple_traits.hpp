@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_TUPLE_TRAITS_JANUARY_2012_1132PM
 #define BOOST_SPIRIT_X4_TUPLE_TRAITS_JANUARY_2012_1132PM
 
-#include <boost/fusion/include/is_sequence.hpp>
+#include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/include/is_view.hpp>
 #include <boost/fusion/include/size.hpp>
 

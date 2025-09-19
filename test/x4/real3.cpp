@@ -14,9 +14,9 @@ int main()
 {
     // strict real number tests
     {
-        using boost::spirit::x4::real_parser;
-        using boost::spirit::x4::strict_ureal_policies;
-        using boost::spirit::x4::strict_real_policies;
+        using x4::real_parser;
+        using x4::strict_ureal_policies;
+        using x4::strict_real_policies;
 
         constexpr real_parser<double, strict_ureal_policies<double>> strict_udouble;
         constexpr real_parser<double, strict_real_policies<double>> strict_double;
@@ -68,7 +68,7 @@ int main()
 
     // Special thousands separated numbers
     {
-        using boost::spirit::x4::real_parser;
+        using x4::real_parser;
         constexpr real_parser<double, ts_real_policies<double>> ts_real;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(ts_real);

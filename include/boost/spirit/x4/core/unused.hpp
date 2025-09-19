@@ -9,9 +9,9 @@
 #ifndef BOOST_SPIRIT_X4_UNUSED_APRIL_16_2006_0616PM
 #define BOOST_SPIRIT_X4_UNUSED_APRIL_16_2006_0616PM
 
-#include <iosfwd> // TODO: remove this, iosfwd is heavier than most people might think
+#include <boost/spirit/x4/core/config.hpp>
+
 #include <type_traits>
-#include <utility>
 
 namespace boost::spirit::x4
 {
@@ -22,19 +22,9 @@ namespace boost::spirit::x4
         // unused_type can masquerade as an empty context (see context.hpp)
 
         template <typename ID>
-        [[nodiscard]] constexpr unused_type get(ID&&) const noexcept
+        [[nodiscard]] static constexpr unused_type get(ID&&) noexcept
         {
             return unused_type{};
-        }
-
-        friend std::ostream& operator<<(std::ostream& os, unused_type const&) noexcept
-        {
-            return os;
-        }
-
-        friend std::istream& operator>>(std::istream& is, unused_type&) noexcept
-        {
-            return is;
         }
     };
 

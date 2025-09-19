@@ -8,7 +8,9 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/auxiliary/attr.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
 
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/make_vector.hpp>
@@ -17,8 +19,6 @@
 #include <optional>
 #include <string>
 #include <type_traits>
-
-namespace x4 = boost::spirit::x4;
 
 // just an `attr` with added type checker
 template <typename Value, typename Expected>

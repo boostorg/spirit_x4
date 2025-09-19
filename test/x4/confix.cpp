@@ -9,11 +9,12 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4/char.hpp>
-#include <boost/spirit/x4/numeric.hpp>
-#include <boost/spirit/x4/operator.hpp>
-#include <boost/spirit/x4/string.hpp>
 #include <boost/spirit/x4/directive/confix.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/numeric/uint.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
 
 int main()
 {

@@ -8,15 +8,29 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/auxiliary/attr.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/negated_char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/no_case.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/numeric/real.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/optional.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/deque.hpp>
-#include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/comparison.hpp>
 
 #include <optional>
 #include <string>
-#include <iostream>
 
 int main()
 {
@@ -184,7 +198,7 @@ int main()
     }
 
     { // check attribute is passed through unary to another sequence
-        using boost::spirit::x4::eps;
+        using x4::eps;
         std::string s;
         BOOST_TEST(parse("ab", eps >> no_case[char_ >> char_], s));
         BOOST_TEST("ab" == s);
@@ -240,7 +254,7 @@ int main()
 
     { // alternative forms of attributes. Allow sequences to take in
       // stl containers.
-        //~ using boost::spirit::x4::hold;
+        //~ using x4::hold;
 
         std::vector<char> v;
         BOOST_TEST(parse("abc", char_ >> *(char_ >> char_), v));
@@ -292,7 +306,7 @@ int main()
         s.clear();
 
         // $$$ hold not yet implemented $$$
-        //~ using boost::spirit::x4::hold;
+        //~ using x4::hold;
 
         //~ rule<char const*, std::string()> word = +char_("abc");
         //~ BOOST_TEST(parse("ab.bc.ca", *hold[word >> string(".")] >> word, s));
@@ -451,8 +465,8 @@ int main()
         >));
     }
 
-    {   // test action
-        using boost::fusion::at_c;
+    {
+        // test action
 
         char c = 0;
         int n = 0;
@@ -467,7 +481,8 @@ int main()
         BOOST_TEST(n == 123);
     }
 
-    {   // test action
+    {
+        // test action
         char c = 0;
         int n = 0;
         auto f = [&](auto& ctx)
@@ -491,7 +506,7 @@ int main()
 
     {
         // test move only types
-        using boost::spirit::x4::eps;
+        using x4::eps;
         std::vector<spirit_test::move_only> v;
 
         using T = std::vector<spirit_test::move_only>;

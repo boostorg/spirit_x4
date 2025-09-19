@@ -9,16 +9,52 @@
 #ifndef BOOST_SPIRIT_X4_NUMERIC_BOOL_HPP
 #define BOOST_SPIRIT_X4_NUMERIC_BOOL_HPP
 
+#include <boost/spirit/x4/core/move_to.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 #include <boost/spirit/x4/core/skip_over.hpp>
-#include <boost/spirit/x4/numeric/bool_policies.hpp>
 
+#include <boost/spirit/x4/string/detail/string_parse.hpp>
+
+#include <string_view>
 #include <iterator>
 #include <type_traits>
 #include <utility>
 
 namespace boost::spirit::x4
 {
+    //  Default boolean policies
+    template <typename T = bool>
+    struct bool_policies
+    {
+        template <std::forward_iterator It, std::sentinel_for<It> Se, typename Attribute, typename CaseCompare>
+        [[nodiscard]] static constexpr bool
+        parse_true(It& first, Se const& last, Attribute& attr_, CaseCompare const& case_compare)
+            noexcept(std::is_nothrow_constructible_v<Attribute, T>)
+        {
+            using namespace std::string_view_literals;
+            if (detail::string_parse("true"sv, first, last, unused, case_compare))
+            {
+                x4::move_to(T(true), attr_);    // result is true
+                return true;
+            }
+            return false;
+        }
+
+        template <std::forward_iterator It, std::sentinel_for<It> Se, typename Attribute, typename CaseCompare>
+        [[nodiscard]] static constexpr bool
+        parse_false(It& first, Se const& last, Attribute& attr_, CaseCompare const& case_compare)
+            noexcept(std::is_nothrow_constructible_v<Attribute, T>)
+        {
+            using namespace std::string_view_literals;
+            if (detail::string_parse("false"sv, first, last, unused, case_compare))
+            {
+                x4::move_to(T(false), attr_);   // result is false
+                return true;
+            }
+            return false;
+        }
+    };
+
     template <typename T, typename Encoding, typename BoolPolicies = bool_policies<T>>
     struct bool_parser : parser<bool_parser<T, Encoding, BoolPolicies>>
     {

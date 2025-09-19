@@ -8,7 +8,6 @@
 #ifndef BOOST_SPIRIT_X4_DIRECTIVE_WITH_HPP
 #define BOOST_SPIRIT_X4_DIRECTIVE_WITH_HPP
 
-#include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 
 #include <iterator>

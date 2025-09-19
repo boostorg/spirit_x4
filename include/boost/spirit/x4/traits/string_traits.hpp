@@ -14,8 +14,16 @@
 # error "`BOOST_SPIRIT_UNICODE` has no effect on X4. #define `BOOST_SPIRIT_X4_UNICODE`"
 #endif
 
-#if defined(BOOST_SPIRIT_X4_NO_STANDARD_WIDE) && !defined(BOOST_SPIRIT_X4_NO_STANDARD_WIDE)
-# error "`BOOST_SPIRIT_X4_NO_STANDARD_WIDE` has no effect on X4. #define `BOOST_SPIRIT_X4_NO_STANDARD_WIDE`"
+#if defined(BOOST_SPIRIT_X3_UNICODE) && !defined(BOOST_SPIRIT_X4_UNICODE)
+# error "`BOOST_SPIRIT_X3_UNICODE` has no effect on X4. #define `BOOST_SPIRIT_X4_UNICODE`"
+#endif
+
+#if defined(BOOST_SPIRIT_NO_STANDARD_WIDE) && !defined(BOOST_SPIRIT_X4_NO_STANDARD_WIDE)
+# error "`BOOST_SPIRIT_NO_STANDARD_WIDE` has no effect on X4. #define `BOOST_SPIRIT_X4_NO_STANDARD_WIDE`"
+#endif
+
+#if defined(BOOST_SPIRIT_X3_NO_STANDARD_WIDE) && !defined(BOOST_SPIRIT_X4_NO_STANDARD_WIDE)
+# error "`BOOST_SPIRIT_X3_NO_STANDARD_WIDE` has no effect on X4. #define `BOOST_SPIRIT_X4_NO_STANDARD_WIDE`"
 #endif
 
 #include <string>
@@ -67,7 +75,7 @@ namespace boost::spirit::x4::traits
     // semantics. Versioned as `X4` for forward compatibility.
     template <typename T, typename CharT>
     concept X4VagueArrayOf2Chars =
-        std::same_as<std::remove_all_extents_t<std::remove_cvref_t<T>>, CharT> &&
+        std::same_as<std::remove_extent_t<std::remove_cvref_t<T>>, CharT> &&
         std::is_bounded_array_v<std::remove_cvref_t<T>> &&
         std::extent_v<std::remove_cvref_t<T>> == 2;
 

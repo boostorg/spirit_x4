@@ -9,14 +9,19 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
 #include <boost/spirit/x4/debug/error_reporting.hpp>
 #include <boost/spirit/x4/symbols.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/directive/with.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
 
-#include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/include/vector.hpp>
 
-#include <optional>
 #include <iterator>
 #include <vector>
 #include <string>
@@ -62,15 +67,16 @@ struct my_attribute
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
+    using namespace x4::standard;
     using x4::rule;
     using x4::int_;
 
-    { // basic tests
+    {
+        // basic tests
 
-        auto a = rule<class a_id>("a") = 'a';
-        auto b = rule<class b_id>("b") = 'b';
-        auto c = rule<class c_id>("c") = 'c';
+        constexpr auto a = rule<class a_id>("a") = 'a';
+        constexpr auto b = rule<class b_id>("b") = 'b';
+        constexpr auto c = rule<class c_id>("c") = 'c';
 
         {
             auto start = *(a | b | c);
@@ -87,7 +93,8 @@ int main()
         }
     }
 
-    { // basic tests w/ skipper
+    {
+        // basic tests w/ skipper
 
         auto a = rule<class a_id>("a") = 'a';
         auto b = rule<class b_id>("b") = 'b';
@@ -120,7 +127,7 @@ int main()
     }
 
     {
-         // error handling
+        // error handling
 
         auto r_def = '(' > int_ > ',' > int_ > ')';
         my_error_handler error_handler;

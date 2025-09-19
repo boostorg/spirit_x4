@@ -11,11 +11,16 @@
 
 #include "real.hpp"
 
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+
+
 int main()
 {
     // thousand separated numbers
     {
-        using boost::spirit::x4::uint_parser;
+        using x4::uint_parser;
 
         uint_parser<unsigned, 10, 1, 3> uint3;
         uint_parser<unsigned, 10, 3, 3> uint3_3;
@@ -32,8 +37,8 @@ int main()
 
     // unsigned real number tests
     {
-        using boost::spirit::x4::real_parser;
-        using boost::spirit::x4::ureal_policies;
+        using x4::real_parser;
+        using x4::ureal_policies;
 
         constexpr real_parser<double, ureal_policies<double> > udouble;
         double d;

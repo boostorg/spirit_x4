@@ -5,21 +5,27 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/at.hpp>
 
 #include <string>
-#include <iostream>
 
-using boost::spirit::x4::rule;
+using x4::rule;
 
 rule<class direct_rule, int> direct_rule = "direct_rule";
 rule<class indirect_rule, int> indirect_rule = "indirect_rule";
 
-auto const direct_rule_def = boost::spirit::x4::int_;
+auto const direct_rule_def = x4::int_;
 auto const indirect_rule_def = direct_rule;
 
 BOOST_SPIRIT_X4_DEFINE(direct_rule)
@@ -27,11 +33,11 @@ BOOST_SPIRIT_X4_DEFINE(indirect_rule)
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
-    using boost::spirit::x4::omit;
-    using boost::spirit::x4::unused_type;
-    using boost::spirit::x4::unused;
-    using boost::spirit::x4::int_;
+    using namespace x4::standard;
+    using x4::omit;
+    using x4::unused_type;
+    using x4::unused;
+    using x4::int_;
 
     using boost::fusion::vector;
     using boost::fusion::at_c;

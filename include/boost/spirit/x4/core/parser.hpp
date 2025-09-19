@@ -9,8 +9,8 @@
 #ifndef BOOST_SPIRIT_X4_PARSER_OCTOBER_16_2008_0254PM
 #define BOOST_SPIRIT_X4_PARSER_OCTOBER_16_2008_0254PM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
-#include <boost/spirit/x4/core/context.hpp>
 #include <boost/spirit/x4/traits/attribute.hpp>
 
 #include <iterator>
@@ -265,7 +265,7 @@ namespace boost::spirit::x4
     } // cpos
 
     template <typename T>
-    using as_parser_t = decltype(as_parser(std::declval<T>())); // no ADL
+    using as_parser_t = decltype(as_parser(std::declval<T>())); // If you see an error here, your `T` is not castable to X4's parser type.
 
     template <typename T>
     using as_parser_plain_t = std::remove_cvref_t<as_parser_t<T>>;
@@ -275,11 +275,12 @@ namespace boost::spirit::x4
     // `is_parser_nothrow_castable`. Most users should use `X4Subject`
     // instead.
     template <typename T>
-    struct is_parser_castable : std::bool_constant<
-        requires {
+    struct is_parser_castable
+    {
+        static constexpr bool value = requires {
             { x4::as_parser(std::declval<T>()) };
-        }
-    > {};
+        };
+    };
 
     template <typename T>
     constexpr bool is_parser_castable_v = is_parser_castable<T>::value;
@@ -291,11 +292,12 @@ namespace boost::spirit::x4
     //    is_parser_nothrow_castable_v<B> &&
     //    std::is_nothrow_constructible_v<op_parser, as_parser_t<A>, as_parser_t<B>>
     template <typename T>
-    struct is_parser_nothrow_castable : std::bool_constant<
-        requires {
+    struct is_parser_nothrow_castable
+    {
+        static constexpr bool value = requires {
             { x4::as_parser(std::declval<T>()) } noexcept;
-        }
-    > {};
+        };
+    };
 
     template <typename T>
     constexpr bool is_parser_nothrow_castable_v = is_parser_nothrow_castable<T>::value;

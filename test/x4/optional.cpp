@@ -8,12 +8,18 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/optional.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/include/vector.hpp>
 
 #include <optional>
-#include <iostream>
 
 #ifdef _MSC_VER
 // bogus https://developercommunity.visualstudio.com/t/buggy-warning-c4709/471956
@@ -43,9 +49,9 @@ int main()
 {
     static_assert(x4::traits::is_optional_v<std::optional<int>>);
 
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::omit;
-    using boost::spirit::x4::standard::char_;
+    using x4::int_;
+    using x4::omit;
+    using x4::standard::char_;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(-int_);
 

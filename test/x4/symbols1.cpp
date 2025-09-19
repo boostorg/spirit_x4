@@ -8,10 +8,10 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/string/string.hpp>
 #include <boost/spirit/x4/symbols.hpp>
-
-#include <iostream>
+#include <boost/spirit/x4/directive/no_case.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
 
 // Custom string type with a C-style string conversion.
 struct custom_string_c
@@ -27,8 +27,8 @@ private:
 
 int main()
 {
-    using boost::spirit::x4::shared_symbols;
-    using boost::spirit::x4::no_case;
+    using x4::shared_symbols;
+    using x4::no_case;
 
     { // basics
         shared_symbols<int> sym;
@@ -77,7 +77,7 @@ int main()
 
 
     { // no-case handling
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
 
         // NOTE: make sure all entries are in lower-case!!!
         shared_symbols<int> sym{"joel", "ruby", "tenji", "tutit", "kim", "joey"};
@@ -137,7 +137,7 @@ int main()
 
     {
         // actions
-        using boost::spirit::x4::_attr;
+        using x4::_attr;
 
         shared_symbols<int> sym;
         sym.add

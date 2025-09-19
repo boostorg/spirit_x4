@@ -31,15 +31,9 @@
 #include <ranges>
 #include <iterator>
 #include <initializer_list>
-#include <iterator> // std::begin
-#include <memory> // std::shared_ptr
+#include <memory>
 #include <type_traits>
 #include <utility>
-
-#if defined(BOOST_MSVC)
-# pragma warning(push)
-# pragma warning(disable: 4355) // 'this' : used in base member initializer list warning
-#endif
 
 #define BOOST_SPIRIT_X4_IMPLICIT_SHARED_SYMBOLS_WARNING(old_api) \
     "Use `shared_" old_api "` instead. `" old_api "` has had a " \
@@ -391,13 +385,13 @@ namespace detail
     {
         template <typename T = unused_type>
         using symbols [[deprecated(BOOST_SPIRIT_X4_IMPLICIT_SHARED_SYMBOLS_WARNING("symbols"))]]
-            = x4::shared_symbols_parser<char_encoding::standard, T>;
+            = shared_symbols_parser<char_encoding::standard, T>;
 
         template <typename T = unused_type>
-        using shared_symbols = x4::shared_symbols_parser<char_encoding::standard, T>;
+        using shared_symbols = shared_symbols_parser<char_encoding::standard, T>;
 
         template <typename T = unused_type>
-        using unique_symbols = x4::unique_symbols_parser<char_encoding::standard, T>;
+        using unique_symbols = unique_symbols_parser<char_encoding::standard, T>;
     } // standard
 
     using standard::symbols;
@@ -409,32 +403,28 @@ namespace detail
     {
         template <typename T = unused_type>
         using symbols [[deprecated(BOOST_SPIRIT_X4_IMPLICIT_SHARED_SYMBOLS_WARNING("symbols"))]]
-            = x4::shared_symbols_parser<char_encoding::standard_wide, T>;
+            = shared_symbols_parser<char_encoding::standard_wide, T>;
 
         template <typename T = unused_type>
-        using shared_symbols = x4::shared_symbols_parser<char_encoding::standard_wide, T>;
+        using shared_symbols = shared_symbols_parser<char_encoding::standard_wide, T>;
 
         template <typename T = unused_type>
-        using unique_symbols = x4::unique_symbols_parser<char_encoding::standard_wide, T>;
+        using unique_symbols = unique_symbols_parser<char_encoding::standard_wide, T>;
     } // standard_wide
 #endif
 
 #ifdef BOOST_SPIRIT_X4_UNICODE
     namespace unicode {
         template <typename T = unused_type>
-        using shared_symbols = x4::shared_symbols_parser<char_encoding::unicode, T>;
+        using shared_symbols = shared_symbols_parser<char_encoding::unicode, T>;
 
         template <typename T = unused_type>
-        using unique_symbols = x4::unique_symbols_parser<char_encoding::unicode, T>;
+        using unique_symbols = unique_symbols_parser<char_encoding::unicode, T>;
     } // unicode
 #endif
 
 } // boost::spirit::x4
 
 #undef BOOST_SPIRIT_X4_IMPLICIT_SHARED_SYMBOLS_WARNING
-
-#if defined(BOOST_MSVC)
-# pragma warning(pop)
-#endif
 
 #endif

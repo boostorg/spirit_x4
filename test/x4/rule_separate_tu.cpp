@@ -45,8 +45,10 @@ int main()
 
     {
         long i;
-        static_assert(!std::is_same<decltype(i), used_attr::grammar_type::attribute_type>::value,
-            "ensure we have instantiated the rule with a different attribute type");
+        static_assert(
+            !std::is_same_v<decltype(i), used_attr::grammar_type::attribute_type>,
+            "ensure we have instantiated the rule with a different attribute type"
+        );
         BOOST_TEST(parse("123", used_attr::grammar, i));
         BOOST_TEST_EQ(i, 123);
         BOOST_TEST(parse(" 42", used_attr::grammar, i, used_attr::skipper));

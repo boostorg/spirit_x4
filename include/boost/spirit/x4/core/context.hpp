@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_CONTEXT_JAN_4_2012_1215PM
 #define BOOST_SPIRIT_X4_CONTEXT_JAN_4_2012_1215PM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 
 #include <type_traits>

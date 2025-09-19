@@ -7,9 +7,12 @@
     http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
+#ifndef BOOST_SPIRIT_X4_TEST_X4_RULE_SEPARATE_TU_GRAMMAR_HPP
+#define BOOST_SPIRIT_X4_TEST_X4_RULE_SEPARATE_TU_GRAMMAR_HPP
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
 
 // Check that `BOOST_SPIRIT_X4_INSTANTIATE` instantiates `parse_rule` with proper
 // types when a rule has no attribute.
@@ -50,3 +53,5 @@ const grammar_type grammar;
 BOOST_SPIRIT_X4_DECLARE(grammar_type)
 
 }
+
+#endif

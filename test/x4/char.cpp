@@ -8,23 +8,24 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
-#define BOOST_SPIRIT_UNICODE
 #define BOOST_SPIRIT_X4_UNICODE
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/char/negated_char.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
 
 #include <string>
 #include <string_view>
-#include <iostream>
 #include <vector>
 #include <algorithm>
 
 int main()
 {
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_('x'));
@@ -68,7 +69,7 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::standard;
+        using namespace x4::standard;
 
         BOOST_TEST(parse("   x", 'x', space));
         BOOST_TEST(parse(L"   x", L'x', space));
@@ -81,7 +82,7 @@ int main()
     }
 
     {
-        using namespace boost::spirit::x4::standard_wide;
+        using namespace x4::standard_wide;
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_(L'x'));
@@ -116,7 +117,7 @@ int main()
 
     // unicode (normal ASCII)
     {
-        using namespace boost::spirit::x4::unicode;
+        using namespace x4::unicode;
 
         BOOST_TEST(parse(U"abcd", +char_(U"abcd")));
         BOOST_TEST(!parse(U"abcd", +char_(U"qwer")));
@@ -137,7 +138,7 @@ int main()
 
     // unicode (escaped Unicode char literals)
     {
-        using namespace boost::spirit::x4::unicode;
+        using namespace x4::unicode;
 
         auto const chars = char_(U"\u0024\u00a2\u0939\u20ac\U00010348");
 
@@ -161,10 +162,9 @@ int main()
         BOOST_TEST(none_matched);
     }
 
-
     {   // single char strings!
-        namespace standard = boost::spirit::x4::standard;
-        namespace wide = boost::spirit::x4::standard_wide;
+        namespace standard = x4::standard;
+        namespace wide = x4::standard_wide;
 
         BOOST_TEST(parse("x", "x"));
         BOOST_TEST(parse(L"x", L"x"));
@@ -177,8 +177,8 @@ int main()
 
     {
         // chsets
-        namespace standard = boost::spirit::x4::standard;
-        namespace wide = boost::spirit::x4::standard_wide;
+        namespace standard = x4::standard;
+        namespace wide = x4::standard_wide;
 
         BOOST_TEST(parse("x", standard::char_("a-z")));
         BOOST_TEST(!parse("1", standard::char_("a-z")));
@@ -190,10 +190,6 @@ int main()
 
         std::string set = "a-z0-9";
         BOOST_TEST(parse("x", standard::char_(set)));
-
-#ifdef SPIRIT_NO_COMPILE_CHECK
-        parse("", standard::char_(L"a-z0-9"));
-#endif
     }
 
     return boost::report_errors();

@@ -27,25 +27,25 @@ namespace boost::spirit::x4::detail
         }
 
         constexpr void
-        set(CharT from, CharT to) noexcept
+        set(CharT from, CharT to)
         {
             rr.set(char_range<CharT>(from, to));
         }
 
         constexpr void
-        set(CharT c) noexcept
+        set(CharT c)
         {
             rr.set(char_range<CharT>(c, c));
         }
 
         constexpr void
-        clear(CharT from, CharT to) noexcept
+        clear(CharT from, CharT to)
         {
             rr.clear(char_range<CharT>(from, to));
         }
 
         constexpr void
-        clear(CharT c) noexcept
+        clear(CharT c)
         {
             rr.clear(char_range<CharT>(c, c));
         }
@@ -57,7 +57,7 @@ namespace boost::spirit::x4::detail
         }
 
         constexpr void
-        inverse() noexcept
+        inverse()
         {
             basic_chset inv;
             inv.set(
@@ -76,7 +76,7 @@ namespace boost::spirit::x4::detail
 
 
         constexpr basic_chset&
-        operator|=(basic_chset const& x) noexcept
+        operator|=(basic_chset const& x)
         {
             typedef typename char_range_run<CharT>::const_iterator const_iterator;
             for (const_iterator iter = x.rr.begin(); iter != x.rr.end(); ++iter)
@@ -85,7 +85,7 @@ namespace boost::spirit::x4::detail
         }
 
         constexpr basic_chset&
-        operator&=(basic_chset const& x) noexcept
+        operator&=(basic_chset const& x)
         {
             basic_chset inv;
             inv.set(
@@ -98,7 +98,7 @@ namespace boost::spirit::x4::detail
         }
 
         constexpr basic_chset&
-        operator-=(basic_chset const& x) noexcept
+        operator-=(basic_chset const& x)
         {
             typedef typename char_range_run<CharT>::const_iterator const_iterator;
             for (const_iterator iter = x.rr.begin(); iter != x.rr.end(); ++iter)
@@ -107,7 +107,7 @@ namespace boost::spirit::x4::detail
         }
 
         constexpr basic_chset&
-        operator^=(basic_chset const& x) noexcept
+        operator^=(basic_chset const& x)
         {
             basic_chset bma = x;
             bma -= *this;

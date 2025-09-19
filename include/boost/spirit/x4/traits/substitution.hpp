@@ -10,19 +10,15 @@
 
 #include <boost/spirit/x4/traits/container_traits.hpp>
 #include <boost/spirit/x4/traits/tuple_traits.hpp>
-#include <boost/spirit/x4/traits/optional_traits.hpp>
 
 #include <boost/fusion/include/is_sequence.hpp>
 #include <boost/fusion/include/map.hpp>
 #include <boost/fusion/include/value_at_key.hpp>
-#include <boost/fusion/adapted/mpl.hpp>
 
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/equal.hpp>
-#include <boost/mpl/apply.hpp>
 #include <boost/mpl/filter_view.hpp>
 #include <boost/mpl/size.hpp>
-#include <boost/mpl/logical.hpp>
 #include <boost/mpl/at.hpp>
 
 #include <optional>
@@ -34,7 +30,7 @@ namespace boost::spirit::x4::traits
     struct is_variant;
 
     // Find out if T can be a (strong) substitute for Attribute
-    template <typename T, typename Attribute, typename Enable = void>
+    template <typename T, typename Attribute>
     struct is_substitute;
 
     template <typename T, typename Attribute>
@@ -52,7 +48,7 @@ namespace boost::spirit::x4::traits
             : is_substitute<container_value_t<T>, container_value_t<Attribute>>
         {};
 
-        template <typename T, typename Attribute, typename Enable = void>
+        template <typename T, typename Attribute>
         struct is_substitute_impl : std::false_type {};
 
         template <typename T, typename Attribute>
@@ -79,7 +75,7 @@ namespace boost::spirit::x4::traits
         {};
     }
 
-    template <typename T, typename Attribute, typename Enable>
+    template <typename T, typename Attribute>
     struct is_substitute
         : std::disjunction<
               std::is_same<T, Attribute>,

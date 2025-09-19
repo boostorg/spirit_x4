@@ -8,54 +8,55 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
 
 #include <string>
 #include <cstring>
-#include <iostream>
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
-    using boost::spirit::x4::rule;
-    using boost::spirit::x4::lit;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::unused_type;
-    using boost::spirit::x4::phrase_parse;
-    using boost::spirit::x4::root_skipper_flag;
-    using boost::spirit::x4::traits::has_attribute_v;
+    using namespace x4::standard;
+    using x4::rule;
+    using x4::lit;
+    using x4::int_;
+    using x4::unused_type;
+    using x4::phrase_parse;
+    using x4::root_skipper_flag;
+    using x4::traits::has_attribute_v;
 
 #ifdef BOOST_SPIRIT_X4_NO_RTTI
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r>{});
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r_>{});
 #endif
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r>{"r"});
-    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r>{"r"} = 'x');
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r_>{"r"});
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(rule<class r_>{"r"} = 'x');
 
     // check attribute advertising
-    static_assert( has_attribute_v<rule<class r, int>, /*Context=*/unused_type>);
-    static_assert(!has_attribute_v<rule<class r     >, /*Context=*/unused_type>);
-    static_assert( has_attribute_v<decltype(rule<class r, int>{} = int_), /*Context=*/unused_type>);
-    static_assert(!has_attribute_v<decltype(rule<class r     >{} = int_), /*Context=*/unused_type>);
+    static_assert( has_attribute_v<rule<class r_, int>, /*Context=*/unused_type>);
+    static_assert(!has_attribute_v<rule<class r_     >, /*Context=*/unused_type>);
+    static_assert( has_attribute_v<decltype(rule<class r_, int>{} = int_), /*Context=*/unused_type>);
+    static_assert(!has_attribute_v<decltype(rule<class r_     >{} = int_), /*Context=*/unused_type>);
 
     {
         // basic tests
 
-        auto a = lit('a');
-        auto b = lit('b');
-        auto c = lit('c');
-        rule<class r> r;
+        constexpr auto a = lit('a');
+        constexpr auto b = lit('b');
+        constexpr auto c = lit('c');
+        constexpr rule<class r_> r("rule");
 
         {
-            auto start =
-                r = *(a | b | c);
-
+            constexpr auto start = r = *(a | b | c);
             BOOST_TEST(parse("abcabcacb", start));
         }
 
         {
-            auto start =
-                r = (a | b) >> (r | b);
-
+            constexpr auto start = r = (a | b) >> (r | b);
             BOOST_TEST(parse("aaaabababaaabbb", start));
             BOOST_TEST(parse("aaaabababaaabba", start).is_partial_match());
 
@@ -67,22 +68,18 @@ int main()
     {
         // basic tests w/ skipper
 
-        auto a = lit('a');
-        auto b = lit('b');
-        auto c = lit('c');
-        rule<class r> r;
+        constexpr auto a = lit('a');
+        constexpr auto b = lit('b');
+        constexpr auto c = lit('c');
+        constexpr rule<class r_> r("rule");
 
         {
-            auto start =
-                r = *(a | b | c);
-
+            constexpr auto start = r = *(a | b | c);
             BOOST_TEST(parse(" a b c a b c a c b ", start, space));
         }
 
         {
-            auto start =
-                r = (a | b) >> (r | b);
-
+            constexpr auto start = r = (a | b) >> (r | b);
             BOOST_TEST(parse(" a a a a b a b a b a a a b b b ", start, space));
             BOOST_TEST(parse(" a a a a b a b a b a a a b b a ", start, space).is_partial_match());
         }
@@ -91,26 +88,20 @@ int main()
     {
         // basic tests w/ skipper but no final post-skip
 
-        auto a = rule<class a_id>()
-            = lit('a');
-
-        auto b = rule<class b_id>()
-            = lit('b');
-
-        auto c = rule<class c_id>()
-            = lit('c');
+        constexpr auto a = rule<class a_id>("a") = lit('a');
+        constexpr auto b = rule<class b_id>("b") = lit('b');
+        constexpr auto c = rule<class c_id>("c") = lit('c');
 
         {
-            auto start = rule<class start_id>() = *(a | b) >> c;
+            constexpr auto start = rule<class start_>("start") = *(a | b) >> c;
 
             auto const res = parse(" a b a a b b a c ... ", start, space, root_skipper_flag::dont_post_skip);
             BOOST_TEST(res.ok && res.remainder.size() == 5);
         }
 
         {
-            rule<class start> start;
-
-            auto p = start = (a | b) >> (start | c);
+            constexpr rule<class start_> start("start");
+            constexpr auto p = start = (a | b) >> (start | c);
 
             BOOST_TEST(parse(" a a a a b a b a b a a a b b b c ", p, space, root_skipper_flag::do_post_skip));
 

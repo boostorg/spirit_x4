@@ -12,8 +12,13 @@
 #include <boost/spirit/x4/char/char_class_tags.hpp>
 #include <boost/spirit/x4/char/detail/cast_char.hpp>
 
+#include <boost/spirit/x4/string/case_compare.hpp>
+
 #include <boost/spirit/x4/char_encoding/standard.hpp>
-#include <boost/spirit/x4/char_encoding/standard_wide.hpp>
+
+#ifndef BOOST_SPIRIT_X4_NO_STANDARD_WIDE
+# include <boost/spirit/x4/char_encoding/standard_wide.hpp>
+#endif
 
 namespace boost::spirit::x4
 {

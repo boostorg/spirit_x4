@@ -10,7 +10,6 @@
 #define BOOST_SPIRIT_X4_POSITION_TAGGED_MAY_01_2014_0321PM
 
 #include <ranges>
-#include <type_traits>
 #include <utility>
 
 namespace boost::spirit::x4

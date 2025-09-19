@@ -9,17 +9,16 @@
 
 #undef BOOST_SPIRIT_NO_STANDARD_WIDE
 
-#ifndef BOOST_SPIRIT_UNICODE
-# define BOOST_SPIRIT_UNICODE
-#endif
-
 #ifndef BOOST_SPIRIT_X4_UNICODE
 # define BOOST_SPIRIT_X4_UNICODE
 #endif
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+
 #include <boost/fusion/include/vector.hpp>
 
 #include <string>

@@ -14,7 +14,7 @@
 
 int main()
 {
-    using boost::spirit::x4::to_utf8;
+    using x4::to_utf8;
     using namespace std::string_literals;
 
     BOOST_TEST_CSTR_EQ("\xED\x9F\xBF", to_utf8(0xD7FFul).c_str());

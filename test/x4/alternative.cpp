@@ -6,16 +6,29 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/auxiliary/attr.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
+#include <boost/spirit/x4/operator/optional.hpp>
+
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/variant.hpp>
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/at.hpp>
+
+#include <boost/variant.hpp>
 
 #include <string>
-#include <iostream>
 #include <vector>
 
 struct di_ignore
@@ -40,14 +53,14 @@ struct undefined {};
 
 int main()
 {
-    using boost::spirit::x4::standard::char_;
-    using boost::spirit::x4::standard::lit;
-    using boost::spirit::x4::attr;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::unused_type;
-    using boost::spirit::x4::unused;
-    using boost::spirit::x4::omit;
-    using boost::spirit::x4::eps;
+    using x4::standard::char_;
+    using x4::standard::lit;
+    using x4::attr;
+    using x4::int_;
+    using x4::unused_type;
+    using x4::unused;
+    using x4::omit;
+    using x4::eps;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ | char_);
 
@@ -124,9 +137,9 @@ int main()
     {   // make sure collapsing eps works as expected
         // (compile check only)
 
-        using boost::spirit::x4::rule;
-        using boost::spirit::x4::_attr;
-        using boost::spirit::x4::_val;
+        using x4::rule;
+        using x4::_attr;
+        using x4::_val;
 
         rule<class r1, wchar_t> r1;
         rule<class r2, wchar_t> r2;
@@ -137,6 +150,7 @@ int main()
         (void)(r3 = ((eps >> r1))[f]);
         (void)(r3 = ((r1) | r2)[f]);
         (void)(r3 = ((eps >> r1) | r2));
+        (void)r3;
     }
 
     {
@@ -175,22 +189,22 @@ int main()
         //compile test only (bug_march_10_2011_8_35_am)
         using value_type = boost::variant<double, std::string>;
 
-        using boost::spirit::x4::rule;
+        using x4::rule;
 
         rule<class r1, value_type> r1;
         [[maybe_unused]] auto r1_ = r1 = r1 | eps; // left recursive!
     }
 
     {
-        using boost::spirit::x4::rule;
+        using x4::rule;
         using d_line = boost::variant<di_ignore, di_include>;
 
         rule<class ignore, di_ignore> ignore;
         rule<class include, di_include> include;
         rule<class line, d_line> line;
 
-        [[maybe_unused]] auto start =
-            line = include | ignore;
+        [[maybe_unused]] auto start = line = include | ignore;
+        (void)line;
     }
 
     // single-element fusion vector tests

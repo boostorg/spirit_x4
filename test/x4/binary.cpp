@@ -26,24 +26,24 @@ constexpr auto binary_test(char const (&binstr)[N], Args&&... args)
 
 int main()
 {
-    using boost::spirit::x4::byte_;
-    using boost::spirit::x4::word;
-    using boost::spirit::x4::dword;
-    using boost::spirit::x4::big_word;
-    using boost::spirit::x4::big_dword;
-    using boost::spirit::x4::little_word;
-    using boost::spirit::x4::little_dword;
+    using x4::byte_;
+    using x4::word;
+    using x4::dword;
+    using x4::big_word;
+    using x4::big_dword;
+    using x4::little_word;
+    using x4::little_dword;
 
-    using boost::spirit::x4::qword;
-    using boost::spirit::x4::big_qword;
-    using boost::spirit::x4::little_qword;
+    using x4::qword;
+    using x4::big_qword;
+    using x4::little_qword;
 
-    using boost::spirit::x4::bin_float;
-    using boost::spirit::x4::big_bin_float;
-    using boost::spirit::x4::little_bin_float;
-    using boost::spirit::x4::bin_double;
-    using boost::spirit::x4::big_bin_double;
-    using boost::spirit::x4::little_bin_double;
+    using x4::bin_float;
+    using x4::big_bin_float;
+    using x4::little_bin_float;
+    using x4::bin_double;
+    using x4::big_bin_double;
+    using x4::little_bin_double;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(byte_);
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(word);

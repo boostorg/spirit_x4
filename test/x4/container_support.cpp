@@ -6,12 +6,20 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
+
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/lexeme.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+
 #include <boost/fusion/include/std_pair.hpp>
 
-#include <iostream>
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -45,7 +53,7 @@ template <typename T, typename U>
 struct is_substitute<T, U>
     : is_substitute<typename T::type, typename U::type>
 {};
-}
+} // boost::spirit::x4::traits
 
 namespace check_substitute {
 using x4::traits::is_substitute_v;
@@ -54,6 +62,8 @@ static_assert(!is_substitute_v<foo<int>, foo<long>>, "is_substitute problem");
 static_assert( is_substitute_v<bar<int>, bar<int>>,  "is_substitute problem");
 static_assert(!is_substitute_v<bar<int>, bar<long>>, "is_substitute problem");
 }
+
+namespace {
 
 constexpr x4::rule<class pair_rule, std::pair<std::string, std::string>> pair_rule("pair");
 constexpr x4::rule<class string_rule, std::string> string_rule("string");
@@ -195,6 +205,8 @@ void test_string_support()
     container.clear();
     BOOST_TEST(parse("e1,e2,e2", cic_rule, container));
 }
+
+} // anonymous
 
 int main()
 {

@@ -89,7 +89,7 @@ namespace boost::spirit::x4
         template <std::ranges::forward_range R>
         struct parse_result_for_impl
         {
-            using type = parse_result<std::ranges::iterator_t<R>, std::ranges::sentinel_t<R>>;
+            using type = parse_result<std::ranges::iterator_t<R const>, std::ranges::sentinel_t<R const>>;
         };
 
         template <std::ranges::forward_range R>
@@ -109,8 +109,8 @@ namespace boost::spirit::x4
         template <std::ranges::forward_range R>
         struct range_parse_parser_impl
         {
-            using iterator_type = std::ranges::iterator_t<R>;
-            using sentinel_type = std::ranges::sentinel_t<R>;
+            using iterator_type = std::ranges::iterator_t<R const>;
+            using sentinel_type = std::ranges::sentinel_t<R const>;
         };
 
         template <std::ranges::forward_range R>

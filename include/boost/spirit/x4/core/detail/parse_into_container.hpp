@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_PARSE_INTO_CONTAINER_JAN_15_2013_0957PM
 #define BOOST_SPIRIT_X4_PARSE_INTO_CONTAINER_JAN_15_2013_0957PM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/move_to.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 
@@ -16,9 +17,9 @@
 #include <boost/spirit/x4/traits/handles_container.hpp>
 #include <boost/spirit/x4/traits/substitution.hpp>
 
-#include <boost/fusion/include/at_key.hpp>
-#include <boost/fusion/include/front.hpp>
-#include <boost/fusion/include/back.hpp>
+#include <boost/fusion/sequence/intrinsic/at_key.hpp>
+#include <boost/fusion/sequence/intrinsic/front.hpp>
+#include <boost/fusion/sequence/intrinsic/back.hpp>
 
 // TODO: remove Boost.Variant usage
 #include <boost/variant/variant.hpp>
@@ -36,15 +37,15 @@ namespace boost::spirit::x4::detail
     struct saver_visitor;
 
     // save to associative fusion container where Key is simple type
-    template <typename Key, typename Enable = void>
+    template <typename Key>
     struct save_to_assoc_attr
     {
         template <typename Value, typename Attribute>
         static constexpr void call(Key const&, Value&& value, Attribute& attr)
-            noexcept(noexcept(x4::move_to(std::move(value), fusion::at_key<Key>(attr))))
+            noexcept(noexcept(x4::move_to(std::forward<Value>(value), fusion::at_key<Key>(attr))))
         {
             static_assert(std::is_rvalue_reference_v<Value&&>);
-            x4::move_to(std::move(value), fusion::at_key<Key>(attr));
+            x4::move_to(std::forward<Value>(value), fusion::at_key<Key>(attr));
         }
     };
 
@@ -57,7 +58,7 @@ namespace boost::spirit::x4::detail
         static constexpr void call(variant<Ts...> const& key, Value&& value, Attribute& attr)
         {
             static_assert(std::is_rvalue_reference_v<Value&&>);
-            boost::apply_visitor(saver_visitor<Attribute, Value>(attr, std::move(value)), key);
+            boost::apply_visitor(saver_visitor<Attribute, Value>(attr, std::forward<Value>(value)), key);
         }
     };
 
@@ -69,8 +70,8 @@ namespace boost::spirit::x4::detail
             , value(std::move(value))
         {};
 
-        Attribute& attr;
-        Value&& value;
+        Attribute& attr;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+        Value&& value;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
         template <typename Key>
         constexpr void operator()(Key const& key) const

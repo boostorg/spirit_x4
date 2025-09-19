@@ -8,12 +8,15 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
 
 #include <iterator>
 #include <string>
 #include <cstring>
-#include <iostream>
 #include <type_traits>
 
 namespace x4 = boost::spirit::x4;
@@ -39,11 +42,11 @@ struct check_no_rule_injection_parser
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
-    using boost::spirit::x4::rule;
-    using boost::spirit::x4::lit;
-    using boost::spirit::x4::unused_type;
-    using boost::spirit::x4::_attr;
+    using namespace x4::standard;
+    using x4::rule;
+    using x4::lit;
+    using x4::unused_type;
+    using x4::_attr;
 
     { // context tests
 

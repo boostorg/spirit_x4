@@ -18,10 +18,9 @@
 #include <boost/mpl/deref.hpp> // TODO: remove this
 #include <boost/mpl/find_if.hpp> // TODO: remove this
 #include <boost/mpl/eval_if.hpp> // TODO: remove this
-#include <boost/mpl/end.hpp> // TODO: remove this
+#include <boost/mpl/begin_end.hpp> // TODO: remove this
 
 #include <type_traits>
-#include <utility>
 
 namespace boost::spirit::x4::traits
 {

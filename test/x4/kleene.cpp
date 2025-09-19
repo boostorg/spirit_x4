@@ -8,11 +8,15 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/lexeme.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
 
 #include <string>
 #include <vector>
-#include <iostream>
 
 struct x_attr {};
 
@@ -33,17 +37,17 @@ namespace boost::spirit::x4::traits
         }
     };
 
-} // boost::spirit::x4::traits
+} // x4::traits
 
 int main()
 {
-    using boost::spirit::x4::char_;
-    using boost::spirit::x4::alpha;
-    using boost::spirit::x4::upper;
-    using boost::spirit::x4::space;
-    using boost::spirit::x4::digit;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::lexeme;
+    using x4::char_;
+    using x4::alpha;
+    using x4::upper;
+    using x4::space;
+    using x4::digit;
+    using x4::int_;
+    using x4::lexeme;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(*char_);
 
@@ -88,7 +92,7 @@ int main()
 
     {
         // actions
-        using boost::spirit::x4::_attr;
+        using x4::_attr;
 
         std::string v;
         auto f = [&](auto& ctx){ v = _attr(ctx); };
@@ -99,7 +103,7 @@ int main()
 
     {
         // more actions
-        using boost::spirit::x4::_attr;
+        using x4::_attr;
 
         std::vector<int> v;
         auto f = [&](auto& ctx){ v = _attr(ctx); };

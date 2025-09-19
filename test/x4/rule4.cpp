@@ -8,9 +8,14 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/not_predicate.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/at.hpp>
 #include <boost/variant.hpp>
 
 #include <iterator>
@@ -61,10 +66,10 @@ bool on_success_gets_preskipped_iterator::ok = false;
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
-    using boost::spirit::x4::rule;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::lit;
+    using namespace x4::standard;
+    using x4::rule;
+    using x4::int_;
+    using x4::lit;
 
     // show that ra = rb and ra %= rb works as expected
     {
@@ -89,6 +94,7 @@ int main()
     {
         rule<class a, int> ra;
         rule<class b, int> rb;
+        (void)rb;
         int attr;
 
         auto f = [](auto&){};
@@ -170,6 +176,7 @@ int main()
         BOOST_TEST(parse("1", expr, i) && i == 1);
 
         constexpr rule<class int_rule, int> int_rule("int_rule");
+        (void)int_rule;
         constexpr auto int_rule_def = int_;
         constexpr auto start = int_rule = int_rule_def;
 

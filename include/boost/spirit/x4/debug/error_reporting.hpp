@@ -13,7 +13,6 @@
 
 #include <string>
 #include <iterator>
-#include <ostream>
 
 // Clang-style error handling utilities
 

@@ -8,14 +8,23 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/auxiliary/attr.hpp>
+#include <boost/spirit/x4/auxiliary/eps.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/negated_char.hpp>
+#include <boost/spirit/x4/string/string.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
+#include <boost/spirit/x4/operator/alternative.hpp>
+
 #include <boost/fusion/include/at_key.hpp>
 #include <boost/fusion/include/make_map.hpp>
 #include <boost/fusion/adapted/struct.hpp>
+
 #include <boost/variant.hpp>
 
 #include <string>
-#include <iostream>
 
 struct AdaptedStruct {
     std::string key1;
@@ -33,10 +42,10 @@ BOOST_FUSION_ADAPT_ASSOC_STRUCT(
 
 int main()
 {
-    using boost::spirit::x4::lit;
-    using boost::spirit::x4::attr;
-    using boost::spirit::x4::char_;
-    using boost::spirit::x4::eps;
+    using x4::lit;
+    using x4::attr;
+    using x4::char_;
+    using x4::eps;
     namespace fusion = boost::fusion;
 
     {

@@ -1,5 +1,6 @@
 /*=============================================================================
     Copyright (c) 2001-2014 Joel de Guzman
+    Copyright (c) 2025 Nana Sakisaka
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -23,9 +24,9 @@ namespace boost { namespace spirit { namespace x4
         constexpr semantic_predicate(bool predicate)
           : predicate(predicate) {}
 
-        template <typename Iterator, typename Context, typename Attribute>
+        template <typename Iterator, typename Context, typename RContext, typename Attribute>
         bool parse(Iterator& first, Iterator const& last
-          , Context const& context, unused_type, Attribute&) const
+          , Context const& context, RContext const&, Attribute&) const
         {
             x4::skip_over(first, last, context);
             return predicate;
@@ -43,9 +44,9 @@ namespace boost { namespace spirit { namespace x4
         constexpr lazy_semantic_predicate(F f)
           : f(f) {}
 
-        template <typename Iterator, typename Context, typename Attribute>
+        template <typename Iterator, typename Context, typename RContext, typename Attribute>
         bool parse(Iterator& first, Iterator const& last
-          , Context const& context, unused_type, Attribute& /* attr */) const
+          , Context const& context, RContext const&, Attribute& /* attr */) const
         {
             x4::skip_over(first, last, context);
             return f(x4::get<rule_context_tag>(context));
@@ -60,9 +61,9 @@ namespace boost { namespace spirit { namespace x4
         static bool const has_attribute = false;
 
         template <typename Iterator, typename Context
-          , typename RuleContext, typename Attribute>
+          , typename RContext, typename Attribute>
         bool parse(Iterator& first, Iterator const& last
-          , Context const& context, RuleContext&, Attribute&) const
+          , Context const& context, RContext const&, Attribute&) const
         {
             x4::skip_over(first, last, context);
             return true;

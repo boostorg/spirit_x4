@@ -7,10 +7,11 @@
 #ifndef BOOST_SPIRIT_X4_SUPPORT_TRAITS_CHAR_ENCODING_TRAITS_HPP
 #define BOOST_SPIRIT_X4_SUPPORT_TRAITS_CHAR_ENCODING_TRAITS_HPP
 
-#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char_encoding/standard.hpp>
 
-#include <boost/spirit/x4/char/literal_char.hpp>
-#include <boost/spirit/x4/string/literal_string.hpp>
+#ifndef BOOST_SPIRIT_X4_NO_STANDARD_WIDE
+# include <boost/spirit/x4/char_encoding/standard_wide.hpp>
+#endif
 
 #ifdef BOOST_SPIRIT_X4_UNICODE
 # include <boost/spirit/x4/char_encoding/unicode.hpp>
@@ -41,7 +42,7 @@ namespace boost::spirit::x4::traits
         };
     } // detail
 
-    template <traits::CharLike CharT>
+    template <CharLike CharT>
     struct char_encoding_traits;
 
     template <>

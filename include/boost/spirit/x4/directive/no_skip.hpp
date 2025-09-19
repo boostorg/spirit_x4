@@ -11,7 +11,6 @@
 #define BOOST_SPIRIT_X4_NO_SKIP_JAN_16_2010_0802PM
 
 #include <boost/spirit/x4/core/context.hpp>
-#include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/skip_over.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 

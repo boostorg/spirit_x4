@@ -8,21 +8,28 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/lexeme.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/directive/repeat.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/kleene.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
 
 #include <vector>
 #include <string>
-#include <iostream>
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
-    using boost::spirit::x4::repeat;
-    using boost::spirit::x4::repeat_inf;
-    using boost::spirit::x4::omit;
-    using boost::spirit::x4::int_;
-    using boost::spirit::x4::lexeme;
-    using boost::spirit::x4::char_;
+    using namespace x4::standard;
+    using x4::repeat;
+    using x4::repeat_inf;
+    using x4::omit;
+    using x4::int_;
+    using x4::lexeme;
+    using x4::char_;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(*x4::lit('x'));
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(repeat(3)['x']);

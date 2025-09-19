@@ -8,17 +8,19 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
-
-#include <iostream>
+#include <boost/spirit/x4/rule.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/directive/lexeme.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
 
 int main()
 {
-    using boost::spirit::x4::standard::space;
-    using boost::spirit::x4::standard::space_type;
-    using boost::spirit::x4::standard::digit;
-    using boost::spirit::x4::lexeme;
-    using boost::spirit::x4::rule;
+    using x4::standard::space;
+    using x4::standard::space_type;
+    using x4::standard::digit;
+    using x4::lexeme;
+    using x4::rule;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(lexeme['x']);
 

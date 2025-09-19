@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_SEQUENCE_DETAIL_JAN_06_2013_1015AM
 #define BOOST_SPIRIT_X4_SEQUENCE_DETAIL_JAN_06_2013_1015AM
 
+#include <boost/spirit/x4/core/config.hpp>
 #include <boost/spirit/x4/core/detail/parse_into_container.hpp>
 
 #include <boost/spirit/x4/traits/attribute.hpp>
@@ -20,8 +21,6 @@
 #include <boost/fusion/include/end.hpp>
 #include <boost/fusion/include/advance.hpp>
 #include <boost/fusion/include/deref.hpp>
-#include <boost/fusion/include/empty.hpp>
-#include <boost/fusion/include/front.hpp>
 #include <boost/fusion/include/iterator_range.hpp>
 
 #include <iterator>

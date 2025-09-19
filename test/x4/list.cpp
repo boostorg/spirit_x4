@@ -8,10 +8,16 @@
 
 #include "test.hpp"
 
-#include <boost/spirit/x4.hpp>
+#include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/char_class.hpp>
+#include <boost/spirit/x4/directive/omit.hpp>
+#include <boost/spirit/x4/numeric/int.hpp>
+#include <boost/spirit/x4/operator/list.hpp>
+#include <boost/spirit/x4/operator/sequence.hpp>
+#include <boost/spirit/x4/operator/optional.hpp>
+#include <boost/spirit/x4/operator/plus.hpp>
 
 #include <string>
-#include <iostream>
 #include <vector>
 #include <set>
 #include <map>
@@ -20,7 +26,7 @@ using namespace spirit_test;
 
 int main()
 {
-    using namespace boost::spirit::x4::standard;
+    using namespace x4::standard;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ % ',');
 
@@ -56,15 +62,15 @@ int main()
     }
 
     { // regression test for has_attribute
-        using boost::spirit::x4::int_;
-        using boost::spirit::x4::omit;
+        using x4::int_;
+        using x4::omit;
 
         int i;
         BOOST_TEST(parse("1:2,3", int_ >> ':' >> omit[int_] % ',', i)) && BOOST_TEST_EQ(i, 1);
     }
 
     {
-        using boost::spirit::x4::int_;
+        using x4::int_;
 
         std::vector<int> v;
         BOOST_TEST(parse("1,2", int_ % ',', v));
@@ -72,7 +78,7 @@ int main()
     }
 
     {
-        using boost::spirit::x4::int_;
+        using x4::int_;
 
         std::vector<int> v;
         BOOST_TEST(parse("(1,2)", '(' >> int_ % ',' >> ')', v));
@@ -96,7 +102,7 @@ int main()
     }
 
     { // actions
-        using boost::spirit::x4::_attr;
+        using x4::_attr;
 
         std::string s;
         auto f = [&](auto& ctx){ s = std::string(_attr(ctx).begin(), _attr(ctx).end()); };
