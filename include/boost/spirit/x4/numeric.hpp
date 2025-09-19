@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_NUMERIC_FEBRUARY_05_2007_1231PM
 #define BOOST_SPIRIT_X4_NUMERIC_FEBRUARY_05_2007_1231PM
 
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/numeric/bool.hpp>
 #include <boost/spirit/x4/numeric/int.hpp>
 #include <boost/spirit/x4/numeric/uint.hpp>

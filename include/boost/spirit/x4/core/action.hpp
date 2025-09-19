@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_ACTION_JANUARY_07_2007_1128AM
 #define BOOST_SPIRIT_X4_ACTION_JANUARY_07_2007_1128AM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/context.hpp>
 #include <boost/spirit/x4/core/action_context.hpp>
 

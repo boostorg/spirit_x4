@@ -9,7 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_SKIP_APRIL_16_2006_0625PM
 #define BOOST_SPIRIT_X4_SKIP_APRIL_16_2006_0625PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/context.hpp>
@@ -35,11 +35,13 @@ namespace boost::spirit::x4
             : skipper(skipper)
         {}
 
-        Skipper const& skipper;
+        Skipper const& skipper;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
     };
 
     template <typename Context>
-    using unused_skipper_t = unused_skipper<std::remove_cvref_t<decltype(x4::get<skipper_tag>(std::declval<Context>()))>>;
+    using unused_skipper_t = unused_skipper<std::remove_cvref_t<decltype(
+        x4::get<skipper_tag>(std::declval<Context const&>())
+    )>>;
 
     namespace detail
     {
@@ -57,11 +59,14 @@ namespace boost::spirit::x4
 
         template <typename Skipper>
         [[nodiscard]] constexpr Skipper const&
-        get_unused_skipper(Skipper const& skipper) noexcept
+        get_unused_skipper(Skipper const& skipper BOOST_SPIRIT_LIFETIMEBOUND) noexcept
         {
             static_assert(X4Subject<Skipper>);
             return skipper;
         }
+
+        template <typename Skipper>
+        void get_unused_skipper(Skipper const&&) = delete; // dangling
 
         template <typename Skipper>
         [[nodiscard]] constexpr Skipper const&
@@ -70,6 +75,9 @@ namespace boost::spirit::x4
             static_assert(X4Subject<Skipper>);
             return unused_skipper.skipper;
         }
+
+        template <typename Skipper>
+        void get_unused_skipper(unused_skipper<Skipper> const&&) = delete;
 
         template <typename Context>
         struct skip_over_context
@@ -160,7 +168,7 @@ namespace boost::spirit::x4
     template <typename Context>
     struct has_skipper
       : std::bool_constant<!detail::is_unused_skipper<
-            std::remove_cvref_t<decltype(x4::get<skipper_tag>(std::declval<Context>()))>
+            std::remove_cvref_t<decltype(x4::get<skipper_tag>(std::declval<Context const&>()))>
         >::value>
     {};
 

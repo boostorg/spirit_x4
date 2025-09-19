@@ -47,7 +47,7 @@ namespace boost::spirit::x4
             : unary_parser<Subject, with_directive<Subject, ID, T const>>
         {
             using base_type = unary_parser<Subject, with_directive<Subject, ID, T const>>;
-            /* not mutable */ T const val_;
+            /* not mutable */ T const val_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
             template <typename SubjectT, typename U>
                 requires
@@ -68,13 +68,13 @@ namespace boost::spirit::x4
             : unary_parser<Subject, with_directive<Subject, ID, T&>>
         {
             using base_type = unary_parser<Subject, with_directive<Subject, ID, T&>>;
-            T& val_;
+            T& val_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
             template <typename SubjectT, typename U>
                 requires
                     std::is_constructible_v<Subject, SubjectT> &&
                     std::is_constructible_v<T&, U&>
-            constexpr with_directive_impl(SubjectT&& subject, U& val)
+            constexpr with_directive_impl(SubjectT&& subject, U& val BOOST_SPIRIT_LIFETIMEBOUND)
                 noexcept(std::is_nothrow_constructible_v<Subject, SubjectT>)
                 : base_type(std::forward<SubjectT>(subject))
                 , val_(val)
@@ -142,7 +142,7 @@ namespace boost::spirit::x4
         struct [[nodiscard]] with_gen
         {
             static_assert(!std::is_rvalue_reference_v<T>);
-            T val;
+            T val;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
             template <X4Subject Subject>
             [[nodiscard]] constexpr with_directive<as_parser_plain_t<Subject>, ID, T>

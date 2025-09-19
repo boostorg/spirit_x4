@@ -9,7 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_UNUSED_APRIL_16_2006_0616PM
 #define BOOST_SPIRIT_X4_UNUSED_APRIL_16_2006_0616PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 
 #include <type_traits>
 
@@ -21,8 +21,7 @@ namespace boost::spirit::x4
 
         // unused_type can masquerade as an empty context (see context.hpp)
 
-        template <typename ID>
-        [[nodiscard]] static constexpr unused_type get(ID&&) noexcept
+        [[nodiscard]] static constexpr unused_type get(auto) noexcept
         {
             return unused_type{};
         }

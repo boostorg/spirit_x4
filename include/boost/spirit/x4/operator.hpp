@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_OPERATOR_FEBRUARY_02_2007_0558PM
 #define BOOST_SPIRIT_X4_OPERATOR_FEBRUARY_02_2007_0558PM
 
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 #include <boost/spirit/x4/operator/alternative.hpp>
 #include <boost/spirit/x4/operator/difference.hpp>

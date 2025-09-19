@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_CONTEXT_JAN_4_2012_1215PM
 #define BOOST_SPIRIT_X4_CONTEXT_JAN_4_2012_1215PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 
 #include <type_traits>
@@ -16,11 +16,6 @@
 
 namespace boost::spirit::x4
 {
-    // For backward compatibility, we can't introduce a new
-    // vocabulary type because many codebase does partial
-    // specialization on `x4::context`. Instead, provide
-    // yet another layer of partial specialization to
-    // provide owning context.
     template <typename T>
     struct owning_context_tag {};
 
@@ -31,28 +26,54 @@ namespace boost::spirit::x4
         static_assert(!std::is_reference_v<Next>);
         static_assert(!std::is_const_v<Next>);
 
-        constexpr context(T& val, Next const& next) noexcept
+        constexpr context(T& val BOOST_SPIRIT_LIFETIMEBOUND, Next const& next BOOST_SPIRIT_LIFETIMEBOUND) noexcept
             : val(val)
             , next(next)
         {}
 
         context(T&, Next const&&) = delete; // dangling
-        context(std::remove_cvref_t<T> const&&, Next const&) = delete; // dangling
-        context(std::remove_cvref_t<T> const&&, Next const&&) = delete; // dangling
+        context(std::remove_const_t<T> const&&, Next const&) = delete; // dangling
+        context(std::remove_const_t<T> const&&, Next const&&) = delete; // dangling
 
-        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept
+        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept BOOST_SPIRIT_LIFETIMEBOUND
         {
             return val;
         }
 
-        template <typename ID_>
-        [[nodiscard]] constexpr decltype(auto) get(ID_ id) const noexcept
+        [[nodiscard]] constexpr decltype(auto) get(auto id) const noexcept
         {
             return next.get(id);
         }
 
-        T& val;
-        Next const& next;
+        T& val;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+        Next const& next;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+    };
+
+    template <typename ID, typename T>
+    struct context<ID, T, unused_type>
+    {
+        constexpr context(T& val BOOST_SPIRIT_LIFETIMEBOUND) noexcept
+            requires (!std::is_same_v<std::remove_const_t<T>, context>)
+            : val(val)
+        {}
+
+        context(std::remove_const_t<T> const&&) = delete; // dangling
+
+        constexpr context(T& val BOOST_SPIRIT_LIFETIMEBOUND, unused_type) noexcept
+            : val(val)
+        {}
+
+        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept BOOST_SPIRIT_LIFETIMEBOUND
+        {
+            return val;
+        }
+
+        [[nodiscard]] static constexpr unused_type get(auto) noexcept
+        {
+            return unused_type{};
+        }
+
+        T& val;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
     };
 
     template <typename ID, typename T, typename Next>
@@ -62,73 +83,72 @@ namespace boost::spirit::x4
 
         template <typename OwningNext>
             requires std::is_constructible_v<Next, OwningNext>
-        constexpr context(T& val, OwningNext&& owning_next)
+        constexpr context(T& val BOOST_SPIRIT_LIFETIMEBOUND, OwningNext&& owning_next)
             noexcept(std::is_nothrow_constructible_v<Next, OwningNext>)
             : val(val)
             , next(std::forward<OwningNext>(owning_next))
         {}
 
-        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept
+        template <typename OwningNext>
+            requires std::is_constructible_v<Next, OwningNext>
+        context(std::remove_const_t<T> const&&, OwningNext&&) = delete; // dangling
+
+        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept BOOST_SPIRIT_LIFETIMEBOUND
         {
             return val;
         }
 
-        template <typename ID_>
-        [[nodiscard]] constexpr decltype(auto) get(ID_ id) const noexcept
+        [[nodiscard]] constexpr decltype(auto) get(auto id) const noexcept
         {
             return next.get(id);
         }
 
-        T& val;
+        T& val;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         Next next; // not reference
     };
 
-    template <typename ID, typename T>
-    struct context<ID, T, unused_type>
+    template <typename ID, typename Context>
+    [[nodiscard]] constexpr decltype(auto)
+    get(Context const& context) noexcept
     {
-        constexpr context(T& val) noexcept
-            : val(val) {}
-
-        constexpr context(T& val, unused_type) noexcept
-            : val(val) {}
-
-        [[nodiscard]] constexpr T& get(std::type_identity<ID>) const noexcept
-        {
-            return val;
-        }
-
-        template <typename ID_>
-        [[nodiscard]] constexpr unused_type get(ID_) const noexcept
-        {
-            return unused_type{};
-        }
-
-        T& val;
-    };
-
-    template <typename Tag, typename Context>
-    [[nodiscard]] constexpr decltype(auto) get(Context const& context) noexcept
-    {
-        return context.get(std::type_identity<Tag>{});
+        return context.get(std::type_identity<ID>{});
     }
 
+    template <typename ID, typename Context>
+    void get(Context const&&) = delete; // dangling
+
     template <typename ID, typename T, typename Next>
-    [[nodiscard]] constexpr context<ID, T, Next> make_context(T& val, Next const& next) noexcept
+    [[nodiscard]] constexpr context<ID, T, Next>
+    make_context(T& val, Next const& next) noexcept
     {
         return { val, next };
     }
 
+    template <typename ID, typename T, typename Next>
+    void make_context(T const&&, Next const&) = delete; // dangling
+
+    template <typename ID, typename T, typename Next>
+    void make_context(T const&&, Next const&&) = delete; // dangling
+
+    template <typename ID, typename T, typename Next>
+    void make_context(T&, Next const&&) = delete; // dangling
+
+
     template <typename ID, typename T>
-    [[nodiscard]] constexpr context<ID, T> make_context(T& val) noexcept
+    [[nodiscard]] constexpr context<ID, T>
+    make_context(T& val) noexcept
     {
         return { val };
     }
+
+    template <typename ID, typename T>
+    void make_context(T const&&) = delete; // dangling
 
     namespace detail
     {
         template <typename ID, typename T, typename Next, typename FoundVal>
         [[nodiscard]] constexpr Next const&
-        make_unique_context(T& /* val */, Next const& next, FoundVal&) noexcept
+        make_unique_context(T&, Next const& next BOOST_SPIRIT_LIFETIMEBOUND, FoundVal&) noexcept
         {
             return next;
         }
@@ -148,6 +168,16 @@ namespace boost::spirit::x4
         return detail::make_unique_context<ID>(val, next, x4::get<ID>(next));
     }
 
+    template <typename ID, typename T, typename Next>
+    void make_unique_context(T const&&, Next const&) = delete; // dangling
+
+    template <typename ID, typename T, typename Next>
+    void make_unique_context(T const&&, Next const&&) = delete; // dangling
+
+    template <typename ID, typename T, typename Next>
+    void make_unique_context(T&, Next const&&) = delete; // dangling
+
+
     // Replaces the contained reference of the leftmost context
     // having the id `ID_To_Replace`. If no such context exists,
     // append a new one.
@@ -162,7 +192,8 @@ namespace boost::spirit::x4
     // a local variable instance to the context.
     template <typename ID_To_Replace, typename ID, typename T, typename Next, typename NewVal>
     [[nodiscard]] constexpr auto replace_context(
-        context<ID, T, Next> const& ctx, NewVal& new_val) noexcept
+        context<ID, T, Next> const& ctx, NewVal& new_val BOOST_SPIRIT_LIFETIMEBOUND
+    ) noexcept
     {
         if constexpr (std::is_same_v<ID, ID_To_Replace>)
         {
@@ -208,6 +239,9 @@ namespace boost::spirit::x4
             }
         }
     }
+
+    template <typename ID_To_Replace, typename ID, typename T, typename Next, typename NewVal>
+    void replace_context(context<ID, T, Next> const&, NewVal const&&) = delete; // dangling
 
 } // boost::spirit::x4
 

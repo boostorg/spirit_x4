@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_SEQUENCE_DETAIL_JAN_06_2013_1015AM
 #define BOOST_SPIRIT_X4_SEQUENCE_DETAIL_JAN_06_2013_1015AM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/detail/parse_into_container.hpp>
 
 #include <boost/spirit/x4/traits/attribute.hpp>

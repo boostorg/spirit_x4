@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_CALL_CONTEXT_MAY_26_2014_0234PM
 #define BOOST_SPIRIT_X4_CALL_CONTEXT_MAY_26_2014_0234PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/context.hpp>
 
 namespace boost::spirit::x4

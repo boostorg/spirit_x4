@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_ALTERNATIVE_DETAIL_JAN_07_2013_1245PM
 #define BOOST_SPIRIT_X4_ALTERNATIVE_DETAIL_JAN_07_2013_1245PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/move_to.hpp>
 
 #include <boost/spirit/x4/traits/attribute.hpp>

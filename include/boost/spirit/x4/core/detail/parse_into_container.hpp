@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_PARSE_INTO_CONTAINER_JAN_15_2013_0957PM
 #define BOOST_SPIRIT_X4_PARSE_INTO_CONTAINER_JAN_15_2013_0957PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/move_to.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 

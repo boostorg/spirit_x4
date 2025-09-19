@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_MARCH_04_2007_0852PM
 #define BOOST_SPIRIT_X4_MARCH_04_2007_0852PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/action.hpp>
 #include <boost/spirit/x4/auxiliary.hpp>
 #include <boost/spirit/x4/char.hpp>

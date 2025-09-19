@@ -9,6 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_AUXILIARY_FEBRUARY_03_2007_0355PM
 #define BOOST_SPIRIT_X4_AUXILIARY_FEBRUARY_03_2007_0355PM
 
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/auxiliary/eps.hpp>
 #include <boost/spirit/x4/auxiliary/eol.hpp>
 #include <boost/spirit/x4/auxiliary/eoi.hpp>

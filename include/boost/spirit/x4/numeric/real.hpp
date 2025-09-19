@@ -233,7 +233,7 @@ namespace boost::spirit::x4
         }
 
     private:
-        RealPolicies policies_{};
+        BOOST_SPIRIT_NO_UNIQUE_ADDRESS RealPolicies policies_{};
     };
 
     inline namespace cpos
@@ -246,6 +246,7 @@ namespace boost::spirit::x4
 
         using long_double_type = real_parser<long double>;
         inline constexpr long_double_type long_double{};
+
     } // cpos
 } // boost::spirit::x4
 

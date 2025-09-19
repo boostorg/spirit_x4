@@ -100,7 +100,7 @@ namespace boost::spirit::x4
         }
 
     private:
-        BoolPolicies policies_{};
+        BOOST_SPIRIT_NO_UNIQUE_ADDRESS BoolPolicies policies_{};
     };
 
     template <typename T, typename Encoding, typename BoolPolicies = bool_policies<T>>
@@ -157,7 +157,7 @@ namespace boost::spirit::x4
         }
 
     private:
-        BoolPolicies policies_{};
+        BOOST_SPIRIT_NO_UNIQUE_ADDRESS BoolPolicies policies_{};
         T n_;
     };
 

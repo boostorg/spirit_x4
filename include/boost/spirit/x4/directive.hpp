@@ -8,6 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_DIRECTIVE_FEBRUARY_05_2007_0313PM
 #define BOOST_SPIRIT_X4_DIRECTIVE_FEBRUARY_05_2007_0313PM
 
+#include <boost/spirit/config.hpp>
 // #include <boost/spirit/x4/directive/as.hpp>
 #include <boost/spirit/x4/directive/confix.hpp>
 #include <boost/spirit/x4/directive/expect.hpp>

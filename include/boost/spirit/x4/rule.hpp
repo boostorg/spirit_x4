@@ -9,6 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_RULE_JAN_08_2012_0326PM
 #define BOOST_SPIRIT_X4_RULE_JAN_08_2012_0326PM
 
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
 #include <boost/spirit/x4/core/skip_over.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>

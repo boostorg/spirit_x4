@@ -7,6 +7,8 @@
 #ifndef BOOST_SPIRIT_X4_SUPPORT_ALLOCATOR_HPP
 #define BOOST_SPIRIT_X4_SUPPORT_ALLOCATOR_HPP
 
+#include <boost/spirit/config.hpp>
+
 #include <memory>
 #include <type_traits>
 #include <utility>

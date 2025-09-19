@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_TST_MARCH_09_2007_0905AM
 #define BOOST_SPIRIT_X4_TST_MARCH_09_2007_0905AM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/allocator.hpp>
 
 #include <iterator>
@@ -162,8 +162,8 @@ namespace boost::spirit::x4::detail
 
         friend struct allocator_ops<tst_node>;
 
-        BOOST_SPIRIT_X4_NO_UNIQUE_ADDRESS Alloc alloc;
-        BOOST_SPIRIT_X4_NO_UNIQUE_ADDRESS node_allocator_type node_alloc;
+        BOOST_SPIRIT_NO_UNIQUE_ADDRESS Alloc alloc;
+        BOOST_SPIRIT_NO_UNIQUE_ADDRESS node_allocator_type node_alloc;
         Char id;                // the node's identity character
         T* data = nullptr;      // optional data
         tst_node* lt = nullptr; // left pointer

@@ -9,7 +9,7 @@
 #ifndef BOOST_SPIRIT_X4_PARSER_OCTOBER_16_2008_0254PM
 #define BOOST_SPIRIT_X4_PARSER_OCTOBER_16_2008_0254PM
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/traits/attribute.hpp>
 

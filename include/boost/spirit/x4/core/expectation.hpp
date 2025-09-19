@@ -8,7 +8,7 @@
 #ifndef BOOST_SPIRIT_X4_SUPPORT_EXPECTATION_HPP
 #define BOOST_SPIRIT_X4_SUPPORT_EXPECTATION_HPP
 
-#include <boost/spirit/x4/core/config.hpp>
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/parser.hpp> // for `x4::what`
 #include <boost/spirit/x4/core/unused.hpp>
 #include <boost/spirit/x4/core/context.hpp>
@@ -48,7 +48,7 @@ namespace boost::spirit::x4
 
     template <typename Context>
     using expectation_failure_t = std::remove_cv_t<std::remove_reference_t<
-        decltype(x4::get<expectation_failure_tag>(std::declval<Context>()))>>;
+        decltype(x4::get<expectation_failure_tag>(std::declval<Context const&>()))>>;
 
     template <std::forward_iterator It>
     using expectation_failure_optional =
