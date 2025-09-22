@@ -23,7 +23,8 @@
 #include <utility>
 #include <print>
 
-namespace x4 = boost::spirit::x4;
+namespace spirit = boost::spirit;
+namespace x4 = spirit::x4;
 
 using x4::unused_type;
 using x4::unused;

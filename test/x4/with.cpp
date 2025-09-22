@@ -26,14 +26,14 @@ struct my_tag;
 
 struct my_rule_class
 {
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Exception, class Context>
-    void on_error(It const&, Se const&, Exception const&, Context const& ctx)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Failure, class Context>
+    void on_error(It const&, Se const&, Context const& ctx, Failure const&)
     {
         ++x4::get<my_tag>(ctx);
     }
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Attr, class Context>
-    void on_success(It const&, Se const&, Attr&, Context const& ctx)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, x4::X4Attribute Attr>
+    void on_success(It const&, Se const&, Context const& ctx, Attr&)
     {
         ++x4::get<my_tag>(ctx);
     }

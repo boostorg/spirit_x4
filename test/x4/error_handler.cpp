@@ -21,17 +21,15 @@
 #include <string>
 #include <sstream>
 
-namespace x4 = boost::spirit::x4;
-
 namespace {
 
 struct error_handler_base
 {
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Exception, class Context>
-    void on_error(It const&, Se const&, Exception const& x, Context const& ctx) const
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, class Failure>
+    void on_error(It const&, Se const&, Context const& ctx, Failure const& x) const
     {
         std::string message = "Error! Expecting: " + x.which() + " here:";
-        auto& error_handler = x4::get<x4::error_handler_tag>(ctx).get();
+        auto& error_handler = x4::get<x4::contexts::error_handler>(ctx).get();
         error_handler(x.where(), message);
     }
 };
@@ -57,7 +55,7 @@ void do_parse(std::string const& line_break)
         std::stringstream stream;
         x4::error_handler<std::string::const_iterator> error_handler{begin, end, stream};
 
-        auto const parser = x4::with<x4::error_handler_tag>(std::ref(error_handler))[test_rule];
+        auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
         (void)parse(begin, end, parser, x4::standard::space);
 
         BOOST_TEST_EQ(stream.str(), "In line 2:\nError! Expecting: \"bar\" here:\n  foo\n__^_\n");
@@ -68,7 +66,7 @@ void do_parse(std::string const& line_break)
         std::stringstream stream;
         x4::error_handler<std::string::const_iterator> error_handler{ begin, end, stream };
 
-        auto const parser = x4::with<x4::error_handler_tag>(std::ref(error_handler))[test_rule];
+        auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
         (void)parse(begin, end, parser);
 
         BOOST_TEST_CSTR_EQ(stream.str().c_str(), "In line 1:\nError! Expecting: \"bar\" here:\nfoo\n___^_\n");
@@ -84,7 +82,7 @@ void test_line_break_first(std::string const& line_break)
     std::stringstream stream;
     x4::error_handler<std::string::const_iterator> error_handler{begin, end, stream};
 
-    auto const parser = x4::with<x4::error_handler_tag>(std::ref(error_handler))[test_rule];
+    auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
     (void)parse(begin, end, parser, x4::space);
 
     BOOST_TEST_EQ(stream.str(), "In line 2:\nError! Expecting: \"bar\" here:\nfoo  foo\n_____^_\n");

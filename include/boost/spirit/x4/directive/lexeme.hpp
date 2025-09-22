@@ -37,7 +37,7 @@ struct lexeme_directive : unary_parser<Subject, lexeme_directive<Subject>>
 
     template<class Context>
     using pre_skip_context_t = std::remove_cvref_t<decltype(
-        x4::make_context<skipper_tag>(std::declval<unused_skipper_t<Context>&>(), std::declval<Context const&>())
+        x4::make_context<contexts::skipper>(std::declval<unused_skipper_t<Context>&>(), std::declval<Context const&>())
     )>;
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
@@ -51,12 +51,12 @@ struct lexeme_directive : unary_parser<Subject, lexeme_directive<Subject>>
     {
         x4::skip_over(first, last, ctx);
 
-        auto const& skipper = x4::get<skipper_tag>(ctx);
+        auto const& skipper = x4::get<contexts::skipper>(ctx);
         unused_skipper_t<Context> unused_skipper(skipper);
 
         return this->subject.parse(
             first, last,
-            x4::make_context<skipper_tag>(unused_skipper, ctx),
+            x4::make_context<contexts::skipper>(unused_skipper, ctx),
             attr
         );
     }

@@ -42,9 +42,9 @@ struct no_skip_directive : unary_parser<Subject, no_skip_directive<Subject>>
 private:
     template<class Context>
     using unused_skipper_context_t = x4::context<
-        skipper_tag,
+        contexts::skipper,
         unused_skipper<
-            std::remove_reference_t<decltype(x4::get<skipper_tag>(std::declval<Context const&>()))>
+            std::remove_reference_t<decltype(x4::get<contexts::skipper>(std::declval<Context const&>()))>
         >,
         Context
     >;
@@ -60,14 +60,14 @@ public:
             Attr
         >)
     {
-        auto const& skipper = x4::get<skipper_tag>(ctx);
+        auto const& skipper = x4::get<contexts::skipper>(ctx);
 
         unused_skipper<std::remove_reference_t<decltype(skipper)>>
         unused_skipper(skipper);
 
         return this->subject.parse(
             first, last,
-            x4::make_context<skipper_tag>(unused_skipper, ctx),
+            x4::make_context<contexts::skipper>(unused_skipper, ctx),
             attr
         );
     }

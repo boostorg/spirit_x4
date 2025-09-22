@@ -50,7 +50,7 @@ template<std::forward_iterator It>
 struct parse_context_for_impl<It>
 {
     using type = context<
-        expectation_failure_tag,
+        contexts::expectation_failure,
         expectation_failure<It>
     >;
 };
@@ -69,9 +69,9 @@ struct phrase_parse_context_for_impl<Skipper, It, Se>
     static_assert(X4ExplicitParser<Skipper, It, Se>);
 
     using type = context<
-        expectation_failure_tag,
+        contexts::expectation_failure,
         expectation_failure<It>,
-        context<skipper_tag, Skipper const>
+        context<contexts::skipper, Skipper const>
     >;
 };
 
@@ -99,40 +99,58 @@ template<class Parser, class R>
 concept X4RangeParseParser =
     X4Parser<
         Parser,
-        typename detail::range_parse_parser_impl<R>::iterator_type,
-        typename detail::range_parse_parser_impl<R>::sentinel_type
+        typename range_parse_parser_impl<R>::iterator_type,
+        typename range_parse_parser_impl<R>::sentinel_type
     >;
 
 template<class Skipper, class R>
 concept X4RangeParseSkipper =
     X4ExplicitParser<
         Skipper,
-        typename detail::range_parse_parser_impl<R>::iterator_type,
-        typename detail::range_parse_parser_impl<R>::sentinel_type
+        typename range_parse_parser_impl<R>::iterator_type,
+        typename range_parse_parser_impl<R>::sentinel_type
     >;
 
 struct parse_fn_main
 {
+private:
+    template<std::ranges::forward_range R>
+        requires (!traits::CharArray<R>)
+    [[nodiscard]] static constexpr decltype(auto) as_parse_range(R const& range) noexcept
+    {
+        return range;
+    }
+
+    template<std::ranges::forward_range R>
+        requires traits::CharArray<R>
+    [[nodiscard]] static constexpr auto as_parse_range(R const& str)
+        noexcept(noexcept(std::basic_string_view{str}))
+    {
+        return std::basic_string_view{str};
+    }
+
+public:
     // --------------------------------------------
     // parse(range)
 
     // R + Parser + Attribute
     template<std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4Attribute ParseAttr>
-        requires (!traits::CharArray<R>)
     static constexpr parse_result_for<R>
     operator()(R const& range, Parser&& p, ParseAttr& attr)
     {
-        using It = std::ranges::iterator_t<R const>;
-        using Se = std::ranges::sentinel_t<R const>;
+        // Treat "str" as `string_view`
+        auto const& range_ = parse_fn_main::as_parse_range(range);
+
+        using It = typename parse_result_for<R>::iterator_type;
+        using Se = typename parse_result_for<R>::sentinel_type;
+        It first = std::ranges::begin(range_);
+        Se last = std::ranges::end(range_);
 
         expectation_failure<It> expect_failure;
 
-        It first = std::ranges::begin(range);
-        Se last = std::ranges::end(range);
-
         bool const ok = as_parser(std::forward<Parser>(p)).parse(
             first, last,
-            x4::make_context<expectation_failure_tag>(expect_failure),
+            x4::make_context<contexts::expectation_failure>(expect_failure),
             attr
         );
         return parse_result_for<R>{
@@ -144,38 +162,24 @@ struct parse_fn_main
 
     // parse_result + R + Parser + Attribute
     template<std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4Attribute ParseAttr>
-        requires (!traits::CharArray<R>)
     static constexpr void
     operator()(parse_result_for<R>& res, R const& range, Parser&& p, ParseAttr& attr)
     {
-        using It = std::ranges::iterator_t<R const>;
-        using Se = std::ranges::sentinel_t<R const>;
-        It first = std::ranges::begin(range);
-        Se last = std::ranges::end(range);
+        // Treat "str" as `string_view`
+        auto const& range_ = parse_fn_main::as_parse_range(range);
+
+        using It = typename parse_result_for<R>::iterator_type;
+        using Se = typename parse_result_for<R>::sentinel_type;
+        It first = std::ranges::begin(range_);
+        Se last = std::ranges::end(range_);
 
         res.expect_failure.clear();
         res.ok = as_parser(std::forward<Parser>(p)).parse(
             first, last,
-            x4::make_context<expectation_failure_tag>(res.expect_failure),
+            x4::make_context<contexts::expectation_failure>(res.expect_failure),
             attr
         );
         res.remainder = {std::move(first), std::move(last)};
-    }
-
-    // "str" + Parser + Attribute
-    template<traits::CharArray R, X4RangeParseParser<R> Parser, X4Attribute ParseAttr>
-    static constexpr parse_result_for<R>
-    operator()(R const& str, Parser&& p, ParseAttr& attr)
-    {
-        return parse_fn_main::operator()(std::basic_string_view{str}, std::forward<Parser>(p), attr);
-    }
-
-    // parse_result + "str" + Parser + Attribute
-    template<traits::CharArray R, X4RangeParseParser<R> Parser, X4Attribute ParseAttr>
-    static constexpr void
-    operator()(parse_result_for<R>& res, R const& str, Parser&& p, ParseAttr& attr)
-    {
-        return parse_fn_main::operator()(res, std::basic_string_view{str}, std::forward<Parser>(p), attr);
     }
 
     // --------------------------------------------
@@ -183,19 +187,21 @@ struct parse_fn_main
 
     // R + Parser + Skipper + Attribute + (root_skipper_flag)
     template<std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper, X4Attribute ParseAttr>
-        requires (!traits::CharArray<R>)
     static constexpr parse_result_for<R>
     operator()(R const& range, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
     {
-        using It = std::ranges::iterator_t<R const>;
-        using Se = std::ranges::sentinel_t<R const>;
-        It first = std::ranges::begin(range);
-        Se last = std::ranges::end(range);
+        // Treat "str" as `string_view`
+        auto const& range_ = parse_fn_main::as_parse_range(range);
 
-        auto const skipper_ctx = x4::make_context<skipper_tag>(s);
+        using It = typename parse_result_for<R>::iterator_type;
+        using Se = typename parse_result_for<R>::sentinel_type;
+        It first = std::ranges::begin(range_);
+        Se last = std::ranges::end(range_);
 
         expectation_failure<It> expect_failure;
-        auto const ctx = x4::make_context<expectation_failure_tag>(expect_failure, skipper_ctx);
+        auto const ctx = x4::make_context<contexts::expectation_failure>(
+            expect_failure, x4::make_context<contexts::skipper>(s)
+        );
 
         bool ok = as_parser(std::forward<Parser>(p)).parse(first, last, ctx, attr);
         if (ok && flag == root_skipper_flag::do_post_skip) {
@@ -212,19 +218,21 @@ struct parse_fn_main
 
     // parse_result + R + Parser + Skipper + Attribute
     template<std::ranges::forward_range R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper, X4Attribute ParseAttr>
-        requires (!traits::CharArray<R>)
     static constexpr void
     operator()(parse_result_for<R>& res, R const& range, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
     {
-        using It = std::ranges::iterator_t<R const>;
-        using Se = std::ranges::sentinel_t<R const>;
-        It first = std::ranges::begin(range);
-        Se last = std::ranges::end(range);
+        // Treat "str" as `string_view`
+        auto const& range_ = parse_fn_main::as_parse_range(range);
 
-        auto const skipper_ctx = x4::make_context<skipper_tag>(s);
+        using It = typename parse_result_for<R>::iterator_type;
+        using Se = typename parse_result_for<R>::sentinel_type;
+        It first = std::ranges::begin(range_);
+        Se last = std::ranges::end(range_);
 
         res.expect_failure.clear();
-        auto const ctx = x4::make_context<expectation_failure_tag>(res.expect_failure, skipper_ctx);
+        auto const ctx = x4::make_context<contexts::expectation_failure>(
+            res.expect_failure, x4::make_context<contexts::skipper>(s)
+        );
 
         res.ok = as_parser(std::forward<Parser>(p)).parse(first, last, ctx, attr);
         if (res.ok && flag == root_skipper_flag::do_post_skip) {
@@ -232,22 +240,6 @@ struct parse_fn_main
             if (res.expect_failure) [[unlikely]] res.ok = false;
         }
         res.remainder = {std::move(first), std::move(last)};
-    }
-
-    // "str" + Parser + Skipper + Attribute + (root_skipper_flag)
-    template<traits::CharArray R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper, X4Attribute ParseAttr>
-    static constexpr parse_result_for<R>
-    operator()(R const& str, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
-    {
-        return parse_fn_main::operator()(std::basic_string_view{str}, std::forward<Parser>(p), s, attr, flag);
-    }
-
-    // parse_result + "str" + Parser + Attribute + Skipper
-    template<traits::CharArray R, X4RangeParseParser<R> Parser, X4RangeParseSkipper<R> Skipper, X4Attribute ParseAttr>
-    static constexpr void
-    operator()(parse_result_for<R>& res, R const& str, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
-    {
-        return parse_fn_main::operator()(res, std::basic_string_view{str}, std::forward<Parser>(p), s, attr, flag);
     }
 
     // --------------------------------------------
@@ -261,7 +253,7 @@ struct parse_fn_main
         expectation_failure<It> expect_failure;
         bool const ok = as_parser(std::forward<Parser>(p)).parse(
             first, last,
-            x4::make_context<expectation_failure_tag>(expect_failure),
+            x4::make_context<contexts::expectation_failure>(expect_failure),
             attr
         );
         return parse_result<It, Se>{
@@ -279,7 +271,7 @@ struct parse_fn_main
         res.expect_failure.clear();
         res.ok = as_parser(std::forward<Parser>(p)).parse(
             first, last,
-            x4::make_context<expectation_failure_tag>(res.expect_failure),
+            x4::make_context<contexts::expectation_failure>(res.expect_failure),
             attr
         );
         res.remainder = {std::move(first), std::move(last)};
@@ -293,10 +285,10 @@ struct parse_fn_main
     static constexpr parse_result<It, Se>
     operator()(It first, Se last, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
     {
-        auto const skipper_ctx = x4::make_context<skipper_tag>(s);
-
         expectation_failure<It> expect_failure;
-        auto const ctx = x4::make_context<expectation_failure_tag>(expect_failure, skipper_ctx);
+        auto const ctx = x4::make_context<contexts::expectation_failure>(
+            expect_failure, x4::make_context<contexts::skipper>(s)
+        );
 
         bool ok = as_parser(std::forward<Parser>(p)).parse(first, last, ctx, attr);
         if (ok && flag == root_skipper_flag::do_post_skip) {
@@ -316,10 +308,10 @@ struct parse_fn_main
     static constexpr void
     operator()(parse_result<It, Se>& res, It first, Se last, Parser&& p, Skipper const& s, ParseAttr& attr, root_skipper_flag flag = root_skipper_flag::do_post_skip)
     {
-        auto const skipper_ctx = x4::make_context<skipper_tag>(s);
-
         res.expect_failure.clear();
-        auto const ctx = x4::make_context<expectation_failure_tag>(res.expect_failure, skipper_ctx);
+        auto const ctx = x4::make_context<contexts::expectation_failure>(
+            res.expect_failure, x4::make_context<contexts::skipper>(s)
+        );
 
         res.ok = as_parser(std::forward<Parser>(p)).parse(first, last, ctx, attr);
         if (res.ok && flag == root_skipper_flag::do_post_skip) {

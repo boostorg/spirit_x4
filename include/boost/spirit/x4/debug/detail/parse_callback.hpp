@@ -84,7 +84,7 @@ struct has_on_error<ID, It, Se, Context> : std::false_type
     );
 };
 
-template<class ID, class It, class Se, typename Attr, class Context>
+template<class ID, class It, class Se, class Context, class Attr>
 concept HasImmutableOnSuccessOverload =
     std::forward_iterator<It> &&
     std::sentinel_for<Se, It> &&
@@ -93,12 +93,12 @@ concept HasImmutableOnSuccessOverload =
         id.on_success(
             std::declval<It const&>(),
             std::declval<Se const&>(),
-            std::declval<Attr&>(),
-            std::declval<Context const&>()
+            std::declval<Context const&>(),
+            std::declval<Attr&>()
         );
     };
 
-template<class ID, class It, class Se, typename Attr, class Context>
+template<class ID, class It, class Se, class Context, class Attr>
 concept HasMutableOnSuccessOverload =
     std::forward_iterator<It> &&
     std::sentinel_for<Se, It> &&
@@ -107,17 +107,17 @@ concept HasMutableOnSuccessOverload =
         id.on_success(
             std::declval<It&>(),
             std::declval<Se&>(),
-            std::declval<Attr&>(),
-            std::declval<Context const&>()
+            std::declval<Context const&>(),
+            std::declval<Attr&>()
         );
     };
 
-template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, X4Attribute Attr, class Context>
+template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
 struct has_on_success : std::false_type {};
 
-template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, X4Attribute Attr, class Context>
-    requires HasImmutableOnSuccessOverload<ID, It, Se, Attr, Context>
-struct has_on_success<ID, It, Se, Attr, Context> : std::true_type
+template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
+    requires HasImmutableOnSuccessOverload<ID, It, Se, Context, Attr>
+struct has_on_success<ID, It, Se, Context, Attr> : std::true_type
 {
     // We intentionally make this hard error to prevent error-prone definition
     static_assert(
@@ -125,19 +125,19 @@ struct has_on_success<ID, It, Se, Attr, Context> : std::true_type
             decltype(std::declval<ID&>().on_success(
                 std::declval<It const&>(),
                 std::declval<Se const&>(),
-                std::declval<Attr&>(),
-                std::declval<Context const&>()
+                std::declval<Context const&>(),
+                std::declval<Attr&>()
             ))
         >,
         "The return type of `on_success` should be `void`."
     );
 };
 
-template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, X4Attribute Attr, class Context>
+template<class ID, std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     requires
-        (!HasImmutableOnSuccessOverload<ID, It, Se, Attr, Context>) &&
-        HasMutableOnSuccessOverload<ID, It, Se, Attr, Context>
-struct has_on_success<ID, It, Se, Attr, Context> : std::false_type
+        (!HasImmutableOnSuccessOverload<ID, It, Se, Context, Attr>) &&
+        HasMutableOnSuccessOverload<ID, It, Se, Context, Attr>
+struct has_on_success<ID, It, Se, Context, Attr> : std::false_type
 {
     // For details, see the comments on `has_on_error`.
     static_assert(

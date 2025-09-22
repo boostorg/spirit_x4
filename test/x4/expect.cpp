@@ -177,8 +177,6 @@ int main()
     using x4::shared_symbols;
     using x4::confix;
     using x4::with;
-    using x4::expectation_failure;
-    using x4::expectation_failure_tag;
 
     using boost::fusion::vector;
     using boost::fusion::at_c;

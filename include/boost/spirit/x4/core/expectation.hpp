@@ -24,10 +24,16 @@
 
 namespace boost::spirit::x4 {
 
-struct expectation_failure_tag
+namespace contexts {
+
+struct expectation_failure
 {
     static constexpr bool is_unique = true;
 };
+
+} // contexts
+
+using expectation_failure_tag [[deprecated("Use `x4::contexts::expectation_failure`")]] = contexts::expectation_failure;
 
 template<std::forward_iterator It>
 struct expectation_failure
@@ -98,7 +104,7 @@ constexpr void swap(expectation_failure<It>& a, expectation_failure<It>& b)
 }
 
 template<class Context>
-using expectation_failure_t = get_context_plain_t<expectation_failure_tag, Context>;
+using expectation_failure_t = get_context_plain_t<contexts::expectation_failure, Context>;
 
 template<class Context>
 [[nodiscard]]
@@ -107,11 +113,11 @@ constexpr bool has_expectation_failure(Context const& ctx) noexcept
     using T = expectation_failure_t<Context>;
     static_assert(
         !std::same_as<unused_type, T>,
-        "Context type was not specified for x4::expectation_failure_tag. "
-        "You probably forgot: `x4::with<x4::expectation_failure_tag>(failure)[p]`. "
+        "Context type was not specified for `x4::contexts::expectation_failure`. "
+        "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
     );
-    return x4::get<expectation_failure_tag>(ctx).has_value();
+    return x4::get<contexts::expectation_failure>(ctx).has_value();
 }
 
 //
@@ -124,16 +130,16 @@ constexpr void set_expectation_failure(
     Subject const& subject,
     Context const& ctx
 )
-    noexcept(noexcept(x4::get<expectation_failure_tag>(ctx).emplace(std::move(where), x4::what(subject))))
+    noexcept(noexcept(x4::get<contexts::expectation_failure>(ctx).emplace(std::move(where), x4::what(subject))))
 {
     using T = expectation_failure_t<Context>;
     static_assert(
         !std::same_as<unused_type, T>,
-        "Context type was not specified for x4::expectation_failure_tag. "
-        "You probably forgot: `x4::with<x4::expectation_failure_tag>(failure)[p]`. "
+        "Context type was not specified for `x4::contexts::expectation_failure`. "
+        "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
     );
-    x4::get<expectation_failure_tag>(ctx).emplace(std::move(where), x4::what(subject));
+    x4::get<contexts::expectation_failure>(ctx).emplace(std::move(where), x4::what(subject));
 }
 
 template<class Context>
@@ -143,12 +149,12 @@ constexpr decltype(auto) get_expectation_failure(Context const& ctx) noexcept
     using T = expectation_failure_t<Context>;
     static_assert(
         !std::same_as<T, unused_type>,
-        "Context type was not specified for x4::expectation_failure_tag. "
-        "You probably forgot: `x4::with<x4::expectation_failure_tag>(failure)[p]`. "
+        "Context type was not specified for `x4::contexts::expectation_failure`. "
+        "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
     );
 
-    return x4::get<expectation_failure_tag>(ctx);
+    return x4::get<contexts::expectation_failure>(ctx);
 }
 
 template<class Context>
@@ -157,11 +163,11 @@ constexpr void clear_expectation_failure(Context const& ctx) noexcept
     using T = expectation_failure_t<Context>;
     static_assert(
         !std::same_as<T, unused_type>,
-        "Context type was not specified for x4::expectation_failure_tag. "
-        "You probably forgot: `x4::with<x4::expectation_failure_tag>(failure)[p]`. "
+        "Context type was not specified for `x4::contexts::expectation_failure`. "
+        "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
     );
-    x4::get<expectation_failure_tag>(ctx).clear();
+    x4::get<contexts::expectation_failure>(ctx).clear();
 }
 
 } // boost::spirit::x4

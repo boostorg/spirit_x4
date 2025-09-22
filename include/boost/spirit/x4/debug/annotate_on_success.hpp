@@ -11,13 +11,19 @@
 
 #include <boost/spirit/x4/core/context.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
+#include <boost/spirit/x4/core/attribute.hpp>
 
+#include <concepts>
 #include <iterator>
 #include <type_traits>
 
 namespace boost::spirit::x4 {
 
-struct error_handler_tag;
+namespace contexts {
+
+struct error_handler;
+
+} // contexts
 
 //  The on_success handler tags the AST with the iterator position
 //  for error handling.
@@ -31,16 +37,16 @@ struct error_handler_tag;
 struct annotate_on_success
 {
     // Catch-all default overload
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class T, class Context>
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     constexpr void
-    on_success(It const& first, Se const& last, T& ast, Context const& ctx)
+    on_success(It const& first, Se const& last, Context const& ctx, Attr& ast)
     {
-        auto&& error_handler_ref = x4::get<error_handler_tag>(ctx);
+        auto&& error_handler_ref = x4::get<contexts::error_handler>(ctx);
 
         static_assert(
-            !std::is_same_v<std::remove_cvref_t<decltype(error_handler_ref)>, unused_type>,
+            !std::same_as<std::remove_cvref_t<decltype(error_handler_ref)>, unused_type>,
             "This rule is derived from `x4::annotate_on_success`, but no reference was bound to "
-            "`x4::error_handler_tag`. You must provide a viable error handler via `x4::with`."
+            "`x4::contexts::error_handler`. You must provide a viable error handler via `x4::with`."
         );
 
         // unwrap `reference_wrapper` if necessary

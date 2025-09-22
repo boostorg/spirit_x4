@@ -51,9 +51,9 @@ struct reskip_directive : unary_parser<Subject, reskip_directive<Subject>>
 private:
     template<class Context>
     using context_t = context<
-        skipper_tag,
+        contexts::skipper,
         std::remove_cvref_t<decltype(detail::get_unused_skipper(
-            std::declval<get_context_plain_t<skipper_tag, Context> const&>()
+            std::declval<get_context_plain_t<contexts::skipper, Context> const&>()
         ))>,
         Context
     >;
@@ -67,8 +67,8 @@ public:
     {
         // This logic is heavily related to the instantiation chain;
         // see `x4::skip_over` for details.
-        auto const& skipper = detail::get_unused_skipper(x4::get<skipper_tag>(ctx));
-        return this->subject.parse(first, last, x4::make_context<skipper_tag>(skipper, ctx), attr);
+        auto const& skipper = detail::get_unused_skipper(x4::get<contexts::skipper>(ctx));
+        return this->subject.parse(first, last, x4::make_context<contexts::skipper>(skipper, ctx), attr);
     }
 };
 
@@ -90,18 +90,18 @@ struct skip_directive : unary_parser<Subject, skip_directive<Subject, Skipper>>
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     [[nodiscard]] constexpr bool
     parse(It& first, Se const& last, Context const& ctx, Attr& attr) const
-        noexcept(is_nothrow_parsable_v<Subject, It, Se, x4::context<skipper_tag, Skipper, Context>, Attr>)
+        noexcept(is_nothrow_parsable_v<Subject, It, Se, context<contexts::skipper, Skipper, Context>, Attr>)
     {
         static_assert(
             !std::same_as<expectation_failure_t<Context>, unused_type>,
-            "Context type was not specified for x4::expectation_failure_tag. "
-            "You probably forgot: `x4::with<x4::expectation_failure_tag>(failure)[p]`. "
+            "Context type was not specified for `x4::contexts::expectation_failure`. "
+            "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
             "Note that you must also bind the context to your skipper."
         );
 
         // This logic is heavily related to the instantiation chain;
         // see `x4::skip_over` for details.
-        return this->subject.parse(first, last, x4::make_context<skipper_tag>(skipper_, ctx), attr);
+        return this->subject.parse(first, last, x4::make_context<contexts::skipper>(skipper_, ctx), attr);
     }
 
 private:

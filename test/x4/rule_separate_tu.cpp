@@ -68,23 +68,21 @@ int main()
     }
     {
         using Context = x4::context<
-            x4::expectation_failure_tag,
+            x4::contexts::expectation_failure,
             x4::expectation_failure<std::string_view::const_iterator>,
-            x4::owning_context<
-                x4::context<
-                    x4::rule_val_context_tag,
-                    int
-                >
+            x4::context<
+                x4::contexts::rule_val,
+                int
             >
         >;
         using RuleAgnosticContext = x4::context<
-            x4::expectation_failure_tag,
+            x4::contexts::expectation_failure,
             x4::expectation_failure<std::string_view::const_iterator>
         >;
 
         static_assert(std::same_as<
             std::remove_cvref_t<decltype(
-                x4::remove_first_context<x4::rule_val_context_tag>(std::declval<Context const&>())
+                x4::remove_first_context<x4::contexts::rule_val>(std::declval<Context const&>())
             )>,
             RuleAgnosticContext
         >);

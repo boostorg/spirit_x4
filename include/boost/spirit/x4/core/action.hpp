@@ -25,6 +25,51 @@ namespace boost::spirit::x4 {
 
 struct raw_attribute_type; // TODO: move this to detail
 
+namespace detail {
+
+// Compose attr(where(val(pass(context))))
+template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
+struct action_context_impl;
+
+template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
+using action_context_t = typename action_context_impl<It, Se, Context, Attr>::type;
+
+template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4NonUnusedAttribute Attr>
+struct action_context_impl<It, Se, Context, Attr>
+{
+    using type = context<
+        contexts::attr,
+        Attr,
+        context<
+            contexts::where,
+            std::ranges::subrange<It, Se> const,
+            context<
+                contexts::parse_pass,
+                bool,
+                canonical_context_t<Context const&>
+            >
+        >
+    >;
+};
+
+template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4UnusedAttribute Attr>
+struct action_context_impl<It, Se, Context, Attr>
+{
+    using type = context<
+        contexts::where,
+        std::ranges::subrange<It, Se> const,
+        context<
+            contexts::parse_pass,
+            bool,
+            canonical_context_t<Context const&>
+        >
+    >;
+};
+
+} // detail
+
+// Note about the constraint on the `Action` parameter:
+//
 // Ideally we should have a context-agnostic concept that can be used
 // like `X4ActionFunctor<F>`, but we technically can't.
 //
@@ -85,64 +130,69 @@ struct action : unary_parser<Subject, action<Subject, Action>>
         return this->parse_main(first, last, ctx, attr);
     }
 
-private:
-    // Compose attr(where(val(pass(context))))
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
-    using composed_context_t = context<
-        attr_context_tag,
-        Attr,
-        context<
-            where_context_tag,
-            std::ranges::subrange<It, Se> const,
-            context<
-                parse_pass_context_tag,
-                bool,
-                Context
-            >
-        >
-    >;
+    constexpr void operator[](auto const&) const = delete; // You can't add semantic action for semantic action
 
+private:
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
-        requires std::invocable<Action const&, composed_context_t<It, Se, Context, Attr> const&>
+        requires std::invocable<Action const&, detail::action_context_t<It, Se, Context, Attr> const&>
     [[nodiscard]] constexpr bool
     call_action(
         It& first, Se const& last,
         Context const& ctx, Attr& attr
     ) const noexcept(false) // construction of `subrange` is never noexcept as per the standard
     {
-        using where_range_t = std::ranges::subrange<It, Se>;
-
         static_assert(
-            std::is_void_v<std::invoke_result_t<Action const&, composed_context_t<It, Se, Context, Attr> const&>>,
+            std::is_void_v<std::invoke_result_t<Action const&, detail::action_context_t<It, Se, Context, Attr> const&>>,
             "Semantic action should not return value. Check your function signature."
         );
 
         bool pass = true;
-        auto const pass_ctx = x4::make_context<parse_pass_context_tag>(pass, ctx);
 
-        // TODO: Provide some trait to detect whether this is actually needed for
+        // TODO:
+        // Provide some trait to detect whether this is actually needed for
         // each semantic actions.
         //
         // Although this can be assumed to be eliminated in optimized code,
         // this still may introduce compile time overhead (and also runtime
         // overhead, as constructing `subrange` is never noexcept).
-        where_range_t const where_rng(first, last);
-        auto const where_ctx = x4::make_context<where_context_tag>(where_rng, pass_ctx);
+        std::ranges::subrange<It, Se> const where_rng(first, last);
 
-        auto const attr_ctx = x4::make_context<attr_context_tag>(attr, where_ctx);
+        // Inject `_attr` only when `Attr` is not `unused_type`
+        if constexpr (X4UnusedAttribute<Attr>) {
+            auto const where_ctx = x4::make_context<contexts::where>(
+                where_rng,
+                x4::make_context<contexts::parse_pass>(pass, ctx)
+            );
 
-        // Sanity check (internal check to detect implementation divergence)
-        static_assert(std::same_as<
-            std::remove_const_t<decltype(attr_ctx)>,
-            composed_context_t<It, Se, Context, Attr>
-        >);
+            // Sanity check (internal check for detecting implementation divergence)
+            static_assert(std::same_as<
+                std::remove_const_t<decltype(where_ctx)>,
+                detail::action_context_t<It, Se, Context, Attr>
+            >);
+            this->f(where_ctx);
 
-        this->f(attr_ctx);
+        } else {
+            auto const attr_ctx = x4::make_context<contexts::attr>(
+                attr,
+                x4::make_context<contexts::where>(
+                    where_rng,
+                    x4::make_context<contexts::parse_pass>(pass, ctx)
+                )
+            );
+
+            // Sanity check (internal check for detecting implementation divergence)
+            static_assert(std::same_as<
+                std::remove_const_t<decltype(attr_ctx)>,
+                detail::action_context_t<It, Se, Context, Attr>
+            >);
+
+            this->f(attr_ctx);
+        }
         return pass;
     }
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
-        requires (!std::invocable<Action const&, composed_context_t<It, Se, Context, Attr> const&>)
+        requires (!std::invocable<Action const&, detail::action_context_t<It, Se, Context, Attr> const&>)
     [[nodiscard]] constexpr bool
     call_action(
         It&, Se const&,

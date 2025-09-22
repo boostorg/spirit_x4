@@ -18,7 +18,17 @@
 namespace boost::spirit::x4 {
 
 // Tag used to get our error handler from the context
-struct error_handler_tag;
+
+namespace contexts {
+
+struct error_handler
+{
+    static constexpr bool is_unique = true;
+};
+
+} // contexts
+
+using error_handler_tag [[deprecated("Use `x4::contexts::error_handler`")]] = contexts::error_handler;
 
 template<std::forward_iterator It>
 class error_handler

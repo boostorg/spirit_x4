@@ -23,16 +23,14 @@
 #include <cstring>
 #include <iostream>
 
-namespace x4 = boost::spirit::x4;
-
 namespace {
 
 int got_it = 0;
 
 struct my_rule_class
 {
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Exception, class Context>
-    void on_error(It const&, Se const& last, Exception const& x, Context const&)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, class Failure>
+    static void on_error(It const&, Se const& last, Context const&, Failure const& x)
     {
         std::cout
             << "Error! Expecting: "
@@ -43,8 +41,8 @@ struct my_rule_class
             << std::endl;
     }
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Attr, class Context>
-    void on_success(It const&, Se const&, Attr&, Context const&)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, x4::X4Attribute Attr>
+    static void on_success(It const&, Se const&, Context const&, Attr&)
     {
         ++got_it;
     }
@@ -52,17 +50,15 @@ struct my_rule_class
 
 struct on_success_gets_preskipped_iterator
 {
-    static bool ok;
+    inline static bool ok = false;
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Attr, class Context>
-    void on_success(It before, Se const& after, Attr&, Context const&)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, x4::X4Attribute Attr>
+    static void on_success(It before, Se const& after, Context const&, Attr&)
     {
         bool const before_was_b = 'b' == *before;
         ok = before_was_b && (++before == after);
     }
 };
-
-bool on_success_gets_preskipped_iterator::ok = false;
 
 } // anonymous
 

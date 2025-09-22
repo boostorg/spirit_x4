@@ -14,16 +14,39 @@
 
 namespace boost::spirit::x4 {
 
-struct parse_pass_context_tag; // _pass
+namespace contexts {
 
-// _val
-struct rule_val_context_tag
+// _pass
+struct parse_pass
 {
     static constexpr bool is_unique = true;
 };
 
-struct where_context_tag; // _where
-struct attr_context_tag; // _attr
+// _val
+struct rule_val
+{
+    static constexpr bool is_unique = true;
+};
+
+// _where
+struct where
+{
+    static constexpr bool is_unique = true;
+};
+
+// _attr
+struct attr
+{
+    static constexpr bool is_unique = true;
+};
+
+} // contexts
+
+using parse_pass_context_tag [[deprecated("Use `x4::contexts::parse_pass`")]] = contexts::parse_pass;
+using rule_val_context_tag [[deprecated("Use `x4::contexts::rule_val`")]] = contexts::rule_val;
+using where_context_tag [[deprecated("Use `x4::contexts::where`")]] = contexts::where;
+using attr_context_tag [[deprecated("Use `x4::contexts::attr`")]] = contexts::attr;
+
 
 namespace detail {
 
@@ -33,7 +56,7 @@ struct _pass_fn
     [[nodiscard]] static constexpr bool&
     operator()(Context const& ctx BOOST_SPIRIT_LIFETIMEBOUND) noexcept
     {
-        return x4::get<parse_pass_context_tag>(ctx);
+        return x4::get<contexts::parse_pass>(ctx);
     }
 
     template<class Context>
@@ -46,7 +69,7 @@ struct _val_fn
     [[nodiscard]] static constexpr auto&&
     operator()(Context const& ctx BOOST_SPIRIT_LIFETIMEBOUND) noexcept
     {
-        return x4::get<rule_val_context_tag>(ctx);
+        return x4::get<contexts::rule_val>(ctx);
     }
 
     template<class Context>
@@ -59,7 +82,7 @@ struct _where_fn
     [[nodiscard]] static constexpr auto&&
     operator()(Context const& ctx BOOST_SPIRIT_LIFETIMEBOUND) noexcept
     {
-        return x4::get<where_context_tag>(ctx);
+        return x4::get<contexts::where>(ctx);
     }
 
     template<class Context>
@@ -72,7 +95,7 @@ struct _attr_fn
     [[nodiscard]] static constexpr auto&&
     operator()(Context const& ctx BOOST_SPIRIT_LIFETIMEBOUND) noexcept
     {
-        return x4::get<attr_context_tag>(ctx);
+        return x4::get<contexts::attr>(ctx);
     }
 
     template<class Context>

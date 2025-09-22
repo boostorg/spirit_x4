@@ -132,7 +132,7 @@ int main()
         auto r_def = '(' > int_ > ',' > int_ > ')';
         my_error_handler error_handler;
 
-        auto parser = x4::with<x4::error_handler_tag>(error_handler)[r_def];
+        auto parser = x4::with<x4::contexts::error_handler>(error_handler)[r_def];
 
         BOOST_TEST( parse("(123,456)", parser));
         BOOST_TEST(!parse("(abc,def)", parser));
