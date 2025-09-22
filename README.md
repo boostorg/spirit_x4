@@ -13,16 +13,11 @@ For background information, see:
 
 # Spirit.X4 [![Build Status](https://github.com/boostorg/spirit_x4/actions/workflows/ci.yml/badge.svg)](https://github.com/boostorg/spirit_x4/actions/workflows/ci.yml)
 
-Spirit is a set of C++ libraries for parsing and output generation implemented as
-Domain Specific Embedded Languages (DSEL) using Expression templates and Template
-Meta-Programming. The Spirit libraries enable a target grammar to be written
-exclusively in C++. Inline grammar specifications can mix freely with other
-C++ code and, thanks to the generative power of C++ templates, are immediately
-executable.
+[**Boost.Spirit.X4**](https://github.com/boostorg/spirit_x4) is a modern, header-only PEG parser combinator library for C++23. It lets you write EBNF-like grammars directly in C++ with deterministic, top-down parsing (ordered choice, lookahead, greedy repetition).
 
-## Spirit.X4 (4th generation)
+X4 succeeds [Boost.Spirit.X3](https://github.com/boostorg/spirit) and is redesigned for clarity, maintainability, and performance using modern C++ features such as concepts and constexpr.
 
-Work in progress; stay tuned!
+X4 scales from quick prototypes to production parsers for DSLs, data formats, and interpreters.
 
 ### Supported Environments
 

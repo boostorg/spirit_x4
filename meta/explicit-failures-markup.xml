@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <explicit-failures-markup>
-    <library name="spirit">
+    <library name="spirit_x4">
       <mark-unusable>
-        <toolset name="sun-5.7"/>
-        <toolset name="sun-5.8"/>
-        <toolset name="sun-5.9"/>
-        <toolset name="sun-5.10"/>
-        <toolset name="vacpp*"/>
-        <toolset name="borland-*"/>
-        <toolset name="cray-8.0"/>
-        <toolset name="msvc-7.1*"/>
-        <toolset name="clang-*-3.1*11*"/>
-        <toolset name="gcc-mngw-gnu-4.3c+"/>
+        <toolset name="*~gnu11*" />
+        <toolset name="*~c++11*" />
+        <toolset name="*~gnu14*" />
+        <toolset name="*~c++14*" />
+        <toolset name="*~c++17*" />
+        <toolset name="*~c++20*" />
+        <toolset name="*~c++2a*" />
+        <toolset name="clang-*-15*" />
+        <toolset name="clang-*-18*" />
+        <toolset name="msvc-10.*" />
+        <toolset name="msvc-11.*" />
+        <toolset name="msvc-12.*" />
+        <toolset name="msvc-13.*" />
+        <toolset name="msvc-14.0" />
+        <toolset name="msvc-14.1" />
+        <toolset name="msvc-14.2" />
       </mark-unusable>
       <test name="x4_*" category="X4" />
     </library>
