@@ -21,6 +21,8 @@
 
 namespace boost::spirit::x4::unicode {
 
+using classify_type = std::uint32_t;
+
 // This header provides Basic (Level 1) Unicode Support
 // See http://unicode.org/reports/tr18/ for details
 
@@ -263,62 +265,62 @@ enum script
 
 } // properties
 
-[[nodiscard]] constexpr properties::category get_category(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr properties::category get_category(classify_type ch) noexcept
 {
     return static_cast<properties::category>(detail::category_lookup(ch) & 0x3F);
 }
 
-[[nodiscard]] constexpr properties::major_category get_major_category(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr properties::major_category get_major_category(classify_type ch) noexcept
 {
     return static_cast<properties::major_category>(unicode::get_category(ch) >> 3);
 }
 
-[[nodiscard]] constexpr bool is_punctuation(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_punctuation(classify_type ch) noexcept
 {
     return unicode::get_major_category(ch) == properties::punctuation;
 }
 
-[[nodiscard]] constexpr bool is_decimal_number(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_decimal_number(classify_type ch) noexcept
 {
     return unicode::get_category(ch) == properties::decimal_number;
 }
 
-[[nodiscard]] constexpr bool is_hex_digit(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_hex_digit(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::hex_digit) != 0;
 }
 
-[[nodiscard]] constexpr bool is_control(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_control(classify_type ch) noexcept
 {
     return unicode::get_category(ch) == properties::control;
 }
 
-[[nodiscard]] constexpr bool is_alphabetic(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_alphabetic(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::alphabetic) != 0;
 }
 
-[[nodiscard]] constexpr bool is_alphanumeric(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_alphanumeric(classify_type ch) noexcept
 {
     return unicode::is_decimal_number(ch) || unicode::is_alphabetic(ch);
 }
 
-[[nodiscard]] constexpr bool is_uppercase(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_uppercase(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::uppercase) != 0;
 }
 
-[[nodiscard]] constexpr bool is_lowercase(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_lowercase(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::lowercase) != 0;
 }
 
-[[nodiscard]] constexpr bool is_white_space(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_white_space(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::white_space) != 0;
 }
 
-[[nodiscard]] constexpr bool is_blank(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_blank(classify_type ch) noexcept
 {
     switch (ch)
     {
@@ -333,7 +335,7 @@ enum script
     }
 }
 
-[[nodiscard]] constexpr bool is_graph(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_graph(classify_type ch) noexcept
 {
     return !(
         unicode::is_white_space(ch) ||
@@ -343,37 +345,37 @@ enum script
     );
 }
 
-[[nodiscard]] constexpr bool is_print(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_print(classify_type ch) noexcept
 {
     return (unicode::is_graph(ch) || unicode::is_blank(ch)) && !unicode::is_control(ch);
 }
 
-[[nodiscard]] constexpr bool is_noncharacter_code_point(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_noncharacter_code_point(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::noncharacter_code_point) != 0;
 }
 
-[[nodiscard]] constexpr bool is_default_ignorable_code_point(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr bool is_default_ignorable_code_point(classify_type ch) noexcept
 {
     return (detail::category_lookup(ch) & properties::default_ignorable_code_point) != 0;
 }
 
-[[nodiscard]] constexpr properties::script get_script(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr properties::script get_script(classify_type ch) noexcept
 {
     return static_cast<properties::script>(detail::script_lookup(ch));
 }
 
-[[nodiscard]] constexpr std::uint32_t to_lowercase(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr classify_type to_lowercase(classify_type ch) noexcept
 {
     // The table returns 0 to signal that this code maps to itself
-    std::uint32_t const r = detail::lowercase_lookup(ch);
+    classify_type const r = detail::lowercase_lookup(ch);
     return r == 0 ? ch : r;
 }
 
-[[nodiscard]] constexpr std::uint32_t to_uppercase(std::uint32_t ch) noexcept
+[[nodiscard]] constexpr classify_type to_uppercase(classify_type ch) noexcept
 {
     // The table returns 0 to signal that this code maps to itself
-    std::uint32_t const r = detail::uppercase_lookup(ch);
+    classify_type const r = detail::uppercase_lookup(ch);
     return r == 0 ? ch : r;
 }
 

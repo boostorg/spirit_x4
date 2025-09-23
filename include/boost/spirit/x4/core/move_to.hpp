@@ -47,7 +47,7 @@ template<traits::NonUnusedAttr T>
 constexpr void move_to(T&& src, T& dest)
     noexcept(std::is_nothrow_assignable_v<T&, T&&>)
 {
-    dest = std::move(src);
+    dest = std::forward<T>(src);
 }
 
 template<traits::NonUnusedAttr T>
@@ -88,7 +88,7 @@ constexpr void move_to(Source&&, Dest&) noexcept
 }
 
 template<std::forward_iterator It, std::sentinel_for<It> Se>
-constexpr void move_to(It const&, Se const&, unused_container_type const&)
+constexpr void move_to(It const&, Se const&, unused_container_type const&) noexcept
 {
     // unused attribute
 }
@@ -237,7 +237,7 @@ move_to(It first, Se last, Dest& dest)
     x4::move_to(first, last, fusion::front(dest));
 }
 
-template<traits::ContainerAttr Source, traits::CategorizedAttr<traits::container_attr> Dest>
+template<traits::X4Container Source, traits::CategorizedAttr<traits::container_attr> Dest>
 constexpr void
 move_to(Source&& src, Dest& dest)
     // TODO: noexcept

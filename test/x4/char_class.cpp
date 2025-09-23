@@ -22,6 +22,23 @@
 int main()
 {
     {
+        std::string_view sv;
+        auto first = sv.begin();
+        auto const last = sv.end();
+        char ch{};
+        static_assert(noexcept(x4::standard::alnum.parse(first, last, unused, ch)));
+        (void)x4::standard::alnum.parse(first, last, unused, ch);
+    }
+    {
+        std::u32string_view sv;
+        auto first = sv.begin();
+        auto const last = sv.end();
+        char32_t ch{};
+        static_assert(noexcept(x4::unicode::alnum.parse(first, last, unused, ch)));
+        (void)x4::unicode::alnum.parse(first, last, unused, ch);
+    }
+
+    {
         using namespace x4::standard;
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alnum);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(alpha);

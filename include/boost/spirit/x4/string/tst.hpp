@@ -84,14 +84,14 @@ struct tst
         return *this;
     }
 
-    template<std::forward_iterator Iterator, class CaseCompare>
-    [[nodiscard]] constexpr T* find(Iterator& first, Iterator last, CaseCompare caseCompare) const noexcept
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class CaseCompare>
+    [[nodiscard]] constexpr T* find(It& first, Se const& last, CaseCompare const& compare) const noexcept
     {
-        return node::find(root_, first, last, caseCompare);
+        return node::find(root_, first, last, compare);
     }
 
-    template<std::forward_iterator Iterator, class Val>
-    constexpr T* add(Iterator first, Iterator last, Val&& val)
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Val>
+    constexpr T* add(It first, Se last, Val&& val)
     {
         if (first == last) return nullptr;
         if (!root_) {
@@ -102,8 +102,8 @@ struct tst
         return this->add(root_, first, last, std::forward<Val>(val));
     }
 
-    template<std::forward_iterator Iterator>
-    constexpr void remove(Iterator first, Iterator last) noexcept
+    template<std::forward_iterator It, std::sentinel_for<It> Se>
+    constexpr void remove(It first, Se last) noexcept
     {
         this->remove(root_, first, last);
     }
@@ -125,9 +125,9 @@ struct tst
     friend struct allocator_ops<tst>;
 
 private:
-    template<std::forward_iterator Iterator, class Val>
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Val>
     [[nodiscard]] constexpr T*
-    add(node* root, Iterator first, Iterator last, Val&& val)
+    add(node* root, It first, Se const last, Val&& val)
     {
         assert(root != nullptr);
         assert(first != last);
@@ -162,9 +162,9 @@ private:
         }
     }
 
-    template<std::forward_iterator Iterator>
+    template<std::forward_iterator It, std::sentinel_for<It> Se>
     constexpr void
-    remove(node*& p, Iterator first, Iterator last) noexcept
+    remove(node*& p, It first, Se const last) noexcept
     {
         if (!p || first == last) return;
 

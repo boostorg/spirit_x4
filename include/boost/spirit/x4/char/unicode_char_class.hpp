@@ -239,9 +239,11 @@ struct inherited_tag {};
 struct common_tag {};
 struct unknown_tag {};
 
+namespace detail {
+
 struct unicode_char_class_base
 {
-    using encoding = char_encoding::unicode;
+    using encoding_type = char_encoding::unicode;
     using char_type = char_encoding::unicode::char_type;
 
 #define BOOST_SPIRIT_X4_BASIC_CLASSIFY(name) \
@@ -249,7 +251,7 @@ struct unicode_char_class_base
     static constexpr bool \
     is(name##_tag, Char ch) noexcept \
     { \
-        return (encoding::is##name)(detail::cast_char<char_type>(ch)); \
+        return (encoding_type::is##name)(detail::cast_char<char_type>(ch)); \
     }
 
 #define BOOST_SPIRIT_X4_CLASSIFY(name) \
@@ -257,7 +259,7 @@ struct unicode_char_class_base
     static constexpr bool \
     is(name##_tag, Char ch) noexcept \
     { \
-        return (encoding::is_##name)(detail::cast_char<char_type>(ch)); \
+        return (encoding_type::is_##name)(detail::cast_char<char_type>(ch)); \
     }
 
 
@@ -503,22 +505,26 @@ struct unicode_char_class_base
 #undef BOOST_SPIRIT_X4_CLASSIFY
 };
 
+} // detail
+
 template<class Tag>
-struct unicode_char_class
-    : char_parser<unicode_char_class<Tag>>
+struct unicode_char_class : char_parser<char_encoding::unicode, unicode_char_class<Tag>>
 {
-    using encoding = char_encoding::unicode;
+    using encoding_type = char_encoding::unicode;
     using tag = Tag;
-    using char_type = typename encoding::char_type;
+    using char_type = typename encoding_type::char_type;
     using attribute_type = char_type;
 
     static constexpr bool has_attribute = true;
 
-    template<class Char, class Context>
-    [[nodiscard]] static constexpr bool test(Char ch, Context const&) noexcept
+    [[nodiscard]] static constexpr bool
+    test(char_encoding::unicode::classify_type const classify_ch, auto const& /* ctx */) noexcept
     {
-        return encoding::ischar(ch) && unicode_char_class_base::is(tag{}, ch);
+        static_assert(noexcept(encoding_type::ischar(classify_ch) && detail::unicode_char_class_base::is(tag{}, classify_ch)));
+        return encoding_type::ischar(classify_ch) && detail::unicode_char_class_base::is(tag{}, classify_ch);
     }
+
+    static constexpr void test(auto const, auto const&) = delete; // Mixing incompatible char types is not allowed
 };
 
 #define BOOST_SPIRIT_X4_CHAR_CLASS(name) \

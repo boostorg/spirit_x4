@@ -42,7 +42,7 @@ void docheck(TST const& tst, CaseCompare const& comp, Char const* s, bool const 
     Char const* first = s;
     Char const* last = s;
     while (*last) ++last;
-    int* r = tst.find(s, last,comp);
+    int* r = tst.find(s, last, comp);
     BOOST_TEST(!!r == expected);
 
     if (r) {

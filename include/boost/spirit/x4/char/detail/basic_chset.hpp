@@ -132,33 +132,33 @@ struct basic_chset_8bit
     [[nodiscard]] constexpr bool
     test(CharT v) const noexcept
     {
-        return bset.test((unsigned char)v);
+        return bset.test(static_cast<unsigned char>(v));
     }
 
     constexpr void
     set(CharT from, CharT to) noexcept
     {
         for (int i = from; i <= to; ++i)
-            bset.set((unsigned char)i);
+            bset.set(static_cast<unsigned char>(i));
     }
 
     constexpr void
     set(CharT c) noexcept
     {
-        bset.set((unsigned char)c);
+        bset.set(static_cast<unsigned char>(c));
     }
 
     constexpr void
     clear(CharT from, CharT to) noexcept
     {
         for (int i = from; i <= to; ++i)
-            bset.reset((unsigned char)i);
+            bset.reset(static_cast<unsigned char>(i));
     }
 
     constexpr void
     clear(CharT c) noexcept
     {
-        bset.reset((unsigned char)c);
+        bset.reset(static_cast<unsigned char>(c));
     }
 
     constexpr void

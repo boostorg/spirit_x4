@@ -19,89 +19,89 @@ namespace boost::spirit::x4::char_encoding {
 struct unicode
 {
     using char_type = char32_t;
-    using classify_type = std::uint32_t;
+    using classify_type = x4::unicode::classify_type;
 
     [[nodiscard]] static constexpr bool
-    isascii_(char_type ch) noexcept
+    isascii_(classify_type ch) noexcept
     {
         return 0 == (ch & ~0x7f);
     }
 
     [[nodiscard]] static constexpr bool
-    ischar(char_type ch) noexcept
+    ischar(classify_type ch) noexcept
     {
         // unicode code points in the range 0x00 to 0x10FFFF
         return ch <= 0x10FFFF;
     }
 
     [[nodiscard]] static constexpr bool
-    isalnum(char_type ch) noexcept
+    isalnum(classify_type ch) noexcept
     {
         return x4::unicode::is_alphanumeric(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isalpha(char_type ch) noexcept
+    isalpha(classify_type ch) noexcept
     {
         return x4::unicode::is_alphabetic(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isdigit(char_type ch) noexcept
+    isdigit(classify_type ch) noexcept
     {
         return x4::unicode::is_decimal_number(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isxdigit(char_type ch) noexcept
+    isxdigit(classify_type ch) noexcept
     {
         return x4::unicode::is_hex_digit(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    iscntrl(char_type ch) noexcept
+    iscntrl(classify_type ch) noexcept
     {
         return x4::unicode::is_control(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isgraph(char_type ch) noexcept
+    isgraph(classify_type ch) noexcept
     {
         return x4::unicode::is_graph(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    islower(char_type ch) noexcept
+    islower(classify_type ch) noexcept
     {
         return x4::unicode::is_lowercase(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isprint(char_type ch) noexcept
+    isprint(classify_type ch) noexcept
     {
         return x4::unicode::is_print(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    ispunct(char_type ch) noexcept
+    ispunct(classify_type ch) noexcept
     {
         return x4::unicode::is_punctuation(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isspace(char_type ch) noexcept
+    isspace(classify_type ch) noexcept
     {
         return x4::unicode::is_white_space(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    (isblank)(char_type ch) noexcept
+    (isblank)(classify_type ch) noexcept
     {
         return x4::unicode::is_blank(ch);
     }
 
     [[nodiscard]] static constexpr bool
-    isupper(char_type ch) noexcept
+    isupper(classify_type ch) noexcept
     {
         return x4::unicode::is_uppercase(ch);
     }
@@ -138,20 +138,20 @@ struct unicode
 
     // Simple character conversions
 
-    [[nodiscard]] static constexpr char_type
-    tolower(char_type ch) noexcept
+    [[nodiscard]] static constexpr classify_type
+    tolower(classify_type ch) noexcept
     {
         return x4::unicode::to_lowercase(ch);
     }
 
-    [[nodiscard]] static constexpr char_type
-    toupper(char_type ch) noexcept
+    [[nodiscard]] static constexpr classify_type
+    toupper(classify_type ch) noexcept
     {
         return x4::unicode::to_uppercase(ch);
     }
 
     [[nodiscard]] static constexpr std::uint32_t
-    toucs4(char_type ch) noexcept
+    toucs4(classify_type ch) noexcept
     {
         return ch;
     }
@@ -166,7 +166,7 @@ struct unicode
     // Major Categories
 #define BOOST_SPIRIT_X4_MAJOR_CATEGORY(name) \
     [[nodiscard]] static constexpr bool \
-    is_##name(char_type ch) noexcept \
+    is_##name(classify_type ch) noexcept \
     { \
         return x4::unicode::get_major_category(ch) == x4::unicode::properties::name; \
     } \
@@ -186,7 +186,7 @@ struct unicode
     // General Categories
 #define BOOST_SPIRIT_X4_CATEGORY(name) \
     [[nodiscard]] static constexpr bool \
-    is_##name(char_type ch) noexcept \
+    is_##name(classify_type ch) noexcept \
     { \
         return x4::unicode::get_category(ch) == x4::unicode::properties::name; \
     } \
@@ -235,7 +235,7 @@ struct unicode
     // Derived Categories
 #define BOOST_SPIRIT_X4_DERIVED_CATEGORY(name) \
     [[nodiscard]] static constexpr bool \
-    is_##name(char_type ch) noexcept \
+    is_##name(classify_type ch) noexcept \
     { \
         return x4::unicode::is_##name(ch); \
     } \
@@ -255,7 +255,7 @@ struct unicode
     // Scripts
 #define BOOST_SPIRIT_X4_SCRIPT(name) \
     [[nodiscard]] static constexpr bool \
-    is_##name(char_type ch) noexcept \
+    is_##name(classify_type ch) noexcept \
     { \
         return x4::unicode::get_script(ch) == x4::unicode::properties::name; \
     } \

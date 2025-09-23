@@ -19,32 +19,41 @@
 namespace boost::spirit::x4 {
 
 template<class Encoding, X4Attribute Attr = typename Encoding::char_type>
-struct literal_char : char_parser<literal_char<Encoding, Attr>>
+struct literal_char : char_parser<Encoding, literal_char<Encoding, Attr>>
 {
-    using char_type = typename Encoding::char_type;
-    using encoding = Encoding;
+    using encoding_type = Encoding;
     using attribute_type = Attr;
+    using char_type = typename Encoding::char_type;
+    using classify_type = typename Encoding::classify_type;
 
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
+
+    literal_char() = delete; // Empty `literal_char` matches infinite times, leading to stack overflow
 
     template<class Char>
         requires
             (!std::is_same_v<std::remove_cvref_t<Char>, literal_char>) &&
-            std::convertible_to<Char, char_type>
+            std::convertible_to<Char, classify_type>
     constexpr literal_char(Char ch) noexcept
-        : ch(static_cast<char_type>(ch))
+        : classify_ch_(static_cast<classify_type>(ch))
     {
-        static_assert(std::same_as<char_type, Char>, "Mixing incompatible character types is not allowed");
+        static_assert(std::same_as<Char, char_type>, "Mixing incompatible character types is not allowed");
     }
 
-    template<class Char, class Context>
-    [[nodiscard]] constexpr bool test(Char ch_, Context const& ctx) const noexcept
+    [[nodiscard]] constexpr bool
+    test(classify_type const test_classify_ch, auto const& ctx) const noexcept
     {
-        static_assert(std::same_as<char_type, Char>, "Mixing incompatible character types is not allowed");
-        return x4::get_case_compare<encoding>(ctx)(ch, char_type(ch_)) == 0;
+        static_assert(noexcept(x4::get_case_compare<encoding_type>(ctx)(classify_ch_, test_classify_ch)));
+        return x4::get_case_compare<encoding_type>(ctx)(classify_ch_, test_classify_ch) == 0;
     }
 
-    char_type ch;
+    constexpr void
+    test(auto const, auto const&) const = delete; // Mixing incompatible character types is not allowed
+
+    [[nodiscard]] constexpr classify_type classify_ch() const noexcept { return classify_ch_; }
+
+private:
+    classify_type classify_ch_{};
 };
 
 template<class Encoding, X4Attribute Attr>
@@ -53,7 +62,7 @@ struct get_info<literal_char<Encoding, Attr>>
     using result_type = std::string;
     [[nodiscard]] std::string operator()(literal_char<Encoding, Attr> const& p) const
     {
-        return '\'' + x4::to_utf8(Encoding::toucs4(p.ch)) + '\'';
+        return '\'' + x4::to_utf8(Encoding::toucs4(p.classify_ch())) + '\'';
     }
 };
 

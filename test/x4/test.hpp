@@ -28,6 +28,8 @@ namespace x4 = spirit::x4;
 
 using x4::unused_type;
 using x4::unused;
+using x4::unused_container_type;
+using x4::unused_container;
 
 namespace spirit_test {
 

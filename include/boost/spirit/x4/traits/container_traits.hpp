@@ -406,7 +406,7 @@ template<class T>
 constexpr bool is_container_v = is_container<T>::value;
 
 template<class T>
-concept ContainerAttr = is_container_v<std::remove_cvref_t<T>>;
+concept X4Container = is_container_v<std::remove_cvref_t<T>>;
 
 // -------------------------------------------------
 

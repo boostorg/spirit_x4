@@ -37,14 +37,19 @@ struct literal_string : parser<literal_string<String, Encoding, Attr>>
     using char_type = typename Encoding::char_type;
     using encoding = Encoding;
     using attribute_type = Attr;
+
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
     static constexpr bool handles_container = has_attribute;
 
-    template<class... Args>
-        requires std::is_constructible_v<String, Args...>
-    constexpr literal_string(Args&&... args)
-        noexcept(std::is_nothrow_constructible_v<String, Args...>)
-        : str(std::forward<Args>(args)...)
+    literal_string() = delete; // Empty `literal_string` matches infinite times, leading to stack overflow
+
+    template<class T, class... Rest>
+        requires
+            (!std::is_same_v<std::remove_cvref_t<T>, literal_string>) &&
+            std::is_constructible_v<String, T, Rest...>
+    constexpr literal_string(T&& val, Rest&&... rest)
+        noexcept(std::is_nothrow_constructible_v<String, T, Rest...>)
+        : str(std::forward<T>(val), std::forward<Rest>(rest)...)
     {}
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr_>
@@ -52,11 +57,12 @@ struct literal_string : parser<literal_string<String, Encoding, Attr>>
     parse(It& first, Se const& last, Context const& ctx, Attr_& attr) const
         noexcept(
             noexcept(x4::skip_over(first, last, ctx)) &&
-            noexcept(detail::string_parse(str, first, last, attr, x4::get_case_compare<encoding>(ctx)))
+            noexcept(detail::string_parse(str, first, last, x4::assume_container(attr), x4::get_case_compare<encoding>(ctx)))
         )
     {
+        static_assert(std::same_as<std::iter_value_t<It>, char_type>, "Mixing incompatible char types is not allowed");
         x4::skip_over(first, last, ctx);
-        return detail::string_parse(str, first, last, attr, x4::get_case_compare<encoding>(ctx));
+        return detail::string_parse(str, first, last, x4::assume_container(attr), x4::get_case_compare<encoding>(ctx));
     }
 
     String str;

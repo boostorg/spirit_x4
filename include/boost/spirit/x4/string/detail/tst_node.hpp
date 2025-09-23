@@ -100,29 +100,31 @@ struct tst_node
             &tst_node::node_alloc,
             &tst_node::lt, &tst_node::eq, &tst_node::gt
         >(*this, std::move(rhs));
+
+        return *this;
     }
 
-    template<std::forward_iterator Iterator, class CaseCompare>
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class CaseCompare>
     [[nodiscard]] static constexpr T*
-    find(tst_node* start, Iterator& first, Iterator last, CaseCompare const& comp) noexcept
+    find(tst_node* start, It& first, Se const& last, CaseCompare const& comp) noexcept
     {
         if (first == last) return nullptr;
 
-        Iterator i = first;
-        Iterator latest = first;
+        It it = first;
+        It latest = first;
         tst_node* p = start;
         T* found = nullptr;
 
-        while (p && i != last) {
-            auto c = comp(*i,p->id);
+        while (p && it != last) {
+            auto c = comp(*it, p->id);
 
             if (c == 0) {
                 if (p->data) {
                     found = p->data;
-                    latest = i;
+                    latest = it;
                 }
                 p = p->eq;
-                ++i;
+                ++it;
 
             } else if (c < 0) {
                 p = p->lt;

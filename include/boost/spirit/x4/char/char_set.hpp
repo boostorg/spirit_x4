@@ -22,11 +22,12 @@ namespace boost::spirit::x4 {
 
 // Parser for a character range
 template<class Encoding, X4Attribute Attr = typename Encoding::char_type>
-struct char_range : char_parser<char_range<Encoding, Attr>>
+struct char_range : char_parser<Encoding, char_range<Encoding, Attr>>
 {
     using char_type = typename Encoding::char_type;
-    using encoding = Encoding;
+    using encoding_type = Encoding;
     using attribute_type = Attr;
+
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
 
     constexpr char_range(char_type from_, char_type to_) noexcept
@@ -38,8 +39,10 @@ struct char_range : char_parser<char_range<Encoding, Attr>>
     [[nodiscard]] constexpr bool test(Char ch_, Context const& ctx) const noexcept
     {
         char_type ch = static_cast<char_type>(ch_);  // optimize for token based parsing
-        return x4::get_case_compare<encoding>(ctx)(ch, from) >= 0
-            && x4::get_case_compare<encoding>(ctx)(ch , to) <= 0;
+        static_assert(noexcept(x4::get_case_compare<encoding_type>(ctx)(ch, from)));
+
+        return x4::get_case_compare<encoding_type>(ctx)(ch, from) >= 0
+            && x4::get_case_compare<encoding_type>(ctx)(ch , to) <= 0;
     }
 
     char_type from, to;
@@ -47,10 +50,10 @@ struct char_range : char_parser<char_range<Encoding, Attr>>
 
 // Parser for a character set
 template<class Encoding, X4Attribute Attr = typename Encoding::char_type>
-struct char_set : char_parser<char_set<Encoding, Attr>>
+struct char_set : char_parser<Encoding, char_set<Encoding, Attr>>
 {
     using char_type = typename Encoding::char_type;
-    using encoding = Encoding;
+    using encoding_type = Encoding;
     using attribute_type = Attr;
 
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
@@ -94,7 +97,8 @@ struct char_set : char_parser<char_set<Encoding, Attr>>
     template<class Char, class Context>
     [[nodiscard]] constexpr bool test(Char ch_, Context const& ctx) const noexcept
     {
-        return x4::get_case_compare<encoding>(ctx).in_set(ch_, chset);
+        static_assert(noexcept(x4::get_case_compare<encoding_type>(ctx).in_set(ch_, chset)));
+        return x4::get_case_compare<encoding_type>(ctx).in_set(ch_, chset);
     }
 
     detail::basic_chset<char_type> chset;

@@ -16,26 +16,34 @@
 namespace boost::spirit::x4 {
 
 template<class Encoding>
-struct any_char : char_parser<any_char<Encoding>>
+struct any_char : char_parser<Encoding, any_char<Encoding>>
 {
+    using encoding_type = Encoding;
+    using attribute_type = typename Encoding::char_type;
     using char_type = typename Encoding::char_type;
-    using encoding = Encoding;
-    using attribute_type = char_type;
+    using classify_type = typename Encoding::classify_type;
 
     static constexpr bool has_attribute = true;
 
-    template<class Context>
     [[nodiscard]] static constexpr bool
-    test(char_type ch, Context const&) noexcept
+    test(classify_type classify_ch, auto const& /* ctx */) noexcept
     {
-        return encoding::ischar(ch);
+        static_assert(noexcept(encoding_type::ischar(classify_ch)));
+        return encoding_type::ischar(classify_ch);
     }
 
+    static constexpr void
+    test(auto, auto const& /* ctx */) = delete; // Mixing incompatible char types is not allowed
+
+    template<std::same_as<char_type> CharT>
     [[nodiscard]] static constexpr literal_char<Encoding>
-    operator()(char_type ch) noexcept
+    operator()(CharT ch) noexcept
     {
         return {ch};
     }
+
+    template<traits::CharIncompatibleWith<char_type> CharT>
+    static constexpr void operator()(CharT) = delete; // Mixing incompatible char types is not allowed
 
     [[nodiscard]] static constexpr literal_char<Encoding>
     operator()(char_type const (&ch)[2]) noexcept
@@ -50,43 +58,30 @@ struct any_char : char_parser<any_char<Encoding>>
         return char_set<Encoding>{ch};
     }
 
+    template<traits::CharIncompatibleWith<char_type> CharT, std::size_t N>
+    static constexpr void
+    operator()(CharT const (&)[N]) = delete; // Mixing incompatible char types is not allowed
+
+    template<std::same_as<char_type> CharT>
     [[nodiscard]] static constexpr char_range<Encoding>
-    operator()(char_type from, char_type to) noexcept
+    operator()(CharT from, CharT to) noexcept
     {
         return {from, to};
     }
 
-    [[nodiscard]] static constexpr char_range<Encoding>
-    operator()(char_type const (&from)[2], char_type const (&to)[2]) noexcept
-    {
-        return {static_cast<char_type>(from[0]), static_cast<char_type>(to[0])};
-    }
+    template<class From, class To>
+        requires traits::CharIncompatibleWith<From, char_type> || traits::CharIncompatibleWith<To, char_type>
+    static constexpr void operator()(From, To) = delete; // Mixing incompatible char types is not allowed
+
+    template<class From, std::size_t FromN, class To, std::size_t ToN>
+    static constexpr void
+    operator()(From const (&)[FromN], To const (&)[ToN]) = delete; // Use single character literal to define character range
 
     [[nodiscard]] static char_set<Encoding>
     operator()(std::basic_string_view<char_type> sv)
     {
         return char_set<Encoding>{std::move(sv)};
     }
-
-    static constexpr void
-    test(traits::CharIncompatibleWith<char_type> auto const&, auto const&) = delete; // Mixing incompatible char types is not allowed
-
-    static constexpr void
-    operator()(traits::CharIncompatibleWith<char_type> auto const&) = delete; // Mixing incompatible char types is not allowed
-
-    template<std::size_t N>
-    static constexpr void
-    operator()(traits::CharIncompatibleWith<char_type> auto const (&)[N]) = delete; // Mixing incompatible char types is not allowed
-
-    template<class FromT, class ToT>
-        requires traits::CharIncompatibleWith<FromT, char_type> || traits::CharIncompatibleWith<ToT, char_type>
-    static constexpr void
-    operator()(FromT const&, ToT const&) = delete; // Mixing incompatible char types is not allowed
-
-    template<class FromT, class ToT>
-        requires traits::CharIncompatibleWith<FromT, char_type> || traits::CharIncompatibleWith<ToT, char_type>
-    static constexpr void
-    operator()(FromT const (&)[2], ToT const (&)[2]) = delete; // Mixing incompatible char types is not allowed
 };
 
 } // boost::spirit::x4

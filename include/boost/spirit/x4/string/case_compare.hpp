@@ -23,23 +23,31 @@
 # include <boost/spirit/x4/char_encoding/unicode.hpp>
 #endif
 
-#include <cstdint>
+#include <concepts>
 
 namespace boost::spirit::x4 {
 
 template<class Encoding>
 struct case_compare
 {
+    using encoding_type = Encoding;
+    using char_type = typename Encoding::char_type;
+    using classify_type = typename Encoding::classify_type;
+
     template<class Char, class CharSet>
     [[nodiscard]] static constexpr bool in_set(Char ch, CharSet const& set) noexcept
     {
-        static_assert(noexcept(set.test(ch)));
-        return set.test(ch);
+        static_assert(std::same_as<Char, char_type> || std::same_as<Char, classify_type>);
+        static_assert(noexcept(set.test(static_cast<classify_type>(ch))));
+        return set.test(static_cast<classify_type>(ch));
     }
 
-    template<class Char>
-    [[nodiscard]] static constexpr std::int32_t operator()(Char lc, Char rc) noexcept
+    template<class LChar, class RChar>
+    [[nodiscard]] static constexpr int
+    operator()(LChar lc, RChar rc) noexcept
     {
+        static_assert(std::same_as<LChar, char_type> || std::same_as<LChar, classify_type>);
+        static_assert(std::same_as<RChar, char_type> || std::same_as<RChar, classify_type>);
         return lc - rc;
     }
 
@@ -53,26 +61,33 @@ struct case_compare
 template<class Encoding>
 struct no_case_compare
 {
+    using encoding_type = Encoding;
+    using char_type = typename Encoding::char_type;
+    using classify_type = typename Encoding::classify_type;
+
     template<class Char, class CharSet>
-    [[nodiscard]] static constexpr bool in_set(Char ch_, CharSet const& set) noexcept
+    [[nodiscard]] static constexpr bool in_set(Char ch, CharSet const& set) noexcept
     {
-        using classify_type = typename Encoding::classify_type;
-        auto ch = classify_type(ch_);
-        static_assert(noexcept(set.test(ch)));
-        return set.test(ch)
+        static_assert(std::same_as<Char, char_type> || std::same_as<Char, classify_type>);
+        auto const classify_ch = static_cast<classify_type>(ch);
+        static_assert(noexcept(set.test(classify_ch)));
+        return set.test(classify_ch)
             || set.test(static_cast<classify_type>(
-                Encoding::islower(ch) ? Encoding::toupper(ch) : Encoding::tolower(ch))
+                Encoding::islower(classify_ch) ? Encoding::toupper(classify_ch) : Encoding::tolower(classify_ch))
             );
     }
 
-    template<class Char>
-    [[nodiscard]] static constexpr std::int32_t operator()(Char lc_, Char const rc_) noexcept
+    template<class LChar, class RChar>
+    [[nodiscard]] static constexpr int
+    operator()(LChar lc, RChar rc) noexcept
     {
-        using classify_type = typename Encoding::classify_type;
-        auto lc = classify_type(lc_);
-        auto rc = classify_type(rc_);
-        return Encoding::islower(rc)
-            ? Encoding::tolower(lc) - rc : Encoding::toupper(lc) - rc;
+        static_assert(std::same_as<LChar, char_type> || std::same_as<LChar, classify_type>);
+        static_assert(std::same_as<RChar, char_type> || std::same_as<RChar, classify_type>);
+
+        auto const classify_lc = static_cast<classify_type>(lc);
+        auto const classify_rc = static_cast<classify_type>(rc);
+        return Encoding::islower(classify_rc)
+            ? Encoding::tolower(classify_lc) - classify_rc : Encoding::toupper(classify_lc) - classify_rc;
     }
 
     template<class CharClassTag>

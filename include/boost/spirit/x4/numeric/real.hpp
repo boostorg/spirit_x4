@@ -114,7 +114,7 @@ struct ureal_policies
         if (*first != 'n' && *first != 'N') return false;   // not "nan"
 
         // nan[(...)] ?
-        if (detail::string_parse("nan"sv, "NAN"sv, first, last, unused)) {
+        if (detail::string_parse("nan"sv, "NAN"sv, first, last, unused_container)) {
             if (first != last && *first == '(') {
                 // skip trailing (...) part
                 It i = first;
@@ -142,9 +142,9 @@ struct ureal_policies
         if (*first != 'i' && *first != 'I') return false;   // not "inf"
 
         // inf or infinity ?
-        if (detail::string_parse("inf"sv, "INF"sv, first, last, unused)) {
+        if (detail::string_parse("inf"sv, "INF"sv, first, last, unused_container)) {
             // skip allowed 'inity' part of infinity
-            (void)detail::string_parse("inity"sv, "INITY"sv, first, last, unused);
+            (void)detail::string_parse("inity"sv, "INITY"sv, first, last, unused_container);
             attr_ = std::numeric_limits<T>::infinity();
             return true;
         }

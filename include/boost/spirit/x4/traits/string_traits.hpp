@@ -98,7 +98,7 @@ concept CppStringLike =
 template<class T, class ExpectedCharT>
 concept CharIncompatibleWith =
     CharLike<T> &&
-    !std::same_as<std::remove_cvref_t<T>, ExpectedCharT>;
+    !std::same_as<T, ExpectedCharT>;
 
 // Mixing incompatible character types is semantically wrong.
 // Don't do that. It may even lead to security vulnerabilities.

@@ -12,6 +12,7 @@
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/include/is_view.hpp>
 #include <boost/fusion/include/size.hpp>
+#include <boost/fusion/include/front.hpp>
 
 #include <type_traits>
 
@@ -69,6 +70,23 @@ struct is_size_one_view
 
 template<class View>
 constexpr bool is_size_one_view_v = is_size_one_view<View>::value;
+
+
+template<class T>
+struct synthesized_value
+{
+    using type = T;
+};
+
+template<class T>
+using synthesized_value_t = typename synthesized_value<T>::type;
+
+template<class T>
+    requires is_size_one_sequence_v<std::remove_cvref_t<T>>
+struct synthesized_value<T>
+{
+    using type = std::remove_cvref_t<typename fusion::result_of::front<T>::type>;
+};
 
 } // boost::spirit::x4::traits
 

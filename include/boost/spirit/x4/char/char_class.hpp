@@ -15,25 +15,32 @@
 
 #include <boost/spirit/x4/string/case_compare.hpp>
 
+#include <boost/spirit/x4/traits/string_traits.hpp>
+
 #include <boost/spirit/x4/char_encoding/standard.hpp>
 
 #ifndef BOOST_SPIRIT_X4_NO_STANDARD_WIDE
 # include <boost/spirit/x4/char_encoding/standard_wide.hpp>
 #endif
 
+#include <concepts>
+
 namespace boost::spirit::x4 {
+
+namespace detail {
 
 template<class Encoding>
 struct char_class_base
 {
-    using char_type = typename Encoding::classify_type;
+    using classify_type = typename Encoding::classify_type;
 
 #define BOOST_SPIRIT_X4_CLASSIFY(name) \
     template<class Char> \
     [[nodiscard]] static constexpr bool \
     is(name##_tag, Char ch) noexcept \
     { \
-        return (Encoding::is##name)(detail::cast_char<char_type>(ch)); \
+        static_assert(std::same_as<Char, classify_type>); \
+        return (Encoding::is##name)(detail::cast_char<classify_type>(ch)); \
     }
 
     BOOST_SPIRIT_X4_CLASSIFY(char)
@@ -53,26 +60,34 @@ struct char_class_base
 #undef BOOST_SPIRIT_X4_CLASSIFY
 };
 
+} // detail
+
 template<class Encoding, class Tag>
-struct char_class : char_parser<char_class<Encoding, Tag>>
+struct char_class_parser : char_parser<Encoding, char_class_parser<Encoding, Tag>>
 {
-    using encoding = Encoding;
+    using encoding_type = Encoding;
     using tag = Tag;
     using char_type = typename Encoding::char_type;
     using attribute_type = char_type;
     static constexpr bool has_attribute = true;
 
-    template<class Char, class Context>
-    [[nodiscard]] static constexpr bool test(Char ch, Context const& ctx) noexcept
+    [[nodiscard]] static constexpr bool
+    test(typename Encoding::classify_type const classify_ch, auto const& ctx) noexcept
     {
-        return encoding::ischar(ch)
-            && char_class_base<Encoding>::is(
-                x4::get_case_compare<Encoding>(ctx).get_char_class_tag(tag()), ch);
+        //static_assert(std::same_as<ClassifyCharT, typename Encoding::classify_type>);
+        return encoding_type::ischar(classify_ch)
+            && detail::char_class_base<Encoding>::is(
+                x4::get_case_compare<Encoding>(ctx).get_char_class_tag(tag{}),
+                static_cast<typename Encoding::classify_type>(classify_ch)
+            );
     }
+
+    static void
+    test(auto const, auto const&) = delete; // Mixing incompatible char types is not allowed. Did you forget `static_cast<typename Encoding::classify_type>(ch)`?
 };
 
 #define BOOST_SPIRIT_X4_CHAR_CLASS(encoding, name) \
-    using name##_type = char_class<char_encoding::encoding, name##_tag>; \
+    using name##_type = char_class_parser<char_encoding::encoding, name##_tag>; \
     inline constexpr name##_type name{};
 
 #define BOOST_SPIRIT_X4_CHAR_CLASSES(encoding) \
