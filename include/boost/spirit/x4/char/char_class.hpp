@@ -88,7 +88,7 @@ struct char_class_parser : char_parser<Encoding, char_class_parser<Encoding, Tag
 
 #define BOOST_SPIRIT_X4_CHAR_CLASS(encoding, name) \
     namespace encoding { \
-    inline constexpr char_class_parser<char_encoding::encoding, char_classes::name##_tag> name{}; \
+    [[maybe_unused]] inline constexpr char_class_parser<char_encoding::encoding, char_classes::name##_tag> name{}; \
     } /* encoding */ \
     namespace parsers::encoding { \
     using x4::encoding::name; \

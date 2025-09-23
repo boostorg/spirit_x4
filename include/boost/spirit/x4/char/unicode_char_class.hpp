@@ -557,7 +557,7 @@ struct unicode_char_class : char_parser<char_encoding::unicode, unicode_char_cla
 
 #define BOOST_SPIRIT_X4_CHAR_CLASS(name) \
     namespace unicode { \
-    inline constexpr unicode_char_class<char_classes::unicode::name##_tag> name{}; \
+    [[maybe_unused]] inline constexpr unicode_char_class<char_classes::unicode::name##_tag> name{}; \
     } /* unicode */ \
     namespace parsers::unicode { \
     using x4::unicode::name; \
