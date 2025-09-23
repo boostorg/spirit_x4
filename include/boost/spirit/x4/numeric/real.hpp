@@ -32,7 +32,6 @@ namespace boost::spirit::x4 {
 template<class T>
 struct ureal_policies
 {
-    // trailing dot policy suggested by Gustavo Guerra
     static constexpr bool allow_leading_dot = true;
     static constexpr bool allow_trailing_dot = true;
     static constexpr bool expect_dot = false;
@@ -152,6 +151,30 @@ struct ureal_policies
     }
 };
 
+namespace detail {
+
+template<class Policy>
+concept RealPolicy = requires(
+    char const*& first, char const* const& last,
+    unused_type const& attr
+) {
+    requires std::same_as<std::remove_const_t<decltype(Policy::allow_leading_dot)>, bool>;
+    requires std::same_as<std::remove_const_t<decltype(Policy::allow_trailing_dot)>, bool>;
+    requires std::same_as<std::remove_const_t<decltype(Policy::expect_dot)>, bool>;
+
+    { Policy::parse_sign(first, last) } -> std::same_as<bool>;
+    { Policy::parse_n(first, last, attr) } -> std::same_as<bool>;
+    { Policy::parse_dot(first, last) } -> std::same_as<bool>;
+    { Policy::parse_frac_n(first, last, attr) } -> std::same_as<bool>;
+    { Policy::parse_exp(first, last) } -> std::same_as<bool>;
+    { Policy::parse_exp_n(first, last, std::declval<int&>()) } -> std::same_as<bool>;
+    { Policy::parse_nan(first, last, attr) } -> std::same_as<bool>;
+    { Policy::parse_inf(first, last, attr) } -> std::same_as<bool>;
+};
+
+} // detail
+
+
 // Default signed real number policies
 template<class T>
 struct real_policies : ureal_policies<T>
@@ -177,57 +200,56 @@ struct strict_real_policies : real_policies<T>
     static constexpr bool expect_dot = true;
 };
 
-template<class T, class RealPolicies = real_policies<T>>
-struct real_parser : parser<real_parser<T, RealPolicies>>
+template<class T, class Policy = real_policies<T>>
+struct real_parser : parser<real_parser<T, Policy>>
 {
+    static_assert(X4Attribute<T>);
+    static_assert(std::default_initializable<T>);
+    static_assert(detail::RealPolicy<Policy>);
+
     using attribute_type = T;
-    using policies_type = RealPolicies;
+    using policy_type = Policy;
 
     static constexpr bool has_attribute = true;
 
     constexpr real_parser() = default;
 
-    template<class RealPoliciesT>
-        requires
-            (!std::is_same_v<std::remove_cvref_t<RealPoliciesT>, real_parser>) &&
-            std::is_constructible_v<RealPolicies, RealPoliciesT>
-    constexpr real_parser(RealPoliciesT&& policies)
-        noexcept(std::is_nothrow_constructible_v<RealPolicies, RealPoliciesT>)
-        : policies_(std::forward<RealPoliciesT>(policies))
-    {}
+    constexpr real_parser(Policy const&) = delete; // Policy should be stateless
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context>
-    [[nodiscard]] constexpr bool
-    parse(It& first, Se const& last, Context const& ctx, T& attr_) const
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, class U>
+        requires
+            std::same_as<std::remove_const_t<U>, T> ||
+            std::same_as<std::remove_const_t<U>, unused_type>
+    [[nodiscard]] static constexpr bool
+    parse(It& first, Se const& last, Context const& ctx, U& attr)
         noexcept(
             noexcept(x4::skip_over(first, last, ctx)) &&
-            noexcept(numeric::extract_real<T, RealPolicies>::parse(first, last, attr_, policies_))
+            noexcept(numeric::extract_real<T, Policy>::parse(first, last, attr))
         )
     {
         x4::skip_over(first, last, ctx);
-        return numeric::extract_real<T, RealPolicies>::parse(first, last, attr_, policies_);
+        return numeric::extract_real<T, Policy>::parse(first, last, attr);
     }
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
-    [[nodiscard]] constexpr bool
-    parse(It& first, Se const& last, Context const& ctx, Attr& attr_param) const
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, class Attr>
+    [[nodiscard]] static constexpr bool
+    parse(It& first, Se const& last, Context const& ctx, Attr& attr)
         noexcept(
             std::is_nothrow_default_constructible_v<T> &&
-            noexcept(this->parse(first, last, ctx, std::declval<T&>())) &&
-            noexcept(x4::move_to(std::declval<T&&>(), attr_param))
+            noexcept(real_parser::parse(first, last, ctx, std::declval<T&>())) &&
+            noexcept(x4::move_to(std::declval<T&&>(), attr))
         )
     {
+        static_assert(X4NonUnusedAttribute<Attr>);
+
         // this case is called when Attribute is not T
         T attr_;
-        if (this->parse(first, last, ctx, attr_)) {
-            x4::move_to(std::move(attr_), attr_param);
+        if (real_parser::parse(first, last, ctx, attr_)) {
+            x4::move_to(std::move(attr_), attr);
             return true;
         }
         return false;
     }
-
-private:
-    BOOST_SPIRIT_NO_UNIQUE_ADDRESS RealPolicies policies_{};
 };
 
 namespace parsers {

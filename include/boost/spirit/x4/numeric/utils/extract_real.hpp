@@ -127,12 +127,12 @@ negate(bool /*neg*/, unused_type n) noexcept
 
 namespace boost::spirit::x4::numeric {
 
-template<class T, class RealPolicies>
+template<class T, class Policy>
 struct extract_real
 {
     template<std::forward_iterator It, std::sentinel_for<It> Se, X4Attribute Attr>
     [[nodiscard]] static constexpr bool
-    parse(It& first, Se const& last, Attr& attr, RealPolicies const& p)
+    parse(It& first, Se const& last, Attr& attr)
         // TODO: noexcept
     {
         if (first == last) return false;
@@ -140,18 +140,18 @@ struct extract_real
 
         // Start by parsing the sign. neg will be true if
         // we got a "-" sign, false otherwise.
-        bool neg = p.parse_sign(first, last);
+        bool neg = Policy::parse_sign(first, last);
 
         // Now attempt to parse an integer
         T n = 0;
-        bool const got_a_number = p.parse_n(first, last, n);
+        bool const got_a_number = Policy::parse_n(first, last, n);
 
         // If we did not get a number it might be a NaN, Inf or a leading
         // dot.
         if (!got_a_number) {
             // Check whether the number to parse is a NaN or Inf
-            if (p.parse_nan(first, last, n) ||
-                p.parse_inf(first, last, n)
+            if (Policy::parse_nan(first, last, n) ||
+                Policy::parse_inf(first, last, n)
             ) {
                 // If we got a negative sign, negate the number
                 x4::move_to(extension::negate(neg, n), attr);
@@ -160,7 +160,7 @@ struct extract_real
 
             // If we did not get a number and our policies do not
             // allow a leading dot, fail and return early (no-match)
-            if (!p.allow_leading_dot) {
+            if (!Policy::allow_leading_dot) {
                 first = save;
                 return false;
             }
@@ -171,12 +171,12 @@ struct extract_real
         int frac_digits = 0;
 
         // Try to parse the dot ('.' decimal point)
-        if (p.parse_dot(first, last)) {
+        if (Policy::parse_dot(first, last)) {
             // We got the decimal point. Now we will try to parse
             // the fraction if it is there. If not, it defaults
             // to zero (0) only if we already got a number.
             It savef = first;
-            if (p.parse_frac_n(first, last, n)) {
+            if (Policy::parse_frac_n(first, last, n)) {
                 // Optimization note: don't compute frac_digits if T is
                 // an unused_type. This should be optimized away by the compiler.
                 if constexpr (!std::same_as<T, unused_type>) {
@@ -184,7 +184,7 @@ struct extract_real
                 }
                 assert(frac_digits >= 0);
 
-            } else if (!got_a_number || !p.allow_trailing_dot) {
+            } else if (!got_a_number || !Policy::allow_trailing_dot) {
                 // We did not get a fraction. If we still haven't got a
                 // number and our policies do not allow a trailing dot,
                 // return no-match.
@@ -194,7 +194,7 @@ struct extract_real
 
             // Now, let's see if we can parse the exponent prefix
             e_pos = first;
-            e_hit = p.parse_exp(first, last);
+            e_hit = Policy::parse_exp(first, last);
 
         } else {
             // No dot and no number! Return no-match.
@@ -206,8 +206,8 @@ struct extract_real
             // If we must expect a dot and we didn't see an exponent
             // prefix, return no-match.
             e_pos = first;
-            e_hit = p.parse_exp(first, last);
-            if constexpr(p.expect_dot) {
+            e_hit = Policy::parse_exp(first, last);
+            if constexpr(Policy::expect_dot) {
                 if (!e_hit) {
                     first = save;
                     return false;
@@ -219,7 +219,7 @@ struct extract_real
             // We got the exponent prefix. Now we will try to parse the
             // actual exponent. It is an error if it is not there.
             int exp = 0;
-            if (p.parse_exp_n(first, last, exp)) {
+            if (Policy::parse_exp_n(first, last, exp)) {
                 // Got the exponent value. Scale the number by
                 // exp-frac_digits.
                 if (!extension::scale(exp, frac_digits, n)) {

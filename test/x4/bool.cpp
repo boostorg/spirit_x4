@@ -7,6 +7,8 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
 
+#define BOOST_SPIRIT_X4_UNICODE
+
 #include "test.hpp"
 
 #include <boost/spirit/x4/directive/no_case.hpp>
@@ -42,6 +44,12 @@ int main()
     using x4::true_;
     using x4::false_;
     using x4::no_case;
+
+    static_assert(x4::detail::BoolPolicy<x4::bool_policies<>, x4::char_encoding::standard>);
+    static_assert(x4::detail::BoolPolicy<x4::bool_policies<>, x4::char_encoding::standard_wide>);
+    static_assert(x4::detail::BoolPolicy<x4::bool_policies<>, x4::char_encoding::unicode>);
+
+    static_assert(x4::detail::BoolPolicy<backwards_bool_policies, x4::char_encoding::standard>);
 
     {
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(bool_);

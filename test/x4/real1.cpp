@@ -16,6 +16,18 @@
 
 int main()
 {
+    static_assert(x4::detail::RealPolicy<x4::real_policies<float>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_ureal_policies<float>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_real_policies<float>>);
+
+    static_assert(x4::detail::RealPolicy<x4::real_policies<double>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_ureal_policies<double>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_real_policies<double>>);
+
+    static_assert(x4::detail::RealPolicy<x4::real_policies<long double>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_ureal_policies<long double>>);
+    static_assert(x4::detail::RealPolicy<x4::strict_real_policies<long double>>);
+
     // 3-digit separated numbers
     {
         using x4::uint_parser;
