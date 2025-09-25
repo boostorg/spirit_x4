@@ -29,6 +29,7 @@ jobs:
         with:
           filters: |
             x4:
+              - '!**/Jamfile'
               - '.github/workflows/*.yml'
               - 'CMakeLists.txt'
               - 'test/CMakeLists.txt'
@@ -77,7 +78,7 @@ jobs:
           - name: MSVC
             toolset: msvc
             version: 2022
-            builder_additional_args: -consoleLoggerParameters:ForceConsoleColor
+            builder_additional_args: -- "-consoleLoggerParameters:ForceConsoleColor"
             executable: cl
 
         spirit_component: ${{ fromJSON(needs.changes.outputs.spirit_component) }}
@@ -218,7 +219,7 @@ jobs:
           .\bootstrap.bat --with-toolset=${{ matrix.compiler.toolset }}
           .\b2 -d0 headers
 
-      - name: Cache upstream Boost libraries
+      - name: Cache upstream Boost libraries (save)
         if: steps.cache-boost.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
@@ -227,12 +228,24 @@ jobs:
             ${{ steps.env-info.outputs.BOOST_ROOT }}
             !${{ steps.env-info.outputs.BOOST_ROOT }}/.git
 
-      - name: Cache CMake Dependencies
-        uses: actions/cache@v4
+      - name: Cache CMake Dependencies (restore)
         id: cache-deps
+        uses: actions/cache/restore@v4
         with:
           key: deps-${{ matrix.os.name }}-${{ matrix.os.version }}-${{ matrix.compiler.toolset }}-${{ matrix.compiler.version }}-${{ matrix.cpp_version.name }}-${{ matrix.build_type.name }}
           path: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4/build/_deps
+
+      # Adapt CMP0168; enable caching in CI
+      # https://cmake.org/cmake/help/latest/module/FetchContent.html#variable:FETCHCONTENT_UPDATES_DISCONNECTED
+      - name: Setup Cached CMake Dependencies
+        id: deps-info
+        shell: bash
+        run: |
+          if [ "${{ steps.cache-deps.outputs.cache-hit }}" = "true" ]; then
+            echo "BOOST_SPIRIT_X4_CMAKE_ARGS=-DFETCHCONTENT_FULLY_DISCONNECTED=ON" >> "$GITHUB_OUTPUT"
+          else
+            echo "BOOST_SPIRIT_X4_CMAKE_ARGS=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Configure
         env:
@@ -241,26 +254,26 @@ jobs:
         shell: bash
         run: |
           set -xe
-          cp -rp "${{ github.workspace }}" libs/spirit_x4
+          cp -rp "${{ github.workspace }}" libs/
           cd libs/spirit_x4
-          cmake -B build \
+          cmake ${{ steps.deps-info.outputs.BOOST_SPIRIT_X4_CMAKE_ARGS }} -B build \
             -DCMAKE_CXX_COMPILER=${{ matrix.compiler.executable }} \
             -DCMAKE_CXX_FLAGS="${{ matrix.compiler.cxxflags }}" \
             -DCMAKE_CXX_STANDARD=${{ matrix.cpp_version.number }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type.name }} \
             -S .
 
-      - name: Build Tests (Ubuntu)
-        if: matrix.os.name == 'ubuntu'
+      - name: Build Tests
         working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
         run: |
-          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }}
+          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }} ${{ matrix.compiler.builder_additional_args }}
 
-      - name: Build Tests (Windows)
-        if: matrix.os.name == 'windows'
-        working-directory: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4
-        run: |
-          cmake --build build --config ${{ matrix.build_type.name }} -j${{ env.BOOST_SPIRIT_X4_BUILD_JOBS }} -- "${{ matrix.compiler.builder_additional_args }}"
+      - name: Cache CMake Dependencies (save)
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ steps.cache-deps.outputs.cache-primary-key }}
+          path: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4/build/_deps
 
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         if: matrix.os.name == 'windows'
