@@ -74,7 +74,6 @@ TEST_CASE("rule2")
         }
         {
             char ch{};
-            auto f = [&](auto& ctx) { ch = _attr(ctx); };
             REQUIRE(parse("z", a, ch)); // attribute is given.
             CHECK(ch == 'z');
         }
@@ -86,7 +85,6 @@ TEST_CASE("rule2")
         }
         {
             char ch{};
-            auto f = [&](auto& ctx) { ch = _attr(ctx); };
             REQUIRE(parse("z", a, ch)); // attribute is given.
             CHECK(ch == 'z');
         }
