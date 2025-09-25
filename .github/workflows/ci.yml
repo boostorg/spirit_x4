@@ -227,6 +227,13 @@ jobs:
             ${{ steps.env-info.outputs.BOOST_ROOT }}
             !${{ steps.env-info.outputs.BOOST_ROOT }}/.git
 
+      - name: Cache CMake Dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          key: deps-${{ matrix.os.name }}-${{ matrix.os.version }}-${{ matrix.compiler.toolset }}-${{ matrix.compiler.version }}-${{ matrix.cpp_version.name }}-${{ matrix.build_type.name }}
+          path: ${{ steps.env-info.outputs.BOOST_ROOT }}/libs/spirit_x4/build/_deps
+
       - name: Configure
         env:
           BOOST_ROOT: ${{ steps.env-info.outputs.BOOST_ROOT }}
