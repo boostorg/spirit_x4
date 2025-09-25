@@ -36,7 +36,9 @@ function(x4_define_test test_name)
         x4_${test_name}_test
         PRIVATE Boost::spirit_x4 boost_spirit_x4_cxx_test
     )
-    add_test(NAME x4_${test_name}_test COMMAND x4_${test_name}_test)
+    add_test(
+        NAME x4_${test_name}_test
+        COMMAND x4_${test_name}_test --colour-mode=ansi)
 endfunction()
 
 function(x4_define_tests)
