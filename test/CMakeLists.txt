@@ -47,8 +47,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 set_target_properties(Catch2 PROPERTIES CXX_EXTENSIONS OFF)
-target_link_libraries(Catch2 PRIVATE boost_spirit_x4_cxx_external)
 target_compile_definitions(Catch2 PUBLIC DO_NOT_USE_WMAIN)
+target_link_libraries(Catch2 PRIVATE boost_spirit_x4_cxx_external)
+target_link_libraries(Catch2WithMain PRIVATE boost_spirit_x4_cxx_external)
 
 target_link_libraries(boost_spirit_x4_cxx_test INTERFACE Catch2::Catch2WithMain)
 
