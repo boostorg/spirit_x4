@@ -38,7 +38,8 @@ function(x4_define_test test_name)
     )
     add_test(
         NAME x4_${test_name}_test
-        COMMAND x4_${test_name}_test --colour-mode=ansi)
+        COMMAND x4_${test_name}_test --colour-mode=ansi
+    )
 endfunction()
 
 function(x4_define_tests)
