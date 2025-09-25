@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <string>
 
-int main()
+TEST_CASE("iterator_check")
 {
     using x4::raw;
     using x4::eps;
@@ -39,20 +39,16 @@ int main()
 
     {
         std::string str;
-        BOOST_TEST(parse(std::ranges::begin(rng), std::ranges::end(rng), +upper >> eoi, str));
-        BOOST_TEST(("ABCDE"==str));
+        REQUIRE(parse(std::ranges::begin(rng), std::ranges::end(rng), +upper >> eoi, str));
+        CHECK("ABCDE" == str);
     }
 
     {
         std::ranges::subrange<std::ranges::iterator_t<range_type>> str;
 
-        BOOST_TEST(parse(std::ranges::begin(rng), std::ranges::end(rng), raw[+upper >> eoi], str));
-        BOOST_TEST((std::ranges::equal(std::string("ABCDE"), str)));
+        REQUIRE(parse(std::ranges::begin(rng), std::ranges::end(rng), raw[+upper >> eoi], str));
+        CHECK(std::ranges::equal(std::string("ABCDE"), str));
     }
 
-    {
-        BOOST_TEST(parse(std::ranges::begin(rng), std::ranges::end(rng), (repeat(6)[upper] | repeat(5)[upper]) >> eoi));
-    }
-
-    return boost::report_errors();
+    CHECK(parse(std::ranges::begin(rng), std::ranges::end(rng), (repeat(6)[upper] | repeat(5)[upper]) >> eoi));
 }

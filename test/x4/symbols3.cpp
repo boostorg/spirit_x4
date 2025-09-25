@@ -44,9 +44,8 @@ int eval(roman const & c)
 
 } // anonymous
 
-int main()
+TEST_CASE("symbols3")
 {
-    namespace x4 = boost::spirit::x4;
     using x4::shared_symbols;
 
     {
@@ -70,23 +69,21 @@ int main()
         auto number = -hundreds >> -tens >> -ones;
 
         roman r;
-        BOOST_TEST(parse("CDXLII", number, r));
-        BOOST_TEST(eval(r) == 442);
+        REQUIRE(parse("CDXLII", number, r));
+        CHECK(eval(r) == 442);
     }
 
     {
         // construction from initializer-list without attribute
         shared_symbols<> foo = {"a1", "a2", "a3"};
-
-        BOOST_TEST(parse("a3", foo));
+        CHECK(parse("a3", foo));
     }
 
     {
         // assignment from initializer-list
         shared_symbols<> foo;
         foo = {"a1", "a2", "a3"};
-
-        BOOST_TEST(parse("a3", foo));
+        CHECK(parse("a3", foo));
     }
 
     {
@@ -94,9 +91,7 @@ int main()
         x4::shared_symbols_parser<x4::char_encoding::unicode, int> foo = {{U"a1", 1}, {U"a2", 2}, {U"a3", 3}};
 
         int r = 0;
-        BOOST_TEST(parse(U"a3", foo, r));
-        BOOST_TEST(r == 3);
+        REQUIRE(parse(U"a3", foo, r));
+        CHECK(r == 3);
     }
-
-    return boost::report_errors();
 }

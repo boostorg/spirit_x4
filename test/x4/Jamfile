@@ -58,74 +58,76 @@ rule compile-fail ( sources + : requirements * : target-name ? )
            : $(requirements) : $(target-name) ] ;
 }
 
-run parser.cpp ;
-run context.cpp ;
-run x3_rule_problem.cpp ;
+obj catch2 : catch_amalgamated.cpp ;
 
-run actions.cpp ;
-run alternative.cpp ;
-run and_predicate.cpp ;
-run attr.cpp ;
-run binary.cpp ;
-run bool.cpp ;
-run char.cpp ;
-run char_class.cpp ;
-run container_support.cpp ;
-run debug.cpp ;
-run difference.cpp ;
-run eoi.cpp ;
-run eol.cpp ;
-run eps.cpp ;
+run parser.cpp catch2 ;
+run context.cpp catch2 ;
+run x3_rule_problem.cpp catch2 ;
 
-run expect.cpp ;
+run actions.cpp catch2 ;
+run alternative.cpp catch2 ;
+run and_predicate.cpp catch2 ;
+run attr.cpp catch2 ;
+run binary.cpp catch2 ;
+run bool.cpp catch2 ;
+run char.cpp catch2 ;
+run char_class.cpp catch2 ;
+run container_support.cpp catch2 ;
+run debug.cpp catch2 ;
+run difference.cpp catch2 ;
+run eoi.cpp catch2 ;
+run eol.cpp catch2 ;
+run eps.cpp catch2 ;
 
-run extract_int.cpp ;
-run int.cpp ;
-run kleene.cpp ;
-run lexeme.cpp ;
-run lit.cpp ;
-run list.cpp ;
-run matches.cpp ;
-run no_case.cpp ;
-run no_skip.cpp ;
-run not_predicate.cpp ;
-run omit.cpp ;
-run optional.cpp ;
-run plus.cpp ;
-run with.cpp ;
+run expect.cpp catch2 ;
 
-run raw.cpp ;
-run real1.cpp ;
-run real2.cpp ;
-run real3.cpp ;
-run rule1.cpp ;
-run rule2.cpp ;
-run rule3.cpp ;
-run rule4.cpp ;
-run sequence.cpp ;
-run skip.cpp ;
-run symbols1.cpp ;
-run symbols2.cpp ;
-run symbols3.cpp ;
-run tst.cpp ;
+run extract_int.cpp catch2 ;
+run int.cpp catch2 ;
+run kleene.cpp catch2 ;
+run lexeme.cpp catch2 ;
+run lit.cpp catch2 ;
+run list.cpp catch2 ;
+run matches.cpp catch2 ;
+run no_case.cpp catch2 ;
+run no_skip.cpp catch2 ;
+run not_predicate.cpp catch2 ;
+run omit.cpp catch2 ;
+run optional.cpp catch2 ;
+run plus.cpp catch2 ;
+run with.cpp catch2 ;
 
-run uint.cpp ;
-run uint_radix.cpp ;
+run raw.cpp catch2 ;
+run real1.cpp catch2 ;
+run real2.cpp catch2 ;
+run real3.cpp catch2 ;
+run rule1.cpp catch2 ;
+run rule2.cpp catch2 ;
+run rule3.cpp catch2 ;
+run rule4.cpp catch2 ;
+run sequence.cpp catch2 ;
+run skip.cpp catch2 ;
+run symbols1.cpp catch2 ;
+run symbols2.cpp catch2 ;
+run symbols3.cpp catch2 ;
+run tst.cpp catch2 ;
 
-run confix.cpp ;
-run repeat.cpp ;
-run seek.cpp ;
+run uint.cpp catch2 ;
+run uint_radix.cpp catch2 ;
 
-run unused.cpp ;
-run attribute_type_check.cpp ;
-run fusion_map.cpp ;
-run error_handler.cpp ;
-run iterator_check.cpp ;
+run confix.cpp catch2 ;
+run repeat.cpp catch2 ;
+run seek.cpp catch2 ;
 
-run to_utf8.cpp ;
+run unused.cpp catch2 ;
+run attribute_type_check.cpp catch2 ;
+run fusion_map.cpp catch2 ;
+run error_handler.cpp catch2 ;
+run iterator_check.cpp catch2 ;
+
+run to_utf8.cpp catch2 ;
 
 obj rule_separate_tu_grammar : rule_separate_tu_grammar.cpp ;
-run rule_separate_tu.cpp rule_separate_tu_grammar ;
+run rule_separate_tu.cpp rule_separate_tu_grammar catch2 ;
 
 obj grammar_linker : grammar.cpp ;
-run grammar_linker.cpp grammar_linker ;
+run grammar_linker.cpp grammar_linker catch2 ;

@@ -52,7 +52,7 @@ struct my_attribute
 
     void access() const
     {
-        BOOST_TEST(alive);
+        CHECK(alive);
     }
     ~my_attribute()
     {
@@ -68,7 +68,7 @@ struct my_attribute
 
 } // anonymous
 
-int main()
+TEST_CASE("debug")
 {
     using namespace x4::standard;
     using x4::rule;
@@ -83,15 +83,15 @@ int main()
 
         {
             auto start = *(a | b | c);
-            BOOST_TEST(parse("abcabcacb", start));
+            CHECK(parse("abcabcacb", start));
         }
 
         {
             rule<class start> start("start");
             auto start_def = start = (a | b) >> (start | b);
 
-            BOOST_TEST(parse("aaaabababaaabbb", start_def));
-            BOOST_TEST(parse("aaaabababaaabba", start_def).is_partial_match());
+            CHECK(parse("aaaabababaaabbb", start_def));
+            CHECK(parse("aaaabababaaabba", start_def).is_partial_match());
         }
     }
 
@@ -104,15 +104,15 @@ int main()
 
         {
             auto start = *(a | b | c);
-            BOOST_TEST(parse(" a b c a b c a c b ", start, space));
+            CHECK(parse(" a b c a b c a c b ", start, space));
         }
 
         {
             rule<class start> start("start");
             auto start_def = start = (a | b) >> (start | b);
 
-            BOOST_TEST(parse(" a a a a b a b a b a a a b b b ", start_def, space));
-            BOOST_TEST(parse(" a a a a b a b a b a a a b b a ", start_def, space).is_partial_match());
+            CHECK(parse(" a a a a b a b a b a a a b b b ", start_def, space));
+            CHECK(parse(" a a a a b a b a b a a a b b a ", start_def, space).is_partial_match());
         }
     }
 
@@ -123,7 +123,7 @@ int main()
         rule<class start, std::vector<fs>> start("start");
         auto start_def = start = *(int_ >> alpha);
 
-        BOOST_TEST(parse("1 a 2 b 3 c", start_def, space));
+        CHECK(parse("1 a 2 b 3 c", start_def, space));
     }
 
     {
@@ -134,11 +134,11 @@ int main()
 
         auto parser = x4::with<x4::contexts::error_handler>(error_handler)[r_def];
 
-        BOOST_TEST( parse("(123,456)", parser));
-        BOOST_TEST(!parse("(abc,def)", parser));
-        BOOST_TEST(!parse("(123,456]", parser));
-        BOOST_TEST(!parse("(123;456)", parser));
-        BOOST_TEST(!parse("[123,456]", parser));
+        CHECK( parse("(123,456)", parser));
+        CHECK(!parse("(abc,def)", parser));
+        CHECK(!parse("(123,456]", parser));
+        CHECK(!parse("(123;456)", parser));
+        CHECK(!parse("[123,456]", parser));
     }
 
     {
@@ -148,8 +148,6 @@ int main()
 
         my_attribute attr;
 
-        BOOST_TEST(parse("a", b, attr));
+        CHECK(parse("a", b, attr));
     }
-
-    return boost::report_errors();
 }

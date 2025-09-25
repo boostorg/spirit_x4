@@ -102,16 +102,16 @@ void test_overflow_handling(char const* begin, char const* end, int i)
     int initial = Base - i % Base; // just a 'random' non-equal to i number
     T x { initial };
     char const* it = begin;
-    bool const r = x4::numeric::extract_int<T, Base, 1, MaxDigits>::call(it, end, x);
+    bool const ok = x4::numeric::extract_int<T, Base, 1, MaxDigits>::call(it, end, x);
 
     if (T::min <= i && i <= T::max) {
-        BOOST_TEST(r);
-        BOOST_TEST(it == end);
-        BOOST_TEST_EQ(x, i);
+        REQUIRE(ok);
+        CHECK(it == end);
+        CHECK(x == i);
 
-    } else if (MaxDigits == -1) { // TODO: Looks like a regression. See #430
-        BOOST_TEST(!r);
-        BOOST_TEST(it == begin);
+    } else if constexpr (MaxDigits == -1) { // TODO: Looks like a regression. See #430
+        REQUIRE(!ok);
+        CHECK(it == begin);
     }
 }
 
@@ -125,16 +125,16 @@ void test_unparsed_digits_are_not_consumed(char const* it, char const* end, int 
     auto len = end - it;
     int initial = Base - i % Base; // just a 'random' non-equal to i number
     T x { initial };
-    bool const r = x4::numeric::extract_int<T, Base, 1, 1>::call(it, end, x);
-    BOOST_TEST(r);
+    bool const ok = x4::numeric::extract_int<T, Base, 1, 1>::call(it, end, x);
+    REQUIRE(ok);
 
     if (-Base < i && i < Base) {
-        BOOST_TEST(it == end);
-        BOOST_TEST_EQ(x, i);
+        CHECK(it == end);
+        CHECK(x == i);
 
     } else {
-        BOOST_TEST_EQ(end - it, len - 1 - int(has_sign));
-        BOOST_TEST_EQ(x, i / Base);
+        CHECK(end - it == len - 1 - int(has_sign));
+        CHECK(x == i / Base);
     }
 }
 
@@ -151,7 +151,7 @@ void run_tests(char const* begin, char const* end, int i)
 
 } // anonymous
 
-int main()
+TEST_CASE("extract_int")
 {
     for (int i = -30; i <= 30; ++i) {
         char s[4];
@@ -165,6 +165,4 @@ int main()
         // (MinOrMax % Base) != 0
         run_tests<custom_int<-15, 15>, 10>(begin, end, i);
     }
-
-    return boost::report_errors();
 }

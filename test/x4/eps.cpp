@@ -11,35 +11,33 @@
 #include <boost/spirit/x4/auxiliary/eps.hpp>
 #include <boost/spirit/x4/operator/not_predicate.hpp>
 
-int main()
+TEST_CASE("eps")
 {
     using x4::eps;
 
     {
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(eps);
-        BOOST_TEST(parse("", eps));
-        BOOST_TEST(parse("xxx", eps).is_partial_match());
-        BOOST_TEST(!parse("", !eps));
+        CHECK(parse("", eps));
+        CHECK(parse("xxx", eps).is_partial_match());
+        CHECK(!parse("", !eps));
     }
-
-    {   // test non-lazy semantic predicate
+    {
+        // test non-lazy semantic predicate
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(eps(true));
-        BOOST_TEST(parse("", eps(true)));
-        BOOST_TEST(!parse("", eps(false)));
-        BOOST_TEST(parse("", !eps(false)));
+        CHECK(parse("", eps(true)));
+        CHECK(!parse("", eps(false)));
+        CHECK(parse("", !eps(false)));
     }
+    {
+        // test lazy semantic predicate
 
-    {   // test lazy semantic predicate
-
-        auto true_ = [] { return true; };
-        auto false_ = [] { return false; };
+        constexpr auto true_fn = [] { return true; };
+        constexpr auto false_Fn = [] { return false; };
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(eps(std::true_type{}));
-        BOOST_TEST(parse("", eps(true_)));
-        BOOST_TEST(!parse("", eps(false_)));
-        BOOST_TEST(parse("", !eps(false_)));
+        CHECK(parse("", eps(true_fn)));
+        CHECK(!parse("", eps(false_Fn)));
+        CHECK(parse("", !eps(false_Fn)));
     }
-
-    return boost::report_errors();
 }

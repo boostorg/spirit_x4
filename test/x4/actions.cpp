@@ -14,11 +14,7 @@
 #include <boost/spirit/x4/operator/alternative.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 
-#include <functional>
-
-#include <cstring>
-
-int main()
+TEST_CASE("action")
 {
     using x4::int_;
 
@@ -27,8 +23,7 @@ int main()
     {
         int x = 0;
         auto const fun_action = [&](auto& ctx) { x += x4::_attr(ctx); };
-        char const *s1 = "{42}", *e1 = s1 + std::strlen(s1);
-        BOOST_TEST(parse(s1, e1, '{' >> int_[fun_action] >> '}'));
+        CHECK(parse("{42}", '{' >> int_[fun_action] >> '}'));
     }
     {
         auto const fail = [](auto& ctx) { x4::_pass(ctx) = false; };
@@ -39,8 +34,8 @@ int main()
             next = x4::_attr(ctx);
         };
 
-        BOOST_TEST(parse(input, x4::int_[fail] | x4::digit[setnext], x4::space).is_partial_match());
-        BOOST_TEST(next == '1');
+        REQUIRE(parse(input, x4::int_[fail] | x4::digit[setnext], x4::space).is_partial_match());
+        CHECK(next == '1');
     }
 
     {
@@ -50,9 +45,7 @@ int main()
         spirit_test::stationary st { 0 };
         static_assert(x4::X4Attribute<spirit_test::stationary>);
 
-        BOOST_TEST(parse("{42}", p[([]{})], st));
-        BOOST_TEST_EQ(st.val, 42);
+        REQUIRE(parse("{42}", p[([]{})], st));
+        CHECK(st.val == 42);
     }
-
-    return boost::report_errors();
 }

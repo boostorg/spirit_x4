@@ -11,16 +11,12 @@
 #include <boost/spirit/x4/numeric/int.hpp>
 #include <boost/spirit/x4/operator/and_predicate.hpp>
 
-int main()
+TEST_CASE("and_predicate")
 {
     using x4::int_;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(&int_);
 
-    {
-        BOOST_TEST(parse("1234", &int_).is_partial_match());
-        BOOST_TEST(!parse("abcd", &int_));
-    }
-
-    return boost::report_errors();
+    CHECK(parse("1234", &int_).is_partial_match());
+    CHECK(!parse("abcd", &int_));
 }

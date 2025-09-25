@@ -17,54 +17,52 @@
 
 #include <string>
 
-int main()
+TEST_CASE("difference")
 {
     using x4::standard::char_;
     using x4::standard::space;
     using x4::lit;
+    using x4::_attr;
+
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ - 'a');
 
     // Basic tests
     {
-        BOOST_TEST(parse("b", char_ - 'a'));
-        BOOST_TEST(!parse("a", char_ - 'a'));
-        BOOST_TEST(parse("/* abcdefghijk */", "/*" >> *(char_ - "*/") >> "*/"));
-        BOOST_TEST(!parse("switch", lit("switch") - "switch"));
+        CHECK(parse("b", char_ - 'a'));
+        CHECK(!parse("a", char_ - 'a'));
+        CHECK(parse("/* abcdefghijk */", "/*" >> *(char_ - "*/") >> "*/"));
+        CHECK(!parse("switch", lit("switch") - "switch"));
     }
 
     // Test attributes
     {
-        char attr;
-        BOOST_TEST(parse("xg", (char_ - 'g') >> 'g', attr));
-        BOOST_TEST(attr == 'x');
+        char attr{};
+        REQUIRE(parse("xg", (char_ - 'g') >> 'g', attr));
+        CHECK(attr == 'x');
     }
 
     // Test handling of container attributes
     {
         std::string attr;
-        BOOST_TEST(parse("abcdefg", *(char_ - 'g') >> 'g', attr));
-        BOOST_TEST(attr == "abcdef");
+        REQUIRE(parse("abcdefg", *(char_ - 'g') >> 'g', attr));
+        CHECK(attr == "abcdef");
     }
 
     {
-        using x4::_attr;
-
         std::string s;
-
-        BOOST_TEST(parse(
+        REQUIRE(parse(
             "/*abcdefghijk*/",
             "/*" >> *(char_ - "*/")[([&](auto& ctx){ s += _attr(ctx); })] >> "*/"
         ));
-        BOOST_TEST(s == "abcdefghijk");
-        s.clear();
-
-        BOOST_TEST(parse(
+        CHECK(s == "abcdefghijk");
+    }
+    {
+        std::string s;
+        REQUIRE(parse(
             "    /*abcdefghijk*/",
             "/*" >> *(char_ - "*/")[([&](auto& ctx){ s += _attr(ctx); })] >> "*/",
             space
         ));
-        BOOST_TEST(s == "abcdefghijk");
+        CHECK(s == "abcdefghijk");
     }
-
-    return boost::report_errors();
 }

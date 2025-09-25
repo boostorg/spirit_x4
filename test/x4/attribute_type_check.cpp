@@ -42,29 +42,28 @@ struct checked_attr_parser : x4::attr_parser<Value>
 };
 
 template<class Expected, class Value>
-static inline checked_attr_parser<std::decay_t<Value>, Expected>
+checked_attr_parser<std::decay_t<Value>, Expected>
 checked_attr(Value&& value) { return { std::forward<Value>(value) }; }
 
 // instantiate our type checker
 // (checks attribute value just to be sure we are ok)
 template<class Value, class Expr>
-static void test_expr(Value const& v, Expr&& expr)
+void test_expr(Value const& v, Expr&& expr)
 {
-    char const* it = "";
     Value r;
-    BOOST_TEST((x4::parse(it, it, std::forward<Expr>(expr), r)));
-    BOOST_TEST((r == v));
+    REQUIRE(x4::parse("", std::forward<Expr>(expr), r));
+    CHECK((r == v));
 }
 
 template<class Expr, class Attr>
-static void gen_sequence(Attr const& attribute, Expr&& expr)
+void gen_sequence(Attr const& attribute, Expr&& expr)
 {
     test_expr(attribute, expr);
     test_expr(attribute, expr >> x4::eps);
 }
 
 template<class Expected, class... ExpectedTail, class Attr, class Expr, class Value, class... Tail>
-static void gen_sequence(Attr const& attribute, Expr&& expr, Value const& v, Tail const&... tail)
+void gen_sequence(Attr const& attribute, Expr&& expr, Value const& v, Tail const&... tail)
 {
     gen_sequence<ExpectedTail...>(attribute, expr >> checked_attr<Expected>(v), tail...);
     gen_sequence<ExpectedTail...>(attribute, expr >> x4::eps >> checked_attr<Expected>(v), tail...);
@@ -72,14 +71,14 @@ static void gen_sequence(Attr const& attribute, Expr&& expr, Value const& v, Tai
 }
 
 template<class Expected, class... ExpectedTail, class Attr, class Value, class... Tail>
-static void gen_sequence_tests(Attr const& attribute, Value const& v, Tail const&... tail)
+void gen_sequence_tests(Attr const& attribute, Value const& v, Tail const&... tail)
 {
     gen_sequence<ExpectedTail...>(attribute, checked_attr<Expected>(v), tail...);
     gen_sequence<ExpectedTail...>(attribute, x4::eps >> checked_attr<Expected>(v), tail...);
 }
 
 template<class Expected, class Value>
-static void gen_single_item_tests(Value const& v)
+void gen_single_item_tests(Value const& v)
 {
     Expected attribute(v);
     gen_sequence(attribute, checked_attr<Expected>(v));
@@ -87,14 +86,14 @@ static void gen_single_item_tests(Value const& v)
 }
 
 template<class Expected, class... ExpectedTail, class Value, class... Tail>
-static void gen_single_item_tests(Value const& v, Tail const&... tail)
+void gen_single_item_tests(Value const& v, Tail const&... tail)
 {
     gen_single_item_tests<Expected>(v);
     gen_single_item_tests<ExpectedTail...>(tail...);
 }
 
 template<class... Expected, class... Values>
-static void gen_tests(Values const&... values)
+void gen_tests(Values const&... values)
 {
     gen_single_item_tests<Expected...>(values...);
 
@@ -121,8 +120,7 @@ void make_test(Attributes const&... attrs)
 
 } // anonymous
 
-int main()
+TEST_CASE("attribute_type_check")
 {
     make_test<int, std::string>(123, "hello");
-    return boost::report_errors();
 }

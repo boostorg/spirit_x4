@@ -99,7 +99,7 @@ BOOST_SPIRIT_X4_INSTANTIATE(decltype(grammar), iterator_type, x4::parse_context_
 
 } // check_recursive_tuple
 
-int main()
+TEST_CASE("rule3")
 {
     using namespace x4::standard;
     using x4::rule;
@@ -115,8 +115,8 @@ int main()
 
         auto rdef = rule_type{} = alpha [f()];
 
-        BOOST_TEST(parse("abcdef", +rdef, s));
-        BOOST_TEST(s == "abcdef");
+        REQUIRE(parse("abcdef", +rdef, s));
+        CHECK(s == "abcdef");
     }
 
     // synth attribute value-init
@@ -129,8 +129,8 @@ int main()
                 _val(ctx) += _attr(ctx);
             })];
 
-        BOOST_TEST(parse("abcdef", +rdef, s));
-        BOOST_TEST(s == "abcdef");
+        REQUIRE(parse("abcdef", +rdef, s));
+        CHECK(s == "abcdef");
     }
 
     {
@@ -140,28 +140,26 @@ int main()
                 "Attr must not be synthesized"
             );
         })];
-        BOOST_TEST(parse("", r));
+        CHECK(parse("", r));
     }
 
     // ensure no unneeded synthesization, copying and moving occurred
     {
         spirit_test::stationary st { 0 };
-        BOOST_TEST(parse("{42}", check_stationary::b, st));
-        BOOST_TEST_EQ(st.val, 42);
+        REQUIRE(parse("{42}", check_stationary::b, st));
+        CHECK(st.val == 42);
     }
 
     {
         using namespace check_recursive;
         node_t v;
-        BOOST_TEST(parse("[4,2]", grammar, v));
-        BOOST_TEST((node_t{std::vector<node_t>{{4}, {2}}} == v));
+        REQUIRE(parse("[4,2]", grammar, v));
+        CHECK((node_t{std::vector<node_t>{{4}, {2}}} == v));
     }
     {
         using namespace check_recursive_scoped;
         node_t v;
-        BOOST_TEST(parse("[4,2]", grammar, v));
-        BOOST_TEST((node_t{std::vector<node_t>{{4}, {2}}} == v));
+        REQUIRE(parse("[4,2]", grammar, v));
+        CHECK((node_t{std::vector<node_t>{{4}, {2}}} == v));
     }
-
-    return boost::report_errors();
 }

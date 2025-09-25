@@ -12,7 +12,7 @@
 #include <vector>
 #include <set>
 
-int main()
+TEST_CASE("x3_rule_problem")
 {
     enum class strong_int : int {};
 
@@ -22,17 +22,17 @@ int main()
         using Se = It;
         using Rule = x4::rule<struct my_rule, int>;
 
-        static_assert(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, int>);
-        static_assert(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long long>);
+        STATIC_CHECK(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, int>);
+        STATIC_CHECK(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long long>);
 
         // Narrowing conversion
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, short>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, unsigned long long>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, double>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, short>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, unsigned long long>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, double>);
 
         // Not permitted as of now, but can be relaxed in the future
-        static_assert(!x4::detail::RuleAttrTransformable<strong_int, int>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, strong_int>);
+        STATIC_CHECK(!x4::detail::RuleAttrTransformable<strong_int, int>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, strong_int>);
     }
 
     // Primitive (double)
@@ -41,14 +41,14 @@ int main()
         using Se = It;
         using Rule = x4::rule<struct my_rule, double>;
 
-        static_assert(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, double>);
-        static_assert(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long double>);
+        STATIC_CHECK(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, double>);
+        STATIC_CHECK(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long double>);
 
         // Narrowing conversion
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, int>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long long>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, unsigned long long>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, float>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, int>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, long long>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, unsigned long long>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, float>);
     }
 
     // "The Spirit X3 rule problem" in Boost.Parser's documentation
@@ -59,10 +59,8 @@ int main()
         using Se = It;
         using Rule = x4::rule<struct my_rule, std::vector<int>>;
 
-        static_assert(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::vector<int>>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::set<int>>);
-        static_assert(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::vector<strong_int>>);
+        STATIC_CHECK(x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::vector<int>>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::set<int>>);
+        STATIC_CHECK(!x4::is_parsable_v<Rule, It, Se, x4::parse_context_for<It, Se>, std::vector<strong_int>>);
     }
-
-    return boost::report_errors();
 }

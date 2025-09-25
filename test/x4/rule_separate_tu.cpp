@@ -16,55 +16,53 @@ namespace {
 
 namespace sem_act {
 
-namespace x4 = boost::spirit::x4;
-
 constexpr auto nop = [](auto const&) {};
 
-x4::rule<class used_attr1_r, int> used_attr1;
-auto const used_attr1_def = used_attr::grammar[nop];
+constexpr x4::rule<class used_attr1_r, int> used_attr1 = "used_attr1";
+constexpr auto used_attr1_def = used_attr::grammar[nop];
 BOOST_SPIRIT_X4_DEFINE(used_attr1);
 
-x4::rule<class used_attr2_r, int> used_attr2;
-auto const used_attr2_def = unused_attr::grammar[nop];
+constexpr x4::rule<class used_attr2_r, int> used_attr2 = "used_attr2";
+constexpr auto used_attr2_def = unused_attr::grammar[nop];
 BOOST_SPIRIT_X4_DEFINE(used_attr2);
 
-x4::rule<class unused_attr1_r> unused_attr1;
-auto const unused_attr1_def = used_attr::grammar[nop];
+constexpr x4::rule<class unused_attr1_r> unused_attr1 = "unused_attr1";
+constexpr auto unused_attr1_def = used_attr::grammar[nop];
 BOOST_SPIRIT_X4_DEFINE(unused_attr1);
 
-x4::rule<class unused_attr2_r> unused_attr2;
-auto const unused_attr2_def = unused_attr::grammar[nop];
+constexpr x4::rule<class unused_attr2_r> unused_attr2 = "unused_attr2";
+constexpr auto unused_attr2_def = unused_attr::grammar[nop];
 BOOST_SPIRIT_X4_DEFINE(unused_attr2);
 
 } // sem_act
 
 } // anonymous
 
-int main()
+TEST_CASE("rule_separate_tu")
 {
     {
-        BOOST_TEST(parse("*", unused_attr::skipper));
-        BOOST_TEST(parse("#", unused_attr::skipper2));
-        BOOST_TEST(parse("==", unused_attr::grammar));
-        BOOST_TEST(parse("*=*=", unused_attr::grammar, unused_attr::skipper));
-        BOOST_TEST(parse("#=#=", unused_attr::grammar, unused_attr::skipper2));
+        CHECK(parse("*", unused_attr::skipper));
+        CHECK(parse("#", unused_attr::skipper2));
+        CHECK(parse("==", unused_attr::grammar));
+        CHECK(parse("*=*=", unused_attr::grammar, unused_attr::skipper));
+        CHECK(parse("#=#=", unused_attr::grammar, unused_attr::skipper2));
     }
 
     {
-        long i = 0;
+        long l = 0;
         static_assert(
-            !std::same_as<decltype(i), used_attr::grammar_type::attribute_type>,
-            "ensure we have instantiated the rule with a different attribute type"
+            !std::same_as<decltype(l), used_attr::grammar_type::attribute_type>,
+            "Ensure we have instantiated the rule with a different attribute type"
         );
-        BOOST_TEST(parse("123", used_attr::grammar, i));
-        BOOST_TEST_EQ(i, 123);
-        BOOST_TEST(parse(" 42", used_attr::grammar, used_attr::skipper, i));
-        BOOST_TEST_EQ(i, 42);
+        REQUIRE(parse("123", used_attr::grammar, l));
+        CHECK(l == 123);
+        REQUIRE(parse(" 42", used_attr::grammar, used_attr::skipper, l));
+        CHECK(l == 42);
     }
 
     {
         long i = 0;
-        BOOST_TEST(parse("123", sem_act::used_attr1, i));
+        CHECK(parse("123", sem_act::used_attr1, i));
     }
     {
         using Context = x4::context<
@@ -88,14 +86,12 @@ int main()
         >);
 
         long i = 0;
-        BOOST_TEST(parse("===", sem_act::used_attr2, i));
+        CHECK(parse("===", sem_act::used_attr2, i));
     }
     {
-        BOOST_TEST(parse("123", sem_act::unused_attr1));
+        CHECK(parse("123", sem_act::unused_attr1));
     }
     {
-        BOOST_TEST(parse("===", sem_act::unused_attr2));
+        CHECK(parse("===", sem_act::unused_attr2));
     }
-
-    return boost::report_errors();
 }

@@ -19,7 +19,7 @@
 #include <concepts>
 #include <type_traits>
 
-int main()
+TEST_CASE("char_class")
 {
     {
         std::string_view sv;
@@ -52,29 +52,29 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(space);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(blank);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(upper);
-        BOOST_TEST(parse("1", alnum));
-        BOOST_TEST(!parse(" ", alnum));
-        BOOST_TEST(!parse("1", alpha));
-        BOOST_TEST(parse("x", alpha));
-        BOOST_TEST(parse(" ", blank));
-        BOOST_TEST(!parse("x", blank));
-        BOOST_TEST(parse("1", digit));
-        BOOST_TEST(!parse("x", digit));
-        BOOST_TEST(parse("a", lower));
-        BOOST_TEST(!parse("A", lower));
-        BOOST_TEST(parse("!", punct));
-        BOOST_TEST(!parse("x", punct));
-        BOOST_TEST(parse(" ", space));
-        BOOST_TEST(parse("\n", space));
-        BOOST_TEST(parse("\r", space));
-        BOOST_TEST(parse("\t", space));
-        BOOST_TEST(parse("A", upper));
-        BOOST_TEST(!parse("a", upper));
-        BOOST_TEST(parse("A", xdigit));
-        BOOST_TEST(parse("0", xdigit));
-        BOOST_TEST(parse("f", xdigit));
-        BOOST_TEST(!parse("g", xdigit));
-        BOOST_TEST(!parse("\xF1", print));
+        CHECK(parse("1", alnum));
+        CHECK(!parse(" ", alnum));
+        CHECK(!parse("1", alpha));
+        CHECK(parse("x", alpha));
+        CHECK(parse(" ", blank));
+        CHECK(!parse("x", blank));
+        CHECK(parse("1", digit));
+        CHECK(!parse("x", digit));
+        CHECK(parse("a", lower));
+        CHECK(!parse("A", lower));
+        CHECK(parse("!", punct));
+        CHECK(!parse("x", punct));
+        CHECK(parse(" ", space));
+        CHECK(parse("\n", space));
+        CHECK(parse("\r", space));
+        CHECK(parse("\t", space));
+        CHECK(parse("A", upper));
+        CHECK(!parse("a", upper));
+        CHECK(parse("A", xdigit));
+        CHECK(parse("0", xdigit));
+        CHECK(parse("f", xdigit));
+        CHECK(!parse("g", xdigit));
+        CHECK(!parse("\xF1", print));
     }
 
     {
@@ -91,28 +91,28 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(space);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(blank);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(upper);
-        BOOST_TEST(parse(L"1", alnum));
-        BOOST_TEST(!parse(L" ", alnum));
-        BOOST_TEST(!parse(L"1", alpha));
-        BOOST_TEST(parse(L"x", alpha));
-        BOOST_TEST(parse(L" ", blank));
-        BOOST_TEST(!parse(L"x", blank));
-        BOOST_TEST(parse(L"1", digit));
-        BOOST_TEST(!parse(L"x", digit));
-        BOOST_TEST(parse(L"a", lower));
-        BOOST_TEST(!parse(L"A", lower));
-        BOOST_TEST(parse(L"!", punct));
-        BOOST_TEST(!parse(L"x", punct));
-        BOOST_TEST(parse(L" ", space));
-        BOOST_TEST(parse(L"\n", space));
-        BOOST_TEST(parse(L"\r", space));
-        BOOST_TEST(parse(L"\t", space));
-        BOOST_TEST(parse(L"A", upper));
-        BOOST_TEST(!parse(L"a", upper));
-        BOOST_TEST(parse(L"A", xdigit));
-        BOOST_TEST(parse(L"0", xdigit));
-        BOOST_TEST(parse(L"f", xdigit));
-        BOOST_TEST(!parse(L"g", xdigit));
+        CHECK(parse(L"1", alnum));
+        CHECK(!parse(L" ", alnum));
+        CHECK(!parse(L"1", alpha));
+        CHECK(parse(L"x", alpha));
+        CHECK(parse(L" ", blank));
+        CHECK(!parse(L"x", blank));
+        CHECK(parse(L"1", digit));
+        CHECK(!parse(L"x", digit));
+        CHECK(parse(L"a", lower));
+        CHECK(!parse(L"A", lower));
+        CHECK(parse(L"!", punct));
+        CHECK(!parse(L"x", punct));
+        CHECK(parse(L" ", space));
+        CHECK(parse(L"\n", space));
+        CHECK(parse(L"\r", space));
+        CHECK(parse(L"\t", space));
+        CHECK(parse(L"A", upper));
+        CHECK(!parse(L"a", upper));
+        CHECK(parse(L"A", xdigit));
+        CHECK(parse(L"0", xdigit));
+        CHECK(parse(L"f", xdigit));
+        CHECK(!parse(L"g", xdigit));
     }
 
     {
@@ -129,34 +129,34 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(space);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(blank);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(upper);
-        BOOST_TEST(parse(U"1", alnum));
-        BOOST_TEST(!parse(U" ", alnum));
-        BOOST_TEST(!parse(U"1", alpha));
-        BOOST_TEST(parse(U"x", alpha));
-        BOOST_TEST(parse(U" ", blank));
-        BOOST_TEST(!parse(U"x", blank));
-        BOOST_TEST(parse(U"1", digit));
-        BOOST_TEST(!parse(U"x", digit));
-        BOOST_TEST(parse(U"a", lower));
-        BOOST_TEST(!parse(U"A", lower));
-        BOOST_TEST(parse(U"!", punct));
-        BOOST_TEST(!parse(U"x", punct));
-        BOOST_TEST(parse(U" ", space));
-        BOOST_TEST(parse(U"\n", space));
-        BOOST_TEST(parse(U"\r", space));
-        BOOST_TEST(parse(U"\t", space));
-        BOOST_TEST(parse(U"A", upper));
-        BOOST_TEST(!parse(U"a", upper));
-        BOOST_TEST(parse(U"A", xdigit));
-        BOOST_TEST(parse(U"0", xdigit));
-        BOOST_TEST(parse(U"f", xdigit));
-        BOOST_TEST(!parse(U"g", xdigit));
+        CHECK(parse(U"1", alnum));
+        CHECK(!parse(U" ", alnum));
+        CHECK(!parse(U"1", alpha));
+        CHECK(parse(U"x", alpha));
+        CHECK(parse(U" ", blank));
+        CHECK(!parse(U"x", blank));
+        CHECK(parse(U"1", digit));
+        CHECK(!parse(U"x", digit));
+        CHECK(parse(U"a", lower));
+        CHECK(!parse(U"A", lower));
+        CHECK(parse(U"!", punct));
+        CHECK(!parse(U"x", punct));
+        CHECK(parse(U" ", space));
+        CHECK(parse(U"\n", space));
+        CHECK(parse(U"\r", space));
+        CHECK(parse(U"\t", space));
+        CHECK(parse(U"A", upper));
+        CHECK(!parse(U"a", upper));
+        CHECK(parse(U"A", xdigit));
+        CHECK(parse(U"0", xdigit));
+        CHECK(parse(U"f", xdigit));
+        CHECK(!parse(U"g", xdigit));
 
-        BOOST_TEST(parse(U"A", alphabetic));
-        BOOST_TEST(parse(U"9", decimal_number));
-        BOOST_TEST(parse(U"\u2800", braille));
-        BOOST_TEST(!parse(U" ", braille));
-        BOOST_TEST(parse(U" ", ~braille));
+        CHECK(parse(U"A", alphabetic));
+        CHECK(parse(U"9", decimal_number));
+        CHECK(parse(U"\u2800", braille));
+        CHECK(!parse(U" ", braille));
+        CHECK(parse(U" ", ~braille));
         // TODO: Add more unicode tests
     }
 
@@ -166,13 +166,13 @@ int main()
         constexpr auto invalid_unicode = char32_t{0x7FFFFFFF};
         auto const input = std::u32string_view(&invalid_unicode, 1);
 
-        BOOST_TEST(!parse(input, char_));
+        CHECK(!parse(input, char_));
 
         // force unicode category lookup
         // related issue: https://github.com/boostorg/spirit/issues/524
-        BOOST_TEST(!parse(input, alpha));
-        BOOST_TEST(!parse(input, upper));
-        BOOST_TEST(!parse(input, lower));
+        CHECK(!parse(input, alpha));
+        CHECK(!parse(input, upper));
+        CHECK(!parse(input, lower));
     }
 
     {   // test attribute extraction
@@ -181,16 +181,16 @@ int main()
         static_assert(std::same_as<attribute_of_t<std::remove_const_t<decltype(x4::standard::alpha)>, unused_type>, char>);
 
         int attr = 0;
-        BOOST_TEST(parse("a", alpha, attr));
-        BOOST_TEST(attr == 'a');
+        REQUIRE(parse("a", alpha, attr));
+        CHECK(attr == 'a');
     }
 
     {   // test attribute extraction
         using x4::standard::alpha;
         using x4::standard::space;
         char attr = 0;
-        BOOST_TEST(parse("     a", alpha, space, attr));
-        BOOST_TEST(attr == 'a');
+        REQUIRE(parse("     a", alpha, space, attr));
+        CHECK(attr == 'a');
     }
 
     {   // test action
@@ -199,11 +199,9 @@ int main()
         char ch = '\0';
         auto f = [&](auto& ctx){ ch = _attr(ctx); };
 
-        BOOST_TEST(parse("x", alnum[f]));
-        BOOST_TEST(ch == 'x');
-        BOOST_TEST(parse("   A", alnum[f], space));
-        BOOST_TEST(ch == 'A');
+        REQUIRE(parse("x", alnum[f]));
+        CHECK(ch == 'x');
+        REQUIRE(parse("   A", alnum[f], space));
+        CHECK(ch == 'A');
     }
-
-    return boost::report_errors();
 }

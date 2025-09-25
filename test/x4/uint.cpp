@@ -55,7 +55,7 @@ struct custom_uint
 
 } // anonymous
 
-int main()
+TEST_CASE("uint")
 {
     // unsigned tests
     {
@@ -64,16 +64,16 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(uint_);
 
-        BOOST_TEST(parse("123456", uint_));
-        BOOST_TEST(parse("123456", uint_, u));
-        BOOST_TEST(u == 123456);
+        CHECK(parse("123456", uint_));
+        REQUIRE(parse("123456", uint_, u));
+        CHECK(u == 123456);
 
-        BOOST_TEST(parse(max_unsigned, uint_));
-        BOOST_TEST(parse(max_unsigned, uint_, u));
-        BOOST_TEST(u == UINT_MAX);
+        CHECK(parse(max_unsigned, uint_));
+        REQUIRE(parse(max_unsigned, uint_, u));
+        CHECK(u == UINT_MAX);
 
-        BOOST_TEST(!parse(unsigned_overflow, uint_));
-        BOOST_TEST(!parse(unsigned_overflow, uint_, u));
+        CHECK(!parse(unsigned_overflow, uint_));
+        CHECK(!parse(unsigned_overflow, uint_, u));
     }
 
     // binary tests
@@ -83,16 +83,16 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(bin);
 
-        BOOST_TEST(parse("11111110", bin));
-        BOOST_TEST(parse("11111110", bin, u));
-        BOOST_TEST(u == 0xFE);
+        CHECK(parse("11111110", bin));
+        REQUIRE(parse("11111110", bin, u));
+        CHECK(u == 0xFE);
 
-        BOOST_TEST(parse(max_binary, bin));
-        BOOST_TEST(parse(max_binary, bin, u));
-        BOOST_TEST(u == UINT_MAX);
+        CHECK(parse(max_binary, bin));
+        REQUIRE(parse(max_binary, bin, u));
+        CHECK(u == UINT_MAX);
 
-        BOOST_TEST(!parse(binary_overflow, bin));
-        BOOST_TEST(!parse(binary_overflow, bin, u));
+        CHECK(!parse(binary_overflow, bin));
+        CHECK(!parse(binary_overflow, bin, u));
     }
 
     // octal tests
@@ -102,16 +102,16 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(oct);
 
-        BOOST_TEST(parse("12545674515", oct));
-        BOOST_TEST(parse("12545674515", oct, u));
-        BOOST_TEST(u == 012545674515);
+        CHECK(parse("12545674515", oct));
+        REQUIRE(parse("12545674515", oct, u));
+        CHECK(u == 012545674515);
 
-        BOOST_TEST(parse(max_octal, oct));
-        BOOST_TEST(parse(max_octal, oct, u));
-        BOOST_TEST(u == UINT_MAX);
+        CHECK(parse(max_octal, oct));
+        REQUIRE(parse(max_octal, oct, u));
+        CHECK(u == UINT_MAX);
 
-        BOOST_TEST(!parse(octal_overflow, oct));
-        BOOST_TEST(!parse(octal_overflow, oct, u));
+        CHECK(!parse(octal_overflow, oct));
+        CHECK(!parse(octal_overflow, oct, u));
     }
 
     // hex tests
@@ -121,20 +121,20 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(hex);
 
-        BOOST_TEST(parse("95BC8DF", hex));
-        BOOST_TEST(parse("95BC8DF", hex, u));
-        BOOST_TEST(u == 0x95BC8DF);
+        CHECK(parse("95BC8DF", hex));
+        REQUIRE(parse("95BC8DF", hex, u));
+        CHECK(u == 0x95BC8DF);
 
-        BOOST_TEST(parse("abcdef12", hex));
-        BOOST_TEST(parse("abcdef12", hex, u));
-        BOOST_TEST(u == 0xabcdef12);
+        CHECK(parse("abcdef12", hex));
+        REQUIRE(parse("abcdef12", hex, u));
+        CHECK(u == 0xabcdef12);
 
-        BOOST_TEST(parse(max_hex, hex));
-        BOOST_TEST(parse(max_hex, hex, u));
-        BOOST_TEST(u == UINT_MAX);
+        CHECK(parse(max_hex, hex));
+        REQUIRE(parse(max_hex, hex, u));
+        CHECK(u == UINT_MAX);
 
-        BOOST_TEST(!parse(hex_overflow, hex));
-        BOOST_TEST(!parse(hex_overflow, hex, u));
+        CHECK(!parse(hex_overflow, hex));
+        CHECK(!parse(hex_overflow, hex, u));
     }
 
     // limited fieldwidth
@@ -145,32 +145,33 @@ int main()
             constexpr uint_parser<unsigned, 10, 1, 3> uint3{};
             BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(uint3);
 
-            BOOST_TEST(parse("123456", uint3).is_partial_match());
+            CHECK(parse("123456", uint3).is_partial_match());
 
             unsigned u = 0;
-            BOOST_TEST(parse("123456", uint3, u).is_partial_match());
-            BOOST_TEST(u == 123);
+            REQUIRE(parse("123456", uint3, u).is_partial_match());
+            CHECK(u == 123);
         }
         {
             constexpr uint_parser<unsigned, 10, 2, 4> uint4{};
             BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(uint4);
 
-            BOOST_TEST(parse("123456", uint4).is_partial_match());
+            CHECK(parse("123456", uint4).is_partial_match());
 
             {
                 unsigned u = 0;
-                BOOST_TEST(parse("123456", uint4, u).is_partial_match());
-                BOOST_TEST(u == 1234);
+                REQUIRE(parse("123456", uint4, u).is_partial_match());
+                CHECK(u == 1234);
             }
 
-            BOOST_TEST(!parse("1", uint4));
+            CHECK(!parse("1", uint4));
             {
                 unsigned u = 0;
-                BOOST_TEST(!parse("1", uint4, u));
+                CHECK(!parse("1", uint4, u));
             }
             {
                 unsigned u = 0;
-                BOOST_TEST(parse("014567", uint4, u).is_partial_match() && u == 145);
+                REQUIRE(parse("014567", uint4, u).is_partial_match());
+                CHECK(u == 145);
             }
         }
 
@@ -180,12 +181,16 @@ int main()
         {
             unsigned u = 1;
             auto const res = parse("0000000", uint_exact4, u);
-            BOOST_TEST(res.is_partial_match() && res.remainder.size() == 3 && u == 0);
+            REQUIRE(res.is_partial_match());
+            REQUIRE(res.remainder.size() == 3);
+            CHECK(u == 0);
         }
         {
             unsigned u = 0;
             auto const res = parse("0001400", uint_exact4, u);
-            BOOST_TEST(res.is_partial_match() && res.remainder.size() == 3 && u == 1);
+            REQUIRE(res.is_partial_match());
+            REQUIRE(res.remainder.size() == 3);
+            CHECK(u == 1);
         }
     }
 
@@ -198,10 +203,10 @@ int main()
         int n = 0;
         auto f = [&](auto& ctx){ n = _attr(ctx); };
 
-        BOOST_TEST(parse("123", uint_[f]));
-        BOOST_TEST(n == 123);
-        BOOST_TEST(parse("   456", uint_[f], space));
-        BOOST_TEST(n == 456);
+        REQUIRE(parse("123", uint_[f]));
+        CHECK(n == 123);
+        REQUIRE(parse("   456", uint_[f], space));
+        CHECK(n == 456);
     }
 
     // Check overflow is parse error
@@ -209,47 +214,55 @@ int main()
         x4::uint_parser<std::uint8_t> uint8_;
         std::uint8_t u8 = 0;
 
-        BOOST_TEST(!parse("999", uint8_, u8));
-        BOOST_TEST(!parse("256", uint8_, u8));
-        BOOST_TEST(parse("255", uint8_, u8));
-
+        CHECK(!parse("999", uint8_, u8));
+        CHECK(!parse("256", uint8_, u8));
+        CHECK(parse("255", uint8_, u8));
+    }
+    {
         x4::uint_parser<std::uint16_t> uint16_;
         std::uint16_t u16 = 0;
 
-        BOOST_TEST(!parse("99999", uint16_, u16));
-        BOOST_TEST(!parse("65536", uint16_, u16));
-        BOOST_TEST(parse("65535", uint16_, u16));
-
+        CHECK(!parse("99999", uint16_, u16));
+        CHECK(!parse("65536", uint16_, u16));
+        CHECK(parse("65535", uint16_, u16));
+    }
+    {
         x4::uint_parser<std::uint32_t> uint32_;
         std::uint32_t u32 = 0;
 
-        BOOST_TEST(!parse("9999999999", uint32_, u32));
-        BOOST_TEST(!parse("4294967296", uint32_, u32));
-        BOOST_TEST(parse("4294967295", uint32_, u32));
-
+        CHECK(!parse("9999999999", uint32_, u32));
+        CHECK(!parse("4294967296", uint32_, u32));
+        CHECK(parse("4294967295", uint32_, u32));
+    }
+    {
         x4::uint_parser<std::int8_t> u_int8_;
+        std::uint8_t u8 = 0;
 
-        BOOST_TEST(!parse("999", u_int8_, u8));
-        BOOST_TEST(!parse("-1", u_int8_, u8));
-        BOOST_TEST(!parse("128", u_int8_, u8));
-        BOOST_TEST(parse("127", u_int8_, u8));
-        BOOST_TEST(parse("0", u_int8_, u8));
-
+        CHECK(!parse("999", u_int8_, u8));
+        CHECK(!parse("-1", u_int8_, u8));
+        CHECK(!parse("128", u_int8_, u8));
+        CHECK(parse("127", u_int8_, u8));
+        CHECK(parse("0", u_int8_, u8));
+    }
+    {
         x4::uint_parser<std::int16_t> u_int16_;
+        std::uint16_t u16 = 0;
 
-        BOOST_TEST(!parse("99999", u_int16_, u16));
-        BOOST_TEST(!parse("-1", u_int16_, u16));
-        BOOST_TEST(!parse("32768", u_int16_, u16));
-        BOOST_TEST(parse("32767", u_int16_, u16));
-        BOOST_TEST(parse("0", u_int16_, u16));
-
+        CHECK(!parse("99999", u_int16_, u16));
+        CHECK(!parse("-1", u_int16_, u16));
+        CHECK(!parse("32768", u_int16_, u16));
+        CHECK(parse("32767", u_int16_, u16));
+        CHECK(parse("0", u_int16_, u16));
+    }
+    {
         x4::uint_parser<std::int32_t> u_int32_;
+        std::uint32_t u32 = 0;
 
-        BOOST_TEST(!parse("9999999999", u_int32_, u32));
-        BOOST_TEST(!parse("-1", u_int32_, u32));
-        BOOST_TEST(!parse("2147483648", u_int32_, u32));
-        BOOST_TEST(parse("2147483647", u_int32_, u32));
-        BOOST_TEST(parse("0", u_int32_, u32));
+        CHECK(!parse("9999999999", u_int32_, u32));
+        CHECK(!parse("-1", u_int32_, u32));
+        CHECK(!parse("2147483648", u_int32_, u32));
+        CHECK(parse("2147483647", u_int32_, u32));
+        CHECK(parse("0", u_int32_, u32));
     }
 
     // custom uint tests
@@ -258,10 +271,8 @@ int main()
         using x4::uint_parser;
         custom_uint u{};
 
-        BOOST_TEST(parse("123456", uint_, u));
+        CHECK(parse("123456", uint_, u));
         uint_parser<custom_uint, 10, 1, 2> uint2;
-        BOOST_TEST(parse("12", uint2, u));
+        CHECK(parse("12", uint2, u));
     }
-
-    return boost::report_errors();
 }

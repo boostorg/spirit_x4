@@ -43,7 +43,7 @@ struct push_back_container<x_attr>
 
 } // x4::traits
 
-int main()
+TEST_CASE("plus")
 {
     using x4::char_;
     using x4::alpha;
@@ -59,58 +59,59 @@ int main()
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(+char_);
 
-    {
-        BOOST_TEST(parse("aaaaaaaa", +char_));
-        BOOST_TEST(parse("a", +char_));
-        BOOST_TEST(!parse("", +char_));
-        BOOST_TEST(parse("aaaaaaaa", +alpha));
-        BOOST_TEST(!parse("aaaaaaaa", +upper));
-    }
+    CHECK(parse("aaaaaaaa", +char_));
+    CHECK(parse("a", +char_));
+    CHECK(!parse("", +char_));
+    CHECK(parse("aaaaaaaa", +alpha));
+    CHECK(!parse("aaaaaaaa", +upper));
 
-    {
-        BOOST_TEST(parse(" a a aaa aa", +char_, space));
-        BOOST_TEST(parse("12345 678 9 ", +digit, space));
-    }
+    CHECK(parse(" a a aaa aa", +char_, space));
+    CHECK(parse("12345 678 9 ", +digit, space));
 
-    {
-        BOOST_TEST(parse("aBcdeFGH", no_case[+char_]));
-        BOOST_TEST(parse("a B cde FGH  ", no_case[+char_], space));
-    }
+    CHECK(parse("aBcdeFGH", no_case[+char_]));
+    CHECK(parse("a B cde FGH  ", no_case[+char_], space));
 
     {
         std::vector<int> v;
-        BOOST_TEST(parse("123 456 789 10", +int_, space, v) && 4 == v.size() &&
-            v[0] == 123 && v[1] == 456 && v[2] == 789 &&  v[3] == 10);
+        REQUIRE(parse("123 456 789", +int_, space, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 123);
+        CHECK(v[1] == 456);
+        CHECK(v[2] == 789);
     }
 
     {
         std::vector<std::string> v;
-        BOOST_TEST(parse("a b c d", +lexeme[+alpha], space, v) && 4 == v.size() &&
-            v[0] == "a" && v[1] == "b" && v[2] == "c" &&  v[3] == "d");
+        REQUIRE(parse("a b c", +lexeme[+alpha], space, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == "a");
+        CHECK(v[1] == "b");
+        CHECK(v[2] == "c");
     }
+
+    CHECK(parse("Kim Kim Kim", +lit("Kim"), space));
 
     {
-        BOOST_TEST(parse("Kim Kim Kim", +lit("Kim"), space));
-    }
-
-    // TODO
-    /*{
-        // The following 2 tests show that omit does not inhibit explicit attributes
-
         std::string s;
-        BOOST_TEST(parse("bbbb", omit[+char_('b')], s) && s == "bbbb");
-
-        s.clear();
-        BOOST_TEST(parse("b b b b ", omit[+char_('b')], s, space) && s == "bbbb");
-    }*/
+        REQUIRE(parse("bbbb", omit[+char_('b')], s));
+        CHECK(s == "");
+    }
+    {
+        std::string s;
+        REQUIRE(parse("b b b b ", omit[+char_('b')], space, s));
+        CHECK(s == "");
+    }
 
     {
         // actions
         std::string v;
         auto f = [&](auto& ctx){ v = _attr(ctx); };
 
-        BOOST_TEST(parse("bbbb", (+char_)[f]) && 4 == v.size() &&
-            v[0] == 'b' && v[1] == 'b' && v[2] == 'b' &&  v[3] == 'b');
+        REQUIRE(parse("bbb", (+char_)[f]));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'b');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'b');
     }
 
     {
@@ -118,8 +119,11 @@ int main()
         std::vector<int> v;
         auto f = [&](auto& ctx){ v = _attr(ctx); };
 
-        BOOST_TEST(parse("1 2 3", (+int_)[f], space) && 3 == v.size() &&
-            v[0] == 1 && v[1] == 2 && v[2] == 3);
+        REQUIRE(parse("1 2 3", (+int_)[f], space));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 1);
+        CHECK(v[1] == 2);
+        CHECK(v[2] == 3);
     }
 
     // attribute customization
@@ -131,16 +135,14 @@ int main()
     // single-element fusion vector tests
     {
         boost::fusion::vector<std::string> fs;
-        BOOST_TEST(parse("12345", +char_, fs)); // ok
-        BOOST_TEST(boost::fusion::at_c<0>(fs) == "12345");
+        REQUIRE(parse("12345", +char_, fs));
+        CHECK(boost::fusion::at_c<0>(fs) == "12345");
     }
 
     {
         // test move only types
         std::vector<spirit_test::move_only> v;
-        BOOST_TEST(parse("sss", +spirit_test::synth_move_only, v));
-        BOOST_TEST_EQ(v.size(), 3);
+        REQUIRE(parse("sss", +spirit_test::synth_move_only, v));
+        CHECK(v.size() == 3);
     }
-
-    return boost::report_errors();
 }

@@ -28,7 +28,7 @@
 
 struct adata
 {
-    int a;
+    int a = 0;
     std::optional<int> b;
 };
 
@@ -43,13 +43,13 @@ struct test_attribute_type
     template<class Context>
     void operator()(Context& ctx) const
     {
-        BOOST_TEST(typeid(decltype(x4::_attr(ctx))).name() == typeid(std::optional<int>).name());
+        CHECK(typeid(decltype(x4::_attr(ctx))).name() == typeid(std::optional<int>).name());
     }
 };
 
 } // anonymous
 
-int main()
+TEST_CASE("optional")
 {
     static_assert(x4::traits::is_optional_v<std::optional<int>>);
 
@@ -60,17 +60,30 @@ int main()
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(-int_);
 
+    CHECK(parse("1234", -int_));
+    CHECK(parse("abcd", -int_).is_partial_match());
+
     {
-        BOOST_TEST(parse("1234", -int_));
-        BOOST_TEST(parse("abcd", -int_).is_partial_match());
-
         std::optional<int> n;
-        BOOST_TEST(parse("", -int_, n)) && BOOST_TEST(!n);
-        BOOST_TEST(parse("123", -int_, n)) && BOOST_TEST(n) && BOOST_TEST_EQ(*n, 123);
-
+        REQUIRE(parse("", -int_, n));
+        CHECK(!n.has_value());
+    }
+    {
+        std::optional<int> n;
+        REQUIRE(parse("123", -int_, n));
+        REQUIRE(n.has_value());
+        CHECK(*n == 123);
+    }
+    {
         std::optional<std::string> s;
-        BOOST_TEST(parse("", -+char_, s)) && BOOST_TEST(!s);
-        BOOST_TEST(parse("abc", -+char_, s)) && BOOST_TEST(s) && BOOST_TEST_EQ(*s, "abc");
+        REQUIRE(parse("", -+char_, s));
+        REQUIRE(!s.has_value());
+    }
+    {
+        std::optional<std::string> s;
+        REQUIRE(parse("abc", -+char_, s));
+        REQUIRE(s.has_value());
+        CHECK(*s == "abc");
     }
 
     {
@@ -78,62 +91,67 @@ int main()
         using boost::fusion::at_c;
         using boost::fusion::vector;
 
-        vector<char, char> v;
-        BOOST_TEST(parse("a1234c", char_ >> -omit[int_] >> char_, v));
-        BOOST_TEST((at_c<0>(v) == 'a'));
-        BOOST_TEST((at_c<1>(v) == 'c'));
+        {
+            vector<char, char> v;
+            REQUIRE(parse("a1234c", char_ >> -omit[int_] >> char_, v));
+            CHECK(at_c<0>(v) == 'a');
+            CHECK(at_c<1>(v) == 'c');
+        }
+        {
+            vector<char, char> v;
+            REQUIRE(parse("a1234c", char_ >> omit[-int_] >> char_, v));
+            CHECK(at_c<0>(v) == 'a');
+            CHECK(at_c<1>(v) == 'c');
+        }
 
-        v = boost::fusion::vector<char, char>();
-        BOOST_TEST(parse("a1234c", char_ >> omit[-int_] >> char_, v));
-        BOOST_TEST((at_c<0>(v) == 'a'));
-        BOOST_TEST((at_c<1>(v) == 'c'));
-
-        char ch;
-        BOOST_TEST(parse(",c", -(',' >> char_), ch));
-        BOOST_TEST((ch == 'c'));
+        {
+            char ch{};
+            REQUIRE(parse(",c", -(',' >> char_), ch));
+            CHECK(ch == 'c');
+        }
     }
 
     {
         // test action
         std::optional<int> n = 0;
-        BOOST_TEST(parse("1234", (-int_)[test_attribute_type()], n));
-        BOOST_TEST((*n == 1234));
+        REQUIRE(parse("1234", (-int_)[test_attribute_type()], n));
+        CHECK(*n == 1234);
     }
 
     {
         std::string s;
-        BOOST_TEST(parse("abc", char_ >> -(char_ >> char_), s));
-        BOOST_TEST(s == "abc");
+        REQUIRE(parse("abc", char_ >> -(char_ >> char_), s));
+        CHECK(s == "abc");
     }
 
     {
+        std::optional<int> n;
+        auto f = [&](auto& ctx) { n = _attr(ctx); };
+        CHECK(parse("abcd", (-int_)[f]).is_partial_match());
+        CHECK(!n.has_value());
+    }
+    {
         std::optional<int> n = 0;
         auto f = [&](auto& ctx){ n = _attr(ctx); };
-
-        BOOST_TEST(parse("1234", (-int_)[f]));
-        BOOST_TEST(*n == 1234);
-
-        n = std::optional<int>();
-        BOOST_TEST(parse("abcd", (-int_)[f]).is_partial_match());
-        BOOST_TEST(!n);
+        REQUIRE(parse("1234", (-int_)[f]));
+        CHECK(*n == 1234);
     }
 
     {
         std::vector<adata> v;
-        BOOST_TEST(parse("a 1 2 a 2", *('a' >> int_ >> -int_), char_(' '), v));
-        BOOST_TEST(
-            2 == v.size() &&
-            1 == v[0].a && v[0].b && 2 == *(v[0].b) &&
-            2 == v[1].a && !v[1].b
-        );
+        REQUIRE(parse("a 1 2 a 2", *('a' >> int_ >> -int_), char_(' '), v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0].a == 1);
+        REQUIRE(v[0].b.has_value());
+        CHECK(*v[0].b == 2);
+        CHECK(v[1].a == 2);
+        CHECK(!v[1].b.has_value());
     }
 
     {
         // test move only types
         std::optional<spirit_test::move_only> o;
-        BOOST_TEST(parse("s", -spirit_test::synth_move_only, o));
-        BOOST_TEST(o);
+        REQUIRE(parse("s", -spirit_test::synth_move_only, o));
+        CHECK(o.has_value());
     }
-
-    return boost::report_errors();
 }

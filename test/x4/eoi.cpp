@@ -10,22 +10,13 @@
 
 #include <boost/spirit/x4/auxiliary/eoi.hpp>
 
-int main()
+TEST_CASE("eoi")
 {
-    namespace x4 = boost::spirit::x4;
     using x4::eoi;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(eoi);
 
-    {
-        BOOST_TEST(parse("", eoi));
-        BOOST_TEST(!(parse("x", eoi)));
-    }
-
-    {
-        BOOST_TEST(x4::what(eoi) == "eoi");
-    }
-
-    return boost::report_errors();
+    CHECK(parse("", eoi));
+    CHECK(!(parse("x", eoi)));
+    CHECK(x4::what(eoi) == "eoi");
 }
-

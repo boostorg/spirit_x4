@@ -54,7 +54,7 @@ constexpr auto value_equals = int_[([](auto& ctx) {
 
 } // anonymous
 
-int main()
+TEST_CASE("with")
 {
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(with<my_tag>(0)['x']);
 
@@ -67,40 +67,40 @@ int main()
     {
         {
             int i = 42;
-            BOOST_TEST(parse("42", with<my_tag>(i)[value_equals<int&>]));
+            CHECK(parse("42", with<my_tag>(i)[value_equals<int&>]));
         }
         {
             int const i = 42;
-            BOOST_TEST(parse("42", with<my_tag>(i)[value_equals<int const&>]));
+            CHECK(parse("42", with<my_tag>(i)[value_equals<int const&>]));
         }
         {
             int i = 42;
-            BOOST_TEST(parse("42", with<my_tag>(std::move(i))[value_equals<int&>]));
+            CHECK(parse("42", with<my_tag>(std::move(i))[value_equals<int&>]));
         }
         {
             int const i = 42;
-            BOOST_TEST(parse("42", with<my_tag>(std::move(i))[value_equals<int const&>]));
+            CHECK(parse("42", with<my_tag>(std::move(i))[value_equals<int const&>]));
         }
 
         {
             int i = 42;
             auto with_gen = with<my_tag>(i);
-            BOOST_TEST(parse("42", with_gen[value_equals<int&>]));
+            CHECK(parse("42", with_gen[value_equals<int&>]));
         }
         {
             int const i = 42;
             auto with_gen = with<my_tag>(i);
-            BOOST_TEST(parse("42", with_gen[value_equals<int const&>]));
+            CHECK(parse("42", with_gen[value_equals<int const&>]));
         }
         {
             int i = 42;
             auto with_gen = with<my_tag>(std::move(i));
-            BOOST_TEST(parse("42", with_gen[value_equals<int&>]));
+            CHECK(parse("42", with_gen[value_equals<int&>]));
         }
         {
             int const i = 42;
             auto with_gen = with<my_tag>(std::move(i));
-            BOOST_TEST(parse("42", with_gen[value_equals<int const&>]));
+            CHECK(parse("42", with_gen[value_equals<int const&>]));
         }
 
         // lvalue `move_only`
@@ -134,9 +134,9 @@ int main()
 
         auto start = with<my_tag>(std::ref(val))[r];
 
-        BOOST_TEST(parse("(123,456)", start));
-        BOOST_TEST(!parse("(abc,def)", start));
-        BOOST_TEST(val == 2);
+        REQUIRE(parse("(123,456)", start));
+        REQUIRE(!parse("(abc,def)", start));
+        CHECK(val == 2);
     }
 
     {
@@ -145,8 +145,8 @@ int main()
         auto const r = int_[([](auto& ctx){
             x4::get<my_tag>(ctx) += x4::_attr(ctx);
         })];
-        BOOST_TEST(parse("123,456", with<my_tag>(val)[r % ',']));
-        BOOST_TEST(579 == val);
+        REQUIRE(parse("123,456", with<my_tag>(val)[r % ',']));
+        CHECK(val == 579);
     }
 
     {
@@ -159,8 +159,8 @@ int main()
                 x4::_val(ctx) = x4::get<my_tag>(ctx);
             })];
         int attr = 0;
-        BOOST_TEST(parse("(1,2,3)", with<my_tag>(100)[r2], attr));
-        BOOST_TEST(106 == attr);
+        REQUIRE(parse("(1,2,3)", with<my_tag>(100)[r2], attr));
+        CHECK(attr == 106);
     }
 
     {
@@ -182,22 +182,23 @@ int main()
         };
         auto const r = rule<struct my_rule_class2, int>() = int_[f];
 
-        int attr = 0;
-        int const cval = 10;
-        BOOST_TEST(parse("5", with<my_tag>(cval)[r], attr));
-        BOOST_TEST(15 == attr); // x4::get returns const ref to cval
-
-        attr = 0;
-        int val = 10;
-        BOOST_TEST(parse("5", with<my_tag>(val)[r], attr));
-        BOOST_TEST(105 == attr); // x4::get returns ref to val
-
-        attr = 0;
-
-        BOOST_TEST(parse("5", with<my_tag>(10)[r], attr));
-        // x4::get returns ref to member variable of with_directive
-        BOOST_TEST(105 == attr);
+        {
+            int attr = 0;
+            int const cval = 10;
+            REQUIRE(parse("5", with<my_tag>(cval)[r], attr));
+            CHECK(attr == 15); // x4::get returns const ref to cval
+        }
+        {
+            int attr = 0;
+            int val = 10;
+            REQUIRE(parse("5", with<my_tag>(val)[r], attr));
+            CHECK(attr == 105); // x4::get returns ref to val
+        }
+        {
+            int attr = 0;
+            REQUIRE(parse("5", with<my_tag>(10)[r], attr));
+            // x4::get returns ref to member variable of with_directive
+            CHECK(attr == 105);
+        }
     }
-
-    return boost::report_errors();
 }

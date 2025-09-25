@@ -40,7 +40,7 @@ BOOST_FUSION_ADAPT_ASSOC_STRUCT(
     (std::string, key2, class key2_attr)
 )
 
-int main()
+TEST_CASE("fusion_map")
 {
     using x4::lit;
     using x4::attr;
@@ -55,14 +55,14 @@ int main()
 
         {
            auto attr_ =  fusion::make_map<key1_attr>(std::string());
-           BOOST_TEST(parse("key1=ABC", kv1, attr_));
-           BOOST_TEST(fusion::at_key<key1_attr>(attr_) == "ABC");
+           REQUIRE(parse("key1=ABC", kv1, attr_));
+           CHECK(fusion::at_key<key1_attr>(attr_) == "ABC");
         }
         {
            AdaptedStruct attr_;
-           BOOST_TEST(parse("key1=ABC", kv1, attr_));
-           BOOST_TEST(attr_.key1 == "ABC");
-           BOOST_TEST(attr_.key2 == "");
+           REQUIRE(parse("key1=ABC", kv1, attr_));
+           CHECK(attr_.key1 == "ABC");
+           CHECK(attr_.key2 == "");
         }
     }
     {   // case when parser handling fusion assoc sequence
@@ -71,9 +71,9 @@ int main()
         constexpr auto kv1 = key1 >> lit("=") >> +~char_(';');
 
         AdaptedStruct attr_;
-        BOOST_TEST(parse("key1=ABC", eps >>  (kv1 % ';') , attr_));
-        BOOST_TEST(attr_.key1 == "ABC");
-        BOOST_TEST(attr_.key2 == "");
+        REQUIRE(parse("key1=ABC", eps >>  (kv1 % ';') , attr_));
+        CHECK(attr_.key1 == "ABC");
+        CHECK(attr_.key2 == "");
     }
     {
         // parsing repeated sequence directly into fusion map (overwrite)
@@ -83,13 +83,13 @@ int main()
         {
             auto attr_ =  fusion::make_map<key1_attr>(std::string());
             constexpr auto parser = kv1 % ';';
-            BOOST_TEST(parse("key1=ABC;key1=XYZ", parser, attr_));
-            BOOST_TEST(fusion::at_key<key1_attr>(attr_) == "XYZ");
+            REQUIRE(parse("key1=ABC;key1=XYZ", parser, attr_));
+            CHECK(fusion::at_key<key1_attr>(attr_) == "XYZ");
         }
         {
             AdaptedStruct attr_;
-            BOOST_TEST(parse("key1=ABC;key1=XYZ", kv1 % ';', attr_));
-            BOOST_TEST(attr_.key1 == "XYZ");
+            REQUIRE(parse("key1=ABC;key1=XYZ", kv1 % ';', attr_));
+            CHECK(attr_.key1 == "XYZ");
         }
     }
 
@@ -100,8 +100,8 @@ int main()
         auto const kv1 = key1 >> lit("=") >> +char_;
         auto attr_ =  fusion::make_map<key1_attr>(std::vector<std::string>());
 
-        BOOST_TEST(parse("key1=ABC;key1=XYZ", kv1 % ";", attr_));
-        BOOST_TEST(fusion::at_key<key1_attr>(attr_) == {"ABC","XYZ"});
+        CHECK(parse("key1=ABC;key1=XYZ", kv1 % ";", attr_));
+        CHECK(fusion::at_key<key1_attr>(attr_) == {"ABC","XYZ"});
         */
     }
 
@@ -114,9 +114,9 @@ int main()
         constexpr auto kv2 = key2 >> lit("=") >> +~char_(';');
 
         auto attr_ =  fusion::make_map<key1_attr, key2_attr>(std::string(),std::string());
-        BOOST_TEST(parse("key2=XYZ;key1=ABC", (kv1|kv2) % ';', attr_));
-        BOOST_TEST(fusion::at_key<key1_attr>(attr_) == "ABC");
-        BOOST_TEST(fusion::at_key<key2_attr>(attr_) == "XYZ");
+        REQUIRE(parse("key2=XYZ;key1=ABC", (kv1|kv2) % ';', attr_));
+        CHECK(fusion::at_key<key1_attr>(attr_) == "ABC");
+        CHECK(fusion::at_key<key2_attr>(attr_) == "XYZ");
     }
 
     {
@@ -129,17 +129,15 @@ int main()
 
         {
             auto attr_ =  fusion::make_map<key1_attr,key2_attr>(std::string(),std::string());
-            BOOST_TEST(parse("key1=ABC;key2=XYZ", pair % ';', attr_));
-            BOOST_TEST(fusion::at_key<key1_attr>(attr_) == "ABC");
-            BOOST_TEST(fusion::at_key<key2_attr>(attr_) == "XYZ");
+            REQUIRE(parse("key1=ABC;key2=XYZ", pair % ';', attr_));
+            CHECK(fusion::at_key<key1_attr>(attr_) == "ABC");
+            CHECK(fusion::at_key<key2_attr>(attr_) == "XYZ");
         }
         {
             AdaptedStruct attr_;
-            BOOST_TEST(parse("key1=ABC;key2=XYZ", pair % ';', attr_));
-            BOOST_TEST(fusion::at_key<key1_attr>(attr_) == "ABC");
-            BOOST_TEST(fusion::at_key<key2_attr>(attr_) == "XYZ");
+            REQUIRE(parse("key1=ABC;key2=XYZ", pair % ';', attr_));
+            CHECK(fusion::at_key<key1_attr>(attr_) == "ABC");
+            CHECK(fusion::at_key<key2_attr>(attr_) == "XYZ");
         }
     }
-
-    return boost::report_errors();
 }

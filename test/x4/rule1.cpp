@@ -16,10 +16,7 @@
 #include <boost/spirit/x4/operator/sequence.hpp>
 #include <boost/spirit/x4/operator/kleene.hpp>
 
-#include <string>
-#include <cstring>
-
-int main()
+TEST_CASE("rule1")
 {
     using namespace x4::standard;
     using x4::rule;
@@ -49,18 +46,15 @@ int main()
         constexpr auto c = lit('c');
         constexpr rule<class r_> r("rule");
 
-        {
-            constexpr auto start = r = *(a | b | c);
-            BOOST_TEST(parse("abcabcacb", start));
-        }
+        CHECK(parse("abcabcacb", *(a | b | c)));
 
         {
             constexpr auto start = r = (a | b) >> (r | b);
-            BOOST_TEST(parse("aaaabababaaabbb", start));
-            BOOST_TEST(parse("aaaabababaaabba", start).is_partial_match());
+            CHECK(parse("aaaabababaaabbb", start));
+            CHECK(parse("aaaabababaaabba", start).is_partial_match());
 
             // ignore the skipper!
-            BOOST_TEST(parse("aaaabababaaabba", start, space).is_partial_match());
+            CHECK(parse("aaaabababaaabba", start, space).is_partial_match());
         }
     }
 
@@ -72,15 +66,12 @@ int main()
         constexpr auto c = lit('c');
         constexpr rule<class r_> r("rule");
 
-        {
-            constexpr auto start = r = *(a | b | c);
-            BOOST_TEST(parse(" a b c a b c a c b ", start, space));
-        }
+        CHECK(parse(" a b c a b c a c b ", *(a | b | c), space));
 
         {
             constexpr auto start = r = (a | b) >> (r | b);
-            BOOST_TEST(parse(" a a a a b a b a b a a a b b b ", start, space));
-            BOOST_TEST(parse(" a a a a b a b a b a a a b b a ", start, space).is_partial_match());
+            CHECK(parse(" a a a a b a b a b a a a b b b ", start, space));
+            CHECK(parse(" a a a a b a b a b a a a b b a ", start, space).is_partial_match());
         }
     }
 
@@ -95,21 +86,21 @@ int main()
             constexpr auto start = rule<class start_>("start") = *(a | b) >> c;
 
             auto const res = parse(" a b a a b b a c ... ", start, space, root_skipper_flag::dont_post_skip);
-            BOOST_TEST(res.ok && res.remainder.size() == 5);
+            REQUIRE(res.ok);
+            CHECK(res.remainder.size() == 5);
         }
 
         {
             constexpr rule<class start_> start("start");
             constexpr auto p = start = (a | b) >> (start | c);
 
-            BOOST_TEST(parse(" a a a a b a b a b a a a b b b c ", p, space, root_skipper_flag::do_post_skip));
+            CHECK(parse(" a a a a b a b a b a a a b b b c ", p, space, root_skipper_flag::do_post_skip));
 
             {
                 auto const res = parse(" a a a a b a b a b a a a b b b c ", p, space, root_skipper_flag::dont_post_skip);
-                BOOST_TEST(res.ok && res.remainder.size() == 1);
+                REQUIRE(res.ok);
+                CHECK(res.remainder.size() == 1);
             }
         }
     }
-
-    return boost::report_errors();
 }

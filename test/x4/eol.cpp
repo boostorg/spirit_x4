@@ -10,24 +10,16 @@
 
 #include <boost/spirit/x4/auxiliary/eol.hpp>
 
-int main()
+TEST_CASE("eol")
 {
-    namespace x4 = boost::spirit::x4;
     using x4::eol;
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(eol);
 
-    {
-        BOOST_TEST(parse("\r\n", eol));
-        BOOST_TEST(parse("\r", eol));
-        BOOST_TEST(parse("\n", eol));
-        BOOST_TEST(!parse("\n\r", eol));
-        BOOST_TEST(!parse("", eol));
-    }
-
-    {
-        BOOST_TEST(x4::what(eol) == "eol");
-    }
-
-    return boost::report_errors();
+    CHECK(parse("\r\n", eol));
+    CHECK(parse("\r", eol));
+    CHECK(parse("\n", eol));
+    CHECK(!parse("\n\r", eol));
+    CHECK(!parse("", eol));
+    CHECK(x4::what(eol) == "eol");
 }

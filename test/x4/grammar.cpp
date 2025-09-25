@@ -11,11 +11,11 @@
 
 #include <boost/spirit/x4/numeric/int.hpp>
 
-auto const grammar_def = x4::int_;
+constexpr auto grammar_def = x4::int_;
 
 BOOST_SPIRIT_X4_DEFINE(grammar)
 BOOST_SPIRIT_X4_INSTANTIATE(
     grammar_type,
-    char const*,
-    x4::parse_context_for<char const*>
+    std::string_view::const_iterator,
+    x4::parse_context_for<std::string_view::const_iterator>
 )

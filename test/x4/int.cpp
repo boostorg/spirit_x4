@@ -65,166 +65,176 @@ struct custom_int
 
 } // anonymous
 
-int main()
+TEST_CASE("int")
 {
+    using x4::short_;
+    using x4::int_;
+    using x4::long_;
+    using x4::long_long;
+    using x4::int8;
+    using x4::_attr;
+    using x4::int_parser;
+
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int8);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(short_);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int_);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(long_);
+    BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(long_long);
+
     // signed integer tests
     {
-        using x4::int_;
-        int i;
+        int i = 0;
+        CHECK(parse("123456", int_));
+        REQUIRE(parse("123456", int_, i));
+        CHECK(i == 123456);
+    }
+    {
+        int i = 0;
+        CHECK(parse("+123456", int_));
+        REQUIRE(parse("+123456", int_, i));
+        CHECK(i == 123456);
+    }
+    {
+        int i = 0;
+        CHECK(parse("-123456", int_));
+        REQUIRE(parse("-123456", int_, i));
+        CHECK(i == -123456);
+    }
+    {
+        int i = 0;
+        CHECK(parse(max_int, int_));
+        REQUIRE(parse(max_int, int_, i));
+        CHECK(i == INT_MAX);
+    }
+    {
+        int i = 0;
+        CHECK(parse(min_int, int_));
+        REQUIRE(parse(min_int, int_, i));
+        CHECK(i == INT_MIN);
+    }
+    {
+        int i = 0;
+        CHECK(!parse(int_overflow, int_));
+        CHECK(!parse(int_overflow, int_, i));
+        CHECK(!parse(int_underflow, int_));
+        CHECK(!parse(int_underflow, int_, i));
 
-        BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int_);
+        CHECK(!parse("-", int_));
+        CHECK(!parse("-", int_, i));
 
-        BOOST_TEST(parse("123456", int_));
-        BOOST_TEST(parse("123456", int_, i));
-        BOOST_TEST(i == 123456);
-
-        BOOST_TEST(parse("+123456", int_));
-        BOOST_TEST(parse("+123456", int_, i));
-        BOOST_TEST(i == 123456);
-
-        BOOST_TEST(parse("-123456", int_));
-        BOOST_TEST(parse("-123456", int_, i));
-        BOOST_TEST(i == -123456);
-
-        BOOST_TEST(parse(max_int, int_));
-        BOOST_TEST(parse(max_int, int_, i));
-        BOOST_TEST(i == INT_MAX);
-
-        BOOST_TEST(parse(min_int, int_));
-        BOOST_TEST(parse(min_int, int_, i));
-        BOOST_TEST(i == INT_MIN);
-
-        BOOST_TEST(!parse(int_overflow, int_));
-        BOOST_TEST(!parse(int_overflow, int_, i));
-        BOOST_TEST(!parse(int_underflow, int_));
-        BOOST_TEST(!parse(int_underflow, int_, i));
-
-        BOOST_TEST(!parse("-", int_));
-        BOOST_TEST(!parse("-", int_, i));
-
-        BOOST_TEST(!parse("+", int_));
-        BOOST_TEST(!parse("+", int_, i));
+        CHECK(!parse("+", int_));
+        CHECK(!parse("+", int_, i));
 
         // Bug report from Steve Nutt
-        BOOST_TEST(!parse("5368709120", int_, i));
-
+        CHECK(!parse("5368709120", int_, i));
+    }
+    {
+        int i = 0;
         // with leading zeros
-        BOOST_TEST(parse("0000000000123456", int_));
-        BOOST_TEST(parse("0000000000123456", int_, i));
-        BOOST_TEST(i == 123456);
+        CHECK(parse("0000000000123456", int_));
+        REQUIRE(parse("0000000000123456", int_, i));
+        CHECK(i == 123456);
     }
 
     // long long tests
     {
-        using x4::long_long;
-        boost::long_long_type ll;
+        long long ll = 0;
+        CHECK(parse("1234567890123456789", long_long));
+        REQUIRE(parse("1234567890123456789", long_long, ll));
+        CHECK(ll == 1234567890123456789LL);
+    }
+    {
+        long long ll = 0;
+        CHECK(parse("-1234567890123456789", long_long));
+        REQUIRE(parse("-1234567890123456789", long_long, ll));
+        CHECK(ll == -1234567890123456789LL);
+    }
+    {
+        long long ll = 0;
+        CHECK(parse(max_long_long, long_long));
+        REQUIRE(parse(max_long_long, long_long, ll));
+        CHECK(ll == LLONG_MAX);
+    }
+    {
+        long long ll = 0;
+        CHECK(parse(min_long_long, long_long));
+        REQUIRE(parse(min_long_long, long_long, ll));
+        CHECK(ll == LLONG_MIN);
+    }
 
-        BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(long_long);
-
-        BOOST_TEST(parse("1234567890123456789", long_long));
-        BOOST_TEST(parse("1234567890123456789", long_long, ll));
-        BOOST_TEST(ll == 1234567890123456789LL);
-
-        BOOST_TEST(parse("-1234567890123456789", long_long));
-        BOOST_TEST(parse("-1234567890123456789", long_long, ll));
-        BOOST_TEST(ll == -1234567890123456789LL);
-
-        BOOST_TEST(parse(max_long_long, long_long));
-        BOOST_TEST(parse(max_long_long, long_long, ll));
-        BOOST_TEST(ll == LLONG_MAX);
-
-        BOOST_TEST(parse(min_long_long, long_long));
-        BOOST_TEST(parse(min_long_long, long_long, ll));
-        BOOST_TEST(ll == LLONG_MIN);
-
-        BOOST_TEST(!parse(long_long_overflow, long_long));
-        BOOST_TEST(!parse(long_long_overflow, long_long, ll));
-        BOOST_TEST(!parse(long_long_underflow, long_long));
-        BOOST_TEST(!parse(long_long_underflow, long_long, ll));
+    {
+        long long ll = 0;
+        CHECK(!parse(long_long_overflow, long_long));
+        CHECK(!parse(long_long_overflow, long_long, ll));
+        CHECK(!parse(long_long_underflow, long_long));
+        CHECK(!parse(long_long_underflow, long_long, ll));
     }
 
     // short_ and long_ tests
     {
-        using x4::short_;
-        using x4::long_;
-        int i;
-
-        BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(short_);
-        BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(long_);
-
-        BOOST_TEST(parse("12345", short_));
-        BOOST_TEST(parse("12345", short_, i));
-        BOOST_TEST(i == 12345);
-
-        BOOST_TEST(parse("1234567890", long_));
-        BOOST_TEST(parse("1234567890", long_, i));
-        BOOST_TEST(i == 1234567890);
+        short s = 0;
+        CHECK(parse("12345", short_));
+        CHECK(parse("12345", short_, s));
+        CHECK(s == 12345);
+    }
+    {
+        long l = 0;
+        CHECK(parse("1234567890", long_));
+        CHECK(parse("1234567890", long_, l));
+        CHECK(l == 1234567890);
     }
 
     // Check overflow is parse error
     {
-        constexpr x4::int_parser<std::int8_t> int8_{};
-        char c;
-
-        BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(int8_);
-
-        BOOST_TEST(!parse("999", int8_, c));
-
-        int i;
-        using x4::short_;
-        BOOST_TEST(!parse("32769", short_, i).is_partial_match());
-        BOOST_TEST(!parse("41234", short_, i).is_partial_match());
+        std::int8_t i = 0;
+        CHECK(!parse("999", int8, i));
+    }
+    {
+        short s = 0;
+        CHECK(!parse("32769", short_, s));
+        CHECK(!parse("41234", short_, s));
     }
 
     // int_parser<unused_type> tests
     {
-        using x4::int_parser;
         constexpr int_parser<unused_type> any_int{};
-
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(any_int);
 
-        BOOST_TEST(parse("123456", any_int));
-        BOOST_TEST(parse("-123456", any_int));
-        BOOST_TEST(parse("-1234567890123456789", any_int));
+        CHECK(parse("123456", any_int));
+        CHECK(parse("-123456", any_int));
+        CHECK(parse("-1234567890123456789", any_int));
     }
 
     // action tests
     {
-        using x4::_attr;
         using x4::standard::space;
-        using x4::int_;
         int n = 0, m = 0;
 
         auto f = [&](auto& ctx){ n = _attr(ctx); };
 
-        BOOST_TEST(parse("123", int_[f]));
-        BOOST_TEST(n == 123);
-        BOOST_TEST(parse("789", int_[f], m));
-        BOOST_TEST(n == 789 && m == 789);
-        BOOST_TEST(parse("   456", int_[f], space));
-        BOOST_TEST(n == 456);
+        REQUIRE(parse("123", int_[f]));
+        CHECK(n == 123);
+        REQUIRE(parse("789", int_[f], m));
+        REQUIRE(n == 789);
+        CHECK(m == 789);
+        REQUIRE(parse("   456", int_[f], space));
+        CHECK(n == 456);
     }
 
     // custom int tests
     {
-        using x4::int_;
-        using x4::int_parser;
-        custom_int i;
+        custom_int i{};
 
-        BOOST_TEST(parse("-123456", int_, i));
+        CHECK(parse("-123456", int_, i));
         int_parser<custom_int, 10, 1, 2> int2;
-        BOOST_TEST(parse("-12", int2, i));
+        CHECK(parse("-12", int2, i));
     }
 
     // single-element fusion vector tests
     {
-        using x4::int_;
-        using x4::int_parser;
-        boost::fusion::vector<int> i;
+        boost::fusion::vector<int> i{};
 
-        BOOST_TEST(parse("-123456", int_, i));
-        BOOST_TEST(boost::fusion::at_c<0>(i) == -123456);
+        REQUIRE(parse("-123456", int_, i));
+        CHECK(boost::fusion::at_c<0>(i) == -123456);
     }
-
-    return boost::report_errors();
 }

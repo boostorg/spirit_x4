@@ -17,15 +17,15 @@ namespace unused_attr {
 
 using iterator_type = std::string_view::const_iterator;
 
-auto const skipper_def = x4::standard::lit('*');
+constexpr auto skipper_def = x4::standard::lit('*');
 BOOST_SPIRIT_X4_DEFINE(skipper)
 BOOST_SPIRIT_X4_INSTANTIATE(skipper_type, iterator_type, x4::parse_context_for<iterator_type>)
 
-auto const skipper2_def = x4::standard::lit('#');
+constexpr auto skipper2_def = x4::standard::lit('#');
 BOOST_SPIRIT_X4_DEFINE(skipper2)
 BOOST_SPIRIT_X4_INSTANTIATE(skipper2_type, iterator_type, x4::parse_context_for<iterator_type>)
 
-auto const grammar_def = *x4::standard::lit('=');
+constexpr auto grammar_def = *x4::standard::lit('=');
 BOOST_SPIRIT_X4_DEFINE(grammar)
 
 BOOST_SPIRIT_X4_INSTANTIATE(grammar_type, iterator_type, x4::parse_context_for<iterator_type>)
@@ -38,11 +38,11 @@ namespace used_attr {
 
 using iterator_type = std::string_view::const_iterator;
 
-auto const skipper_def = x4::standard::space;
+constexpr auto skipper_def = x4::standard::space;
 BOOST_SPIRIT_X4_DEFINE(skipper)
 BOOST_SPIRIT_X4_INSTANTIATE(skipper_type, iterator_type, x4::parse_context_for<iterator_type>)
 
-auto const grammar_def = x4::int_;
+constexpr auto grammar_def = x4::int_;
 BOOST_SPIRIT_X4_DEFINE(grammar)
 BOOST_SPIRIT_X4_INSTANTIATE(grammar_type, iterator_type, x4::parse_context_for<iterator_type>)
 

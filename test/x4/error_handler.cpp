@@ -58,7 +58,7 @@ void do_parse(std::string const& line_break)
         auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
         (void)parse(begin, end, parser, x4::standard::space);
 
-        BOOST_TEST_EQ(stream.str(), "In line 2:\nError! Expecting: \"bar\" here:\n  foo\n__^_\n");
+        CHECK(stream.str() == "In line 2:\nError! Expecting: \"bar\" here:\n  foo\n__^_\n");
     }
 
     {
@@ -69,7 +69,7 @@ void do_parse(std::string const& line_break)
         auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
         (void)parse(begin, end, parser);
 
-        BOOST_TEST_CSTR_EQ(stream.str().c_str(), "In line 1:\nError! Expecting: \"bar\" here:\nfoo\n___^_\n");
+        CHECK(stream.str() == "In line 1:\nError! Expecting: \"bar\" here:\nfoo\n___^_\n");
     }
 }
 
@@ -85,12 +85,12 @@ void test_line_break_first(std::string const& line_break)
     auto const parser = x4::with<x4::contexts::error_handler>(std::ref(error_handler))[test_rule];
     (void)parse(begin, end, parser, x4::space);
 
-    BOOST_TEST_EQ(stream.str(), "In line 2:\nError! Expecting: \"bar\" here:\nfoo  foo\n_____^_\n");
+    CHECK(stream.str() == "In line 2:\nError! Expecting: \"bar\" here:\nfoo  foo\n_____^_\n");
 }
 
 } // anonymous
 
-int main()
+TEST_CASE("error_handler")
 {
     do_parse("\n");
     do_parse("\r");
@@ -99,7 +99,4 @@ int main()
     test_line_break_first("\n");
     test_line_break_first("\r");
     test_line_break_first("\r\n");
-
-
-    return boost::report_errors();
 }

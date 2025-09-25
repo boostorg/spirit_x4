@@ -43,11 +43,11 @@ void docheck(TST const& tst, CaseCompare const& comp, Char const* s, bool const 
     Char const* last = s;
     while (*last) ++last;
     int* r = tst.find(s, last, comp);
-    BOOST_TEST(!!r == expected);
+    CHECK(!!r == expected);
 
     if (r) {
-        BOOST_TEST(s - first == N);
-        BOOST_TEST(*r == val);
+        CHECK(s - first == N);
+        CHECK(*r == val);
     }
 }
 
@@ -336,11 +336,8 @@ void tests()
 
 } // anonymous
 
-int main()
+TEST_CASE("tst")
 {
     using x4::tst;
-
     tests<tst<char, int>, tst<wchar_t, int>>();
-
-    return boost::report_errors();
 }

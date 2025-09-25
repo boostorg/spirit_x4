@@ -22,101 +22,105 @@
 #include <set>
 #include <map>
 
-int main()
+TEST_CASE("list")
 {
     using namespace x4::standard;
 
+    using x4::int_;
+    using x4::omit;
+    using x4::_attr;
+
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ % ',');
 
-    {
-        BOOST_TEST(parse("a,b,c,d,e,f,g,h", char_ % ','));
-        BOOST_TEST(parse("a,b,c,d,e,f,g,h,", char_ % ',').is_partial_match());
-    }
+    CHECK(parse("a,b,c,d,e,f,g,h", char_ % ','));
+    CHECK(parse("a,b,c,d,e,f,g,h,", char_ % ',').is_partial_match());
+
+    CHECK(parse("a, b, c, d, e, f, g, h", char_ % ',', space));
+    CHECK(parse("a, b, c, d, e, f, g, h,", char_ % ',', space).is_partial_match());
 
     {
-        BOOST_TEST(parse("a, b, c, d, e, f, g, h", char_ % ',', space));
-        BOOST_TEST(parse("a, b, c, d, e, f, g, h,", char_ % ',', space).is_partial_match());
+        std::string s;
+        REQUIRE(parse("a,b,c,d,e,f,g,h", char_ % ',', s));
+        CHECK(s == "abcdefgh");
+
+        CHECK(!parse("a,b,c,d,e,f,g,h,", char_ % ','));
     }
 
     {
         std::string s;
-        BOOST_TEST(parse("a,b,c,d,e,f,g,h", char_ % ',', s));
-        BOOST_TEST(s == "abcdefgh");
-
-        BOOST_TEST(!parse("a,b,c,d,e,f,g,h,", char_ % ','));
+        REQUIRE(parse("ab,cd,ef,gh", (char_ >> char_) % ',', s));
+        CHECK(s == "abcdefgh");
     }
+
+    CHECK(!parse("ab,cd,ef,gh,", (char_ >> char_) % ','));
+    CHECK(!parse("ab,cd,ef,g", (char_ >> char_) % ','));
 
     {
         std::string s;
-        BOOST_TEST(parse("ab,cd,ef,gh", (char_ >> char_) % ',', s));
-        BOOST_TEST(s == "abcdefgh");
-
-        BOOST_TEST(!parse("ab,cd,ef,gh,", (char_ >> char_) % ','));
-        BOOST_TEST(!parse("ab,cd,ef,g", (char_ >> char_) % ','));
-
-        s.clear();
-        BOOST_TEST(parse("ab,cd,efg", (char_ >> char_) % ',' >> char_, s));
-        BOOST_TEST(s == "abcdefg");
+        REQUIRE(parse("ab,cd,efg", (char_ >> char_) % ',' >> char_, s));
+        CHECK(s == "abcdefg");
     }
 
     {
         // regression test for has_attribute
-        using x4::int_;
-        using x4::omit;
-
-        int i;
-        BOOST_TEST(parse("1:2,3", int_ >> ':' >> omit[int_] % ',', i)) && BOOST_TEST_EQ(i, 1);
+        int i = 0;
+        REQUIRE(parse("1:2,3", int_ >> ':' >> omit[int_] % ',', i));
+        CHECK(i == 1);
     }
 
     {
-        using x4::int_;
-
         std::vector<int> v;
-        BOOST_TEST(parse("1,2", int_ % ',', v));
-        BOOST_TEST(2 == v.size() && 1 == v[0] && 2 == v[1]);
+        REQUIRE(parse("1,2", int_ % ',', v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 1);
+        CHECK(v[1] == 2);
     }
 
     {
-        using x4::int_;
-
         std::vector<int> v;
-        BOOST_TEST(parse("(1,2)", '(' >> int_ % ',' >> ')', v));
-        BOOST_TEST(2 == v.size() && 1 == v[0] && 2 == v[1]);
+        REQUIRE(parse("(1,2)", '(' >> int_ % ',' >> ')', v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 1);
+        CHECK(v[1] == 2);
     }
 
     {
         std::vector<std::string> v;
-        BOOST_TEST(parse("a,b,c,d", +alpha % ',', v));
-        BOOST_TEST(4 == v.size() && "a" == v[0] && "b" == v[1] && "c" == v[2] && "d" == v[3]);
+        REQUIRE(parse("a,b,c", +alpha % ',', v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == "a");
+        CHECK(v[1] == "b");
+        CHECK(v[2] == "c");
     }
 
     {
         std::vector<std::optional<char>> v;
-        BOOST_TEST(parse("#a,#", ('#' >> -alpha) % ',', v));
-        BOOST_TEST(2 == v.size() && v[0] && *v[0] == 'a' && !v[1]);
-
+        REQUIRE(parse("#a,#", ('#' >> -alpha) % ',', v));
+        REQUIRE(v.size() == 2);
+        REQUIRE(v[0].has_value());
+        CHECK(*v[0] == 'a');
+        CHECK(!v[1].has_value());
+    }
+    {
         std::vector<char> v2;
-        BOOST_TEST(parse("#a,#", ('#' >> -alpha) % ',', v2));
-        BOOST_TEST(1 == v2.size() && 'a' == v2[0]);
+        REQUIRE(parse("#a,#", ('#' >> -alpha) % ',', v2));
+        REQUIRE(v2.size() == 1);
+        CHECK(v2[0] == 'a');
     }
 
     {
         // actions
-        using x4::_attr;
-
         std::string s;
         auto f = [&](auto& ctx){ s = std::string(_attr(ctx).begin(), _attr(ctx).end()); };
 
-        BOOST_TEST(parse("a,b,c,d,e,f,g,h", (char_ % ',')[f]));
-        BOOST_TEST(s == "abcdefgh");
+        REQUIRE(parse("a,b,c,d,e,f,g,h", (char_ % ',')[f]));
+        CHECK(s == "abcdefgh");
     }
 
     {
         // test move only types
         std::vector<spirit_test::move_only> v;
-        BOOST_TEST(parse("s.s.s.s", spirit_test::synth_move_only % '.', v));
-        BOOST_TEST_EQ(v.size(), 4);
+        REQUIRE(parse("s.s.s.s", spirit_test::synth_move_only % '.', v));
+        CHECK(v.size() == 4);
     }
-
-    return boost::report_errors();
 }

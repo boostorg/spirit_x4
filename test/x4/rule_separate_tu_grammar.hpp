@@ -20,17 +20,17 @@ namespace unused_attr {
 
 // skipper must have no attribute, check `parse` and `skip_over`
 using skipper_type = x4::rule<class skipper_r>;
-const skipper_type skipper;
+constexpr skipper_type skipper = "skipper";
 BOOST_SPIRIT_X4_DECLARE(skipper_type)
 
 // the `unused_type const` must have the same effect as no attribute
 using skipper2_type = x4::rule<class skipper2_r, unused_type const>;
-const skipper2_type skipper2;
+constexpr skipper2_type skipper2 = "skipper2";
 BOOST_SPIRIT_X4_DECLARE(skipper2_type)
 
 // grammar must have no attribute, check `parse` and `phrase_parse`
 using grammar_type = x4::rule<class grammar_r>;
-const grammar_type grammar;
+constexpr grammar_type grammar = "grammar";
 BOOST_SPIRIT_X4_DECLARE(grammar_type)
 
 } // unused_attr
@@ -40,11 +40,11 @@ BOOST_SPIRIT_X4_DECLARE(grammar_type)
 namespace used_attr {
 
 using skipper_type = x4::rule<class skipper_r>;
-const skipper_type skipper;
+constexpr skipper_type skipper = "skipper";
 BOOST_SPIRIT_X4_DECLARE(skipper_type)
 
 using grammar_type = x4::rule<class grammar_r, int, true>;
-const grammar_type grammar;
+constexpr grammar_type grammar = "grammar";
 BOOST_SPIRIT_X4_DECLARE(grammar_type)
 
 } // used_attr

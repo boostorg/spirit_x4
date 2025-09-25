@@ -11,7 +11,7 @@
 #include <boost/spirit/x4/rule.hpp>
 #include <boost/spirit/x4/symbols.hpp>
 
-int main()
+TEST_CASE("symbols2")
 {
     using x4::shared_symbols;
     using x4::rule;
@@ -21,13 +21,13 @@ int main()
         char const* syms[] = {"Joel", "Ruby", "Tenji", "Tutit", "Kim", "Joey"};
         shared_symbols<int> sym(syms);
 
-        BOOST_TEST(parse("Joel", sym));
-        BOOST_TEST(parse("Ruby", sym));
-        BOOST_TEST(parse("Tenji", sym));
-        BOOST_TEST(parse("Tutit", sym));
-        BOOST_TEST(parse("Kim", sym));
-        BOOST_TEST(parse("Joey", sym));
-        BOOST_TEST(!parse("XXX", sym));
+        CHECK(parse("Joel", sym));
+        CHECK(parse("Ruby", sym));
+        CHECK(parse("Tenji", sym));
+        CHECK(parse("Tutit", sym));
+        CHECK(parse("Kim", sym));
+        CHECK(parse("Joey", sym));
+        CHECK(!parse("XXX", sym));
     }
 
     {
@@ -38,19 +38,19 @@ int main()
         shared_symbols<int> sym(syms, data);
 
         int i = 0;
-        BOOST_TEST(parse("Joel", sym, i));
-        BOOST_TEST(i == 1);
-        BOOST_TEST(parse("Ruby", sym, i));
-        BOOST_TEST(i == 2);
-        BOOST_TEST(parse("Tenji", sym, i));
-        BOOST_TEST(i == 3);
-        BOOST_TEST(parse("Tutit", sym, i));
-        BOOST_TEST(i == 4);
-        BOOST_TEST(parse("Kim", sym, i));
-        BOOST_TEST(i == 5);
-        BOOST_TEST(parse("Joey", sym, i));
-        BOOST_TEST(i == 6);
-        BOOST_TEST(!parse("XXX", sym, i));
+        CHECK(parse("Joel", sym, i));
+        CHECK(i == 1);
+        CHECK(parse("Ruby", sym, i));
+        CHECK(i == 2);
+        CHECK(parse("Tenji", sym, i));
+        CHECK(i == 3);
+        CHECK(parse("Tutit", sym, i));
+        CHECK(i == 4);
+        CHECK(parse("Kim", sym, i));
+        CHECK(i == 5);
+        CHECK(parse("Joey", sym, i));
+        CHECK(i == 6);
+        CHECK(!parse("XXX", sym, i));
     }
 
     {
@@ -62,17 +62,17 @@ int main()
         std::string const b("def");
         sym += a;
         sym += b;
-        BOOST_TEST(parse("abc", sym));
-        BOOST_TEST(parse("def", sym));
+        CHECK(parse("abc", sym));
+        CHECK(parse("def", sym));
         sym = a;
-        BOOST_TEST(parse("abc", sym));
-        BOOST_TEST(!parse("def", sym));
+        CHECK(parse("abc", sym));
+        CHECK(!parse("def", sym));
 
         // non-const C-style string
         char arr[2]; arr[0] = 'a'; arr[1] = '\0';
         sym = arr;
-        BOOST_TEST(parse("a", sym));
-        BOOST_TEST(!parse("b", sym));
+        CHECK(parse("a", sym));
+        CHECK(!parse("b", sym));
     }
 
     {
@@ -81,77 +81,95 @@ int main()
         shared_symbols<int> sym;
         sym.add("a", 1)("b", 2);
 
-        BOOST_TEST(!sym.find("c"));
+        CHECK(!sym.find("c"));
 
-        BOOST_TEST(sym.find("a") && *sym.find("a") == 1);
-        BOOST_TEST(sym.find("b") && *sym.find("b") == 2);
+        REQUIRE(sym.find("a"));
+        CHECK(*sym.find("a") == 1);
 
-        BOOST_TEST(sym.at("a") == 1);
-        BOOST_TEST(sym.at("b") == 2);
-        BOOST_TEST(sym.at("c") == 0);
+        REQUIRE(sym.find("b"));
+        CHECK(*sym.find("b") == 2);
 
-        BOOST_TEST(sym.find("a") && *sym.find("a") == 1);
-        BOOST_TEST(sym.find("b") && *sym.find("b") == 2);
-        BOOST_TEST(sym.find("c") && *sym.find("c") == 0);
+        CHECK(sym.at("a") == 1);
+        CHECK(sym.at("b") == 2);
+        CHECK(sym.at("c") == 0);
+
+        REQUIRE(sym.find("a"));
+        CHECK(*sym.find("a") == 1);
+        REQUIRE(sym.find("b"));
+        CHECK(*sym.find("b") == 2);
+        REQUIRE(sym.find("c"));
+        CHECK(*sym.find("c") == 0);
 
         shared_symbols<int> const_sym(sym);
 
-        BOOST_TEST(const_sym.find("a") && *const_sym.find("a") == 1);
-        BOOST_TEST(const_sym.find("b") && *const_sym.find("b") == 2);
-        BOOST_TEST(const_sym.find("c") && *const_sym.find("c") == 0);
-        BOOST_TEST(!const_sym.find("d"));
+        REQUIRE(const_sym.find("a"));
+        CHECK(*const_sym.find("a") == 1);
+        REQUIRE(const_sym.find("b"));
+        CHECK(*const_sym.find("b") == 2);
+        REQUIRE(const_sym.find("c"));
+        CHECK(*const_sym.find("c") == 0);
+        CHECK(!const_sym.find("d"));
 
         char const *str1 = "all";
         char const *first = str1, *last = str1 + 3;
-        BOOST_TEST(*sym.prefix_find(first, last) == 1 && first == str1 + 1);
+        REQUIRE(*sym.prefix_find(first, last) == 1);
+        CHECK(first == str1 + 1);
 
         char const *str2 = "dart";
         first = str2; last = str2 + 4;
-        BOOST_TEST(!sym.prefix_find(first, last) && first == str2);
+        REQUIRE(!sym.prefix_find(first, last));
+        CHECK(first == str2);
     }
 
     {
         // name
         shared_symbols<int> sym,sym2;
         sym.name("test");
-        BOOST_TEST(sym.name()=="test");
+        CHECK(sym.name()=="test");
         sym2 = sym;
-        BOOST_TEST(sym2.name()=="test");
+        CHECK(sym2.name()=="test");
 
         shared_symbols<int> sym3(sym);
-        BOOST_TEST(sym3.name()=="test");
+        CHECK(sym3.name()=="test");
     }
 
     {
         // Substrings
 
         shared_symbols<int> sym;
-        BOOST_TEST(sym.at("foo") == 0);
+        CHECK(sym.at("foo") == 0);
         sym.at("foo") = 1;
-        BOOST_TEST(sym.at("foo") == 1);
-        BOOST_TEST(sym.at("fool") == 0);
+        CHECK(sym.at("foo") == 1);
+        CHECK(sym.at("fool") == 0);
         sym.at("fool") = 2;
-        BOOST_TEST(sym.find("foo") && *sym.find("foo") == 1);
-        BOOST_TEST(sym.find("fool") && *sym.find("fool") == 2);
-        BOOST_TEST(!sym.find("foolish"));
-        BOOST_TEST(!sym.find("foot"));
-        BOOST_TEST(!sym.find("afoot"));
+        REQUIRE(sym.find("foo"));
+        CHECK(*sym.find("foo") == 1);
+        REQUIRE(sym.find("fool"));
+        CHECK(*sym.find("fool") == 2);
+        CHECK(!sym.find("foolish"));
+        CHECK(!sym.find("foot"));
+        CHECK(!sym.find("afoot"));
 
         char const *str, *first, *last;
         str = "foolish"; first = str; last = str + 7;
-        BOOST_TEST(*sym.prefix_find(first, last) == 2 && first == str + 4);
+        REQUIRE(*sym.prefix_find(first, last) == 2);
+        CHECK(first == str + 4);
 
         first = str; last = str + 4;
-        BOOST_TEST(*sym.prefix_find(first, last) == 2 && first == str + 4);
+        REQUIRE(*sym.prefix_find(first, last) == 2);
+        CHECK(first == str + 4);
 
         str = "food"; first = str; last = str + 4;
-        BOOST_TEST(*sym.prefix_find(first, last) == 1 && first == str + 3);
+        REQUIRE(*sym.prefix_find(first, last) == 1);
+        CHECK(first == str + 3);
 
         first = str; last = str + 3;
-        BOOST_TEST(*sym.prefix_find(first, last) == 1 && first == str + 3);
+        REQUIRE(*sym.prefix_find(first, last) == 1);
+        CHECK(first == str + 3);
 
         first = str; last = str + 2;
-        BOOST_TEST(!sym.prefix_find(first, last) && first == str);
+        REQUIRE(!sym.prefix_find(first, last));
+        CHECK(first == str);
     }
 
     {
@@ -163,7 +181,7 @@ int main()
         vars.remove("l2");
         (void)vars.find("l1");
         double* d = vars.find("l1");
-        BOOST_TEST(d != nullptr);
+        CHECK(d != nullptr);
     }
 
     {
@@ -172,9 +190,7 @@ int main()
         sym += std::string("Joel");
         sym += std::string("Ruby");
 
-        BOOST_TEST(parse("Joel", sym));
-        BOOST_TEST(parse("Ruby", sym));
+        CHECK(parse("Joel", sym));
+        CHECK(parse("Ruby", sym));
     }
-
-    return boost::report_errors();
 }

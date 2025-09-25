@@ -17,104 +17,176 @@ void basic_real_parser_test(P parser)
 {
     T attr;
 
-    BOOST_TEST(parse("-1234", parser));
-    BOOST_TEST(parse("-1234", parser, attr) && compare(attr, T(-1234l)));
+    CHECK(parse("-1234", parser));
+    REQUIRE(parse("-1234", parser, attr));
+    CHECK(compare(attr, T(-1234l)));
 
-    BOOST_TEST(parse("-1.2e3", parser));
-    BOOST_TEST(parse("-1.2e3", parser, attr) && compare(attr, T(-1.2e3l)));
+    CHECK(parse("-1.2e3", parser));
+    REQUIRE(parse("-1.2e3", parser, attr));
+    CHECK(compare(attr, T(-1.2e3l)));
 
-    BOOST_TEST(parse("+1.2e3", parser));
-    BOOST_TEST(parse("+1.2e3", parser, attr) && compare(attr, T(1.2e3l)));
+    CHECK(parse("+1.2e3", parser));
+    REQUIRE(parse("+1.2e3", parser, attr));
+    CHECK(compare(attr, T(1.2e3l)));
 
-    BOOST_TEST(parse("-0.1", parser));
-    BOOST_TEST(parse("-0.1", parser, attr) && compare(attr, T(-0.1l)));
+    CHECK(parse("-0.1", parser));
+    REQUIRE(parse("-0.1", parser, attr));
+    CHECK(compare(attr, T(-0.1l)));
 
-    BOOST_TEST(parse("-1.2e-3", parser));
-    BOOST_TEST(parse("-1.2e-3", parser, attr) && compare(attr, T(-1.2e-3l)));
+    CHECK(parse("-1.2e-3", parser));
+    REQUIRE(parse("-1.2e-3", parser, attr));
+    CHECK(compare(attr, T(-1.2e-3l)));
 
-    BOOST_TEST(parse("-1.e2", parser));
-    BOOST_TEST(parse("-1.e2", parser, attr) && compare(attr, T(-1.e2l)));
+    CHECK(parse("-1.e2", parser));
+    REQUIRE(parse("-1.e2", parser, attr));
+    CHECK(compare(attr, T(-1.e2l)));
 
-    BOOST_TEST(parse("-.2e3", parser));
-    BOOST_TEST(parse("-.2e3", parser, attr) && compare(attr, T(-.2e3l)));
+    CHECK(parse("-.2e3", parser));
+    REQUIRE(parse("-.2e3", parser, attr));
+    CHECK(compare(attr, T(-.2e3l)));
 
-    BOOST_TEST(parse("-2e3", parser));
-    BOOST_TEST(parse("-2e3", parser, attr) && compare(attr, T(-2e3l)));
+    CHECK(parse("-2e3", parser));
+    REQUIRE(parse("-2e3", parser, attr));
+    CHECK(compare(attr, T(-2e3l)));
 
-    BOOST_TEST(!parse("-e3", parser));
-    BOOST_TEST(!parse("-e3", parser, attr));
+    CHECK(!parse("-e3", parser));
+    CHECK(!parse("-e3", parser, attr));
 
-    BOOST_TEST(!parse("-1.2e", parser));
-    BOOST_TEST(!parse("-1.2e", parser, attr));
+    CHECK(!parse("-1.2e", parser));
+    CHECK(!parse("-1.2e", parser, attr));
 }
 
 } // anonymous
 
-int main()
+TEST_CASE("real2")
 {
+    using x4::double_;
+
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::float_);
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::double_);
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(x4::long_double);
 
     // signed real number tests
-    {
-        basic_real_parser_test<float>(x4::float_);
-        basic_real_parser_test<double>(x4::double_);
-        basic_real_parser_test<long double>(x4::long_double);
-    }
+    basic_real_parser_test<float>(x4::float_);
+    basic_real_parser_test<double>(x4::double_);
+    basic_real_parser_test<long double>(x4::long_double);
 
     {
-        using x4::double_;
         double d = 0;
-
-#if defined(BOOST_SPIRIT_TEST_REAL_PRECISION)
-        BOOST_TEST(parse("-5.7222349715140557e+307", double_, d));
-        BOOST_TEST(d == -5.7222349715140557e+307); // exact!
-
-        BOOST_TEST(parse("2.0332938517515416e-308", double_, d));
-        BOOST_TEST(d == 2.0332938517515416e-308); // exact!
-
-        BOOST_TEST(parse("20332938517515416e291", double_, d));
-        BOOST_TEST(d == 20332938517515416e291); // exact!
-
-        BOOST_TEST(parse("2.0332938517515416e307", double_, d));
-        BOOST_TEST(d == 2.0332938517515416e307); // exact!
-#endif
-
-        BOOST_TEST(parse("-inf", double_));
-        BOOST_TEST(parse("-infinity", double_));
-        BOOST_TEST(parse("-inf", double_, d) && std::isinf(d) && std::signbit(d));
-        BOOST_TEST(parse("-infinity", double_, d) && std::isinf(d) && std::signbit(d));
-        BOOST_TEST(parse("-INF", double_));
-        BOOST_TEST(parse("-INFINITY", double_));
-        BOOST_TEST(parse("-INF", double_, d) && std::isinf(d) && std::signbit(d));
-        BOOST_TEST(parse("-INFINITY", double_, d) && std::isinf(d) && std::signbit(d));
-
-        BOOST_TEST(parse("-nan", double_));
-        BOOST_TEST(parse("-nan", double_, d) && std::isnan(d) && std::signbit(d));
-        BOOST_TEST(parse("-NAN", double_));
-        BOOST_TEST(parse("-NAN", double_, d) && std::isnan(d) && std::signbit(d));
-
-        BOOST_TEST(parse("-nan(...)", double_));
-        BOOST_TEST(parse("-nan(...)", double_, d) && std::isnan(d) && std::signbit(d));
-        BOOST_TEST(parse("-NAN(...)", double_));
-        BOOST_TEST(parse("-NAN(...)", double_, d) && std::isnan(d) && std::signbit(d));
-
-        BOOST_TEST(!parse("1e999", double_));
-        BOOST_TEST(!parse("1e-999", double_));
-        BOOST_TEST(parse("2.1111111e-303", double_, d) && compare(d, 2.1111111e-303));
-        BOOST_TEST(!parse("1.1234e", double_, d) && compare(d, 1.1234));
-
-        // https://svn.boost.org/trac10/ticket/11608
-        BOOST_TEST(parse("1267650600228229401496703205376", double_, d) &&
-            compare(d, 1267650600228229401496703205376.)); // Note Qi has better precision
-
-        BOOST_TEST(parse("12676506.00228229401496703205376", double_, d) &&
-            compare(d, 12676506.00228229401496703205376)); // Note Qi has better precision
-
-        BOOST_TEST(parse("12676506.00228229401496703205376E6", double_, d) &&
-            compare(d, 12676506.00228229401496703205376E6)); // Note Qi has better precision
+        CHECK(parse("-5.7222349715140557e+307", double_, d));
+        CHECK(d == -5.7222349715140557e+307); // exact
+    }
+    {
+        double d = 0;
+        CHECK(parse("2.0332938517515416e-308", double_, d));
+        CHECK(d == 2.0332938517515416e-308); // exact
+    }
+    {
+        double d = 0;
+        CHECK(parse("20332938517515416e291", double_, d));
+        CHECK(d == 20332938517515416e291); // exact
+    }
+    {
+        double d = 0;
+        CHECK(parse("2.0332938517515416e307", double_, d));
+        CHECK(d == 2.0332938517515416e307); // exact
     }
 
-    return boost::report_errors();
+    CHECK(parse("-inf", double_));
+    CHECK(parse("-infinity", double_));
+
+    {
+        double d = 0;
+        REQUIRE(parse("-inf", double_, d));
+        REQUIRE(std::isinf(d));
+        CHECK(std::signbit(d));
+    }
+    {
+        double d = 0;
+        REQUIRE(parse("-infinity", double_, d));
+        REQUIRE(std::isinf(d));
+        CHECK(std::signbit(d));
+    }
+
+    CHECK(parse("-INF", double_));
+    CHECK(parse("-INFINITY", double_));
+
+    {
+        double d = 0;
+        REQUIRE(parse("-INF", double_, d));
+        REQUIRE(std::isinf(d));
+        CHECK(std::signbit(d));
+    }
+    {
+        double d = 0;
+        REQUIRE(parse("-INFINITY", double_, d));
+        REQUIRE(std::isinf(d));
+        CHECK(std::signbit(d));
+    }
+
+    {
+        double d = 0;
+        CHECK(parse("-nan", double_));
+        REQUIRE(parse("-nan", double_, d));
+        REQUIRE(std::isnan(d));
+        CHECK(std::signbit(d));
+    }
+    {
+        double d = 0;
+        CHECK(parse("-NAN", double_));
+        REQUIRE(parse("-NAN", double_, d));
+        REQUIRE(std::isnan(d));
+        CHECK(std::signbit(d));
+    }
+    {
+        double d = 0;
+        CHECK(parse("-nan(...)", double_));
+        REQUIRE(parse("-nan(...)", double_, d));
+        REQUIRE(std::isnan(d));
+        CHECK(std::signbit(d));
+    }
+    {
+        double d = 0;
+        CHECK(parse("-NAN(...)", double_));
+        REQUIRE(parse("-NAN(...)", double_, d));
+        REQUIRE(std::isnan(d));
+        CHECK(std::signbit(d));
+    }
+
+    CHECK(!parse("1e999", double_));
+    CHECK(!parse("1e-999", double_));
+
+    {
+        double d = 0;
+        REQUIRE(parse("2.1111111e-303", double_, d));
+        CHECK(compare(d, 2.1111111e-303));
+    }
+    {
+        double d = 0;
+        REQUIRE(parse("1.1234e", double_, d).is_partial_match());
+        CHECK(compare(d, 1.1234));
+    }
+
+    // https://svn.boost.org/trac10/ticket/11608
+    {
+        // Note Qi has better precision
+        // TODO(2025): why?
+
+        {
+            double d = 0;
+            REQUIRE(parse("1267650600228229401496703205376", double_, d));
+            CHECK(compare(d, 1267650600228229401496703205376.));
+        }
+
+        {
+            double d = 0;
+            REQUIRE(parse("12676506.00228229401496703205376", double_, d));
+            CHECK(compare(d, 12676506.00228229401496703205376));
+        }
+        {
+            double d = 0;
+            REQUIRE(parse("12676506.00228229401496703205376E6", double_, d));
+            CHECK(compare(d, 12676506.00228229401496703205376E6));
+        }
+    }
 }

@@ -16,7 +16,7 @@
 #include <boost/spirit/x4/operator/kleene.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 
-int main()
+TEST_CASE("skip")
 {
     using x4::standard::space;
     using x4::standard::char_;
@@ -28,27 +28,21 @@ int main()
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(skip('x')['y']);
 
-    {
-        BOOST_TEST(parse("a b c d", skip(space)[*char_]));
-    }
+    CHECK(parse("a b c d", skip(space)[*char_]));
 
     {
         // test attribute
         std::string s;
-        BOOST_TEST(parse("a b c d", skip(space)[*char_], s));
-        BOOST_TEST(s == "abcd");
+        REQUIRE(parse("a b c d", skip(space)[*char_], s));
+        CHECK(s == "abcd");
     }
 
-    {
-        // reskip
-        BOOST_TEST(parse("ab c d", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space));
-        BOOST_TEST(parse("abcd", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space));
-        BOOST_TEST(!(parse("a bcd", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space)));
+    // reskip
+    CHECK(parse("ab c d", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space));
+    CHECK(parse("abcd", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space));
+    CHECK(!(parse("a bcd", lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']], space)));
 
-        BOOST_TEST(parse("ab c d", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space));
-        BOOST_TEST(parse("abcd", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space));
-        BOOST_TEST(!(parse("a bcd", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space)));
-    }
-
-    return boost::report_errors();
+    CHECK(parse("ab c d", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space));
+    CHECK(parse("abcd", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space));
+    CHECK(!(parse("a bcd", lexeme[lexeme[lit('a') >> 'b' >> reskip[lit('c') >> 'd']]], space)));
 }

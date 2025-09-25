@@ -9,7 +9,11 @@
 #   http://www.boost.org/LICENSE_1_0.txt)
 #==============================================================================
 
-project : requirements <library>/boost/spirit_x4//boost_spirit_x4 ;
+project
+    : requirements
+        <library>/boost/spirit_x4//boost_spirit_x4
+        <define>BOOST_SPIRIT_CI_IS_B2
+    ;
 
 build-project x4 ;
 

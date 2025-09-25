@@ -14,7 +14,7 @@
 #include <boost/spirit/x4/directive/lexeme.hpp>
 #include <boost/spirit/x4/operator/plus.hpp>
 
-int main()
+TEST_CASE("lexeme")
 {
     using x4::standard::space;
     using x4::standard::digit;
@@ -23,23 +23,20 @@ int main()
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(lexeme['x']);
 
+    CHECK(parse(" 1 2 3 4 5", +digit, space));
+    CHECK(!parse(" 1 2 3 4 5", lexeme[+digit], space));
+    CHECK(parse(" 12345", lexeme[+digit], space));
+    CHECK(parse(" 12345  ", lexeme[+digit], space));
+
+    // lexeme collapsing
+    CHECK(!parse(" 1 2 3 4 5", lexeme[lexeme[+digit]], space));
+    CHECK(parse(" 12345", lexeme[lexeme[+digit]], space));
+    CHECK(parse(" 12345  ", lexeme[lexeme[+digit]], space));
+
     {
-        BOOST_TEST(parse(" 1 2 3 4 5", +digit, space));
-        BOOST_TEST(!parse(" 1 2 3 4 5", lexeme[+digit], space));
-        BOOST_TEST(parse(" 12345", lexeme[+digit], space));
-        BOOST_TEST(parse(" 12345  ", lexeme[+digit], space));
-
-        // lexeme collapsing
-        BOOST_TEST(!parse(" 1 2 3 4 5", lexeme[lexeme[+digit]], space));
-        BOOST_TEST(parse(" 12345", lexeme[lexeme[+digit]], space));
-        BOOST_TEST(parse(" 12345  ", lexeme[lexeme[+digit]], space));
-
-        auto r = +digit;
-        auto rr = lexeme[r];
-
-        BOOST_TEST(!parse(" 1 2 3 4 5", rr, space));
-        BOOST_TEST(parse(" 12345", rr, space));
+        constexpr auto r = +digit;
+        constexpr auto rr = lexeme[r];
+        CHECK(!parse(" 1 2 3 4 5", rr, space));
+        CHECK(parse(" 12345", rr, space));
     }
-
-    return boost::report_errors();
 }

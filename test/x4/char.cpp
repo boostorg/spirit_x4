@@ -23,7 +23,7 @@
 #include <vector>
 #include <algorithm>
 
-int main()
+TEST_CASE("char")
 {
     static_assert(x4::traits::is_container_v<std::string>);
     static_assert(x4::traits::X4Container<std::string>);
@@ -74,37 +74,37 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(~~char_('x'));
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(~~char_('a', 'z'));
 
-        BOOST_TEST(parse("x", 'x'));
-        BOOST_TEST(parse(L"x", L'x'));
-        BOOST_TEST(!parse("y", 'x'));
-        BOOST_TEST(!parse(L"y", L'x'));
+        CHECK(parse("x", 'x'));
+        CHECK(parse(L"x", L'x'));
+        CHECK(!parse("y", 'x'));
+        CHECK(!parse(L"y", L'x'));
 
-        BOOST_TEST(parse("x", char_));
-        BOOST_TEST(parse("x", char_('x')));
-        BOOST_TEST(!parse("x", char_('y')));
-        BOOST_TEST(parse("x", char_('a', 'z')));
-        BOOST_TEST(!parse("x", char_('0', '9')));
+        CHECK(parse("x", char_));
+        CHECK(parse("x", char_('x')));
+        CHECK(!parse("x", char_('y')));
+        CHECK(parse("x", char_('a', 'z')));
+        CHECK(!parse("x", char_('0', '9')));
 
-        BOOST_TEST(parse("0", char_('0', '9')));
-        BOOST_TEST(parse("9", char_('0', '9')));
-        BOOST_TEST(!parse("0", ~char_('0', '9')));
-        BOOST_TEST(!parse("9", ~char_('0', '9')));
+        CHECK(parse("0", char_('0', '9')));
+        CHECK(parse("9", char_('0', '9')));
+        CHECK(!parse("0", ~char_('0', '9')));
+        CHECK(!parse("9", ~char_('0', '9')));
 
-        BOOST_TEST(!parse("x", ~char_));
-        BOOST_TEST(!parse("x", ~char_('x')));
-        BOOST_TEST(parse(" ", ~char_('x')));
-        BOOST_TEST(parse("X", ~char_('x')));
-        BOOST_TEST(!parse("x", ~char_('b', 'y')));
-        BOOST_TEST(parse("a", ~char_('b', 'y')));
-        BOOST_TEST(parse("z", ~char_('b', 'y')));
+        CHECK(!parse("x", ~char_));
+        CHECK(!parse("x", ~char_('x')));
+        CHECK(parse(" ", ~char_('x')));
+        CHECK(parse("X", ~char_('x')));
+        CHECK(!parse("x", ~char_('b', 'y')));
+        CHECK(parse("a", ~char_('b', 'y')));
+        CHECK(parse("z", ~char_('b', 'y')));
 
-        BOOST_TEST(parse("x", ~~char_));
-        BOOST_TEST(parse("x", ~~char_('x')));
-        BOOST_TEST(!parse(" ", ~~char_('x')));
-        BOOST_TEST(!parse("X", ~~char_('x')));
-        BOOST_TEST(parse("x", ~~char_('b', 'y')));
-        BOOST_TEST(!parse("a", ~~char_('b', 'y')));
-        BOOST_TEST(!parse("z", ~~char_('b', 'y')));
+        CHECK(parse("x", ~~char_));
+        CHECK(parse("x", ~~char_('x')));
+        CHECK(!parse(" ", ~~char_('x')));
+        CHECK(!parse("X", ~~char_('x')));
+        CHECK(parse("x", ~~char_('b', 'y')));
+        CHECK(!parse("a", ~~char_('b', 'y')));
+        CHECK(!parse("z", ~~char_('b', 'y')));
     }
     {
         using namespace x4::standard_wide;
@@ -117,56 +117,56 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(~~char_(L'x'));
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(~~char_(L'a', L'z'));
 
-        BOOST_TEST(parse(L"x", char_));
-        BOOST_TEST(parse(L"x", char_(L'x')));
-        BOOST_TEST(!parse(L"x", char_(L'y')));
-        BOOST_TEST(parse(L"x", char_(L'a', L'z')));
-        BOOST_TEST(!parse(L"x", char_(L'0', L'9')));
+        CHECK(parse(L"x", char_));
+        CHECK(parse(L"x", char_(L'x')));
+        CHECK(!parse(L"x", char_(L'y')));
+        CHECK(parse(L"x", char_(L'a', L'z')));
+        CHECK(!parse(L"x", char_(L'0', L'9')));
 
-        BOOST_TEST(!parse(L"x", ~char_));
-        BOOST_TEST(!parse(L"x", ~char_(L'x')));
-        BOOST_TEST(parse(L" ", ~char_(L'x')));
-        BOOST_TEST(parse(L"X", ~char_(L'x')));
-        BOOST_TEST(!parse(L"x", ~char_(L'b', L'y')));
-        BOOST_TEST(parse(L"a", ~char_(L'b', L'y')));
-        BOOST_TEST(parse(L"z", ~char_(L'b', L'y')));
+        CHECK(!parse(L"x", ~char_));
+        CHECK(!parse(L"x", ~char_(L'x')));
+        CHECK(parse(L" ", ~char_(L'x')));
+        CHECK(parse(L"X", ~char_(L'x')));
+        CHECK(!parse(L"x", ~char_(L'b', L'y')));
+        CHECK(parse(L"a", ~char_(L'b', L'y')));
+        CHECK(parse(L"z", ~char_(L'b', L'y')));
 
-        BOOST_TEST(parse(L"x", ~~char_));
-        BOOST_TEST(parse(L"x", ~~char_(L'x')));
-        BOOST_TEST(!parse(L" ", ~~char_(L'x')));
-        BOOST_TEST(!parse(L"X", ~~char_(L'x')));
-        BOOST_TEST(parse(L"x", ~~char_(L'b', L'y')));
-        BOOST_TEST(!parse(L"a", ~~char_(L'b', L'y')));
-        BOOST_TEST(!parse(L"z", ~~char_(L'b', L'y')));
+        CHECK(parse(L"x", ~~char_));
+        CHECK(parse(L"x", ~~char_(L'x')));
+        CHECK(!parse(L" ", ~~char_(L'x')));
+        CHECK(!parse(L"X", ~~char_(L'x')));
+        CHECK(parse(L"x", ~~char_(L'b', L'y')));
+        CHECK(!parse(L"a", ~~char_(L'b', L'y')));
+        CHECK(!parse(L"z", ~~char_(L'b', L'y')));
     }
 
     {
         using namespace x4::standard;
 
-        BOOST_TEST(parse("   x", 'x', space));
-        BOOST_TEST(parse("   x", char_, space));
-        BOOST_TEST(parse("   x", char_('x'), space));
-        BOOST_TEST(!parse("   x", char_('y'), space));
-        BOOST_TEST(parse("   x", char_('a', 'z'), space));
-        BOOST_TEST(!parse("   x", char_('0', '9'), space));
+        CHECK(parse("   x", 'x', space));
+        CHECK(parse("   x", char_, space));
+        CHECK(parse("   x", char_('x'), space));
+        CHECK(!parse("   x", char_('y'), space));
+        CHECK(parse("   x", char_('a', 'z'), space));
+        CHECK(!parse("   x", char_('0', '9'), space));
     }
     {
         using namespace x4::standard_wide;
 
-        BOOST_TEST(parse(L"   x", L'x', space));
-        BOOST_TEST(parse(L"   x", char_, space));
-        BOOST_TEST(parse(L"   x", char_(L'x'), space));
-        BOOST_TEST(!parse(L"   x", char_(L'y'), space));
-        BOOST_TEST(parse(L"   x", char_(L'a', L'z'), space));
-        BOOST_TEST(!parse(L"   x", char_(L'0', L'9'), space));
+        CHECK(parse(L"   x", L'x', space));
+        CHECK(parse(L"   x", char_, space));
+        CHECK(parse(L"   x", char_(L'x'), space));
+        CHECK(!parse(L"   x", char_(L'y'), space));
+        CHECK(parse(L"   x", char_(L'a', L'z'), space));
+        CHECK(!parse(L"   x", char_(L'0', L'9'), space));
     }
 
     // unicode (normal ASCII)
     {
         using namespace x4::unicode;
 
-        BOOST_TEST(parse(U"abcd", +char_(U"abcd")));
-        BOOST_TEST(!parse(U"abcd", +char_(U"qwer")));
+        CHECK(parse(U"abcd", +char_(U"abcd")));
+        CHECK(!parse(U"abcd", +char_(U"qwer")));
 
         auto const sub_delims = char_(U"!$&'()*+,;=");
 
@@ -179,7 +179,7 @@ int main()
                 return parse(delim, sub_delims).completed();
             });
 
-        BOOST_TEST(matched_all_sub_delims);
+        CHECK(matched_all_sub_delims);
     }
 
     // unicode (escaped Unicode char literals)
@@ -206,34 +206,31 @@ int main()
                 return !parse(bad_test_str, chars).completed();
             });
 
-        BOOST_TEST(all_matched);
-        BOOST_TEST(none_matched);
+        CHECK(all_matched);
+        CHECK(none_matched);
     }
 
     // single char strings
     {
-        BOOST_TEST(parse("x", "x"));
-        BOOST_TEST(parse(L"x", L"x"));
-        BOOST_TEST(parse("x", standard::char_("x")));
-        BOOST_TEST(parse(L"x", standard_wide::char_(L"x")));
+        CHECK(parse("x", "x"));
+        CHECK(parse(L"x", L"x"));
+        CHECK(parse("x", standard::char_("x")));
+        CHECK(parse(L"x", standard_wide::char_(L"x")));
 
-        BOOST_TEST(parse("x", standard::char_('a', 'z')));
-        BOOST_TEST(parse(L"x", standard_wide::char_(L'a', L'z')));
+        CHECK(parse("x", standard::char_('a', 'z')));
+        CHECK(parse(L"x", standard_wide::char_(L'a', L'z')));
     }
 
     // chsets
     {
-        BOOST_TEST(parse("x", standard::char_("a-z")));
-        BOOST_TEST(!parse("1", standard::char_("a-z")));
-        BOOST_TEST(parse("1", standard::char_("a-z0-9")));
+        CHECK(parse("x", standard::char_("a-z")));
+        CHECK(!parse("1", standard::char_("a-z")));
+        CHECK(parse("1", standard::char_("a-z0-9")));
 
-        BOOST_TEST(parse(L"x", standard_wide::char_(L"a-z")));
-        BOOST_TEST(!parse(L"1", standard_wide::char_(L"a-z")));
-        BOOST_TEST(parse(L"1", standard_wide::char_(L"a-z0-9")));
+        CHECK(parse(L"x", standard_wide::char_(L"a-z")));
+        CHECK(!parse(L"1", standard_wide::char_(L"a-z")));
+        CHECK(parse(L"1", standard_wide::char_(L"a-z0-9")));
 
-        std::string set = "a-z0-9";
-        BOOST_TEST(parse("x", standard::char_(set)));
+        CHECK(parse("x", standard::char_(std::string("a-z0-9"))));
     }
-
-    return boost::report_errors();
 }

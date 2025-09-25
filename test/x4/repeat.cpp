@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 
-int main()
+TEST_CASE("repeat")
 {
     using namespace x4::standard;
     using x4::repeat;
@@ -37,135 +37,146 @@ int main()
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(repeat(3, repeat_inf)['x']);
 
     {
-        BOOST_TEST(parse("aaaaaaaa", *char_));
-        BOOST_TEST(parse("aaaaaaaa", repeat(8)[char_]));
-        BOOST_TEST(!parse("aa", repeat(3)[char_]));
-        BOOST_TEST(parse("aaa", repeat(3, 5)[char_]));
-        BOOST_TEST(parse("aaaaa", repeat(3, 5)[char_]));
-        BOOST_TEST(!parse("aaaaaa", repeat(3, 5)[char_]));
-        BOOST_TEST(!parse("aa", repeat(3, 5)[char_]));
+        CHECK(parse("aaaaaaaa", *char_));
+        CHECK(parse("aaaaaaaa", repeat(8)[char_]));
+        CHECK(!parse("aa", repeat(3)[char_]));
+        CHECK(parse("aaa", repeat(3, 5)[char_]));
+        CHECK(parse("aaaaa", repeat(3, 5)[char_]));
+        CHECK(!parse("aaaaaa", repeat(3, 5)[char_]));
+        CHECK(!parse("aa", repeat(3, 5)[char_]));
 
-        BOOST_TEST(parse("aaa", repeat(3, repeat_inf)[char_]));
-        BOOST_TEST(parse("aaaaa", repeat(3, repeat_inf)[char_]));
-        BOOST_TEST(parse("aaaaaa", repeat(3, repeat_inf)[char_]));
-        BOOST_TEST(!parse("aa", repeat(3, repeat_inf)[char_]));
+        CHECK(parse("aaa", repeat(3, repeat_inf)[char_]));
+        CHECK(parse("aaaaa", repeat(3, repeat_inf)[char_]));
+        CHECK(parse("aaaaaa", repeat(3, repeat_inf)[char_]));
+        CHECK(!parse("aa", repeat(3, repeat_inf)[char_]));
     }
     {
         std::string s;
-        BOOST_TEST(parse("aaaaaaaa", *(char_ >> char_), s));
-        BOOST_TEST(s == "aaaaaaaa");
-
-        s.clear();
-        BOOST_TEST(parse("aaaaaaaa", repeat(4)[char_ >> char_], s));
-        BOOST_TEST(s == "aaaaaaaa");
-
-        BOOST_TEST(!parse("aa", repeat(3)[char_ >> char_]));
-        BOOST_TEST(!parse("a", repeat(1)[char_ >> char_]));
-
-        s.clear();
-        BOOST_TEST(parse("aa", repeat(1, 3)[char_ >> char_], s));
-        BOOST_TEST(s == "aa");
-
-        s.clear();
-        BOOST_TEST(parse("aaaaaa", repeat(1, 3)[char_ >> char_], s));
-        BOOST_TEST(s == "aaaaaa");
-
-        BOOST_TEST(!parse("aaaaaaa", repeat(1, 3)[char_ >> char_]));
-        BOOST_TEST(!parse("a", repeat(1, 3)[char_ >> char_]));
-
-        s.clear();
-        BOOST_TEST(parse("aaaa", repeat(2, repeat_inf)[char_ >> char_], s));
-        BOOST_TEST(s == "aaaa");
-
-        s.clear();
-        BOOST_TEST(parse("aaaaaa", repeat(2, repeat_inf)[char_ >> char_], s));
-        BOOST_TEST(s == "aaaaaa");
-
-        BOOST_TEST(!parse("aa", repeat(2, repeat_inf)[char_ >> char_]));
+        REQUIRE(parse("aaaaaaaa", *(char_ >> char_), s));
+        CHECK(s == "aaaaaaaa");
     }
+
+    {
+        std::string s;
+        REQUIRE(parse("aaaaaaaa", repeat(4)[char_ >> char_], s));
+        CHECK(s == "aaaaaaaa");
+    }
+
+    CHECK(!parse("aa", repeat(3)[char_ >> char_]));
+    CHECK(!parse("a", repeat(1)[char_ >> char_]));
+
+    {
+        std::string s;
+        REQUIRE(parse("aa", repeat(1, 3)[char_ >> char_], s));
+        CHECK(s == "aa");
+    }
+    {
+        std::string s;
+        REQUIRE(parse("aaaaaa", repeat(1, 3)[char_ >> char_], s));
+        CHECK(s == "aaaaaa");
+    }
+
+    CHECK(!parse("aaaaaaa", repeat(1, 3)[char_ >> char_]));
+    CHECK(!parse("a", repeat(1, 3)[char_ >> char_]));
+
+    {
+        std::string s;
+        REQUIRE(parse("aaaa", repeat(2, repeat_inf)[char_ >> char_], s));
+        CHECK(s == "aaaa");
+    }
+    {
+        std::string s;
+        REQUIRE(parse("aaaaaa", repeat(2, repeat_inf)[char_ >> char_], s));
+        CHECK(s == "aaaaaa");
+    }
+
+    CHECK(!parse("aa", repeat(2, repeat_inf)[char_ >> char_]));
 
     // from classic spirit tests
     {
-        BOOST_TEST(parse("", repeat(0, repeat_inf)['x']));
+        CHECK(parse("", repeat(0, repeat_inf)['x']));
 
         // repeat exact 8
         {
             constexpr auto rep8 = repeat(8)[alpha] >> 'X';
-            BOOST_TEST(!parse("abcdefgX", rep8).is_partial_match());
-            BOOST_TEST(parse("abcdefghX", rep8));
-            BOOST_TEST(!parse("abcdefghiX", rep8).is_partial_match());
-            BOOST_TEST(!parse("abcdefgX", rep8).is_partial_match());
-            BOOST_TEST(!parse("aX", rep8).is_partial_match());
+            CHECK(!parse("abcdefgX", rep8));
+            CHECK(parse("abcdefghX", rep8));
+            CHECK(!parse("abcdefghiX", rep8));
+            CHECK(!parse("abcdefgX", rep8));
+            CHECK(!parse("aX", rep8));
         }
 
         // repeat 2 to 8
         {
             constexpr auto rep28 = repeat(2, 8)[alpha] >> '*';
-            BOOST_TEST(parse("abcdefg*", rep28));
-            BOOST_TEST(parse("abcdefgh*", rep28));
-            BOOST_TEST(!parse("abcdefghi*", rep28).is_partial_match());
-            BOOST_TEST(!parse("a*", rep28).is_partial_match());
+            CHECK(parse("abcdefg*", rep28));
+            CHECK(parse("abcdefgh*", rep28));
+            CHECK(!parse("abcdefghi*", rep28));
+            CHECK(!parse("a*", rep28));
         }
 
         // repeat 2 or more
         {
             constexpr auto rep2_ = repeat(2, repeat_inf)[alpha] >> '+';
-            BOOST_TEST(parse("abcdefg+", rep2_));
-            BOOST_TEST(parse("abcdefgh+", rep2_));
-            BOOST_TEST(parse("abcdefghi+", rep2_));
-            BOOST_TEST(parse("abcdefg+", rep2_));
-            BOOST_TEST(!parse("a+", rep2_));
+            CHECK(parse("abcdefg+", rep2_));
+            CHECK(parse("abcdefgh+", rep2_));
+            CHECK(parse("abcdefghi+", rep2_));
+            CHECK(parse("abcdefg+", rep2_));
+            CHECK(!parse("a+", rep2_));
         }
 
         // repeat 0
         {
             constexpr auto rep0 = repeat(0)[alpha] >> '/';
-            BOOST_TEST(parse("/", rep0));
-            BOOST_TEST(!parse("a/", rep0));
+            CHECK(parse("/", rep0));
+            CHECK(!parse("a/", rep0));
         }
 
         // repeat 0 or 1
         {
             constexpr auto rep01 = repeat(0, 1)[alpha >> digit] >> '?';
-            BOOST_TEST(!parse("abcdefg?", rep01));
-            BOOST_TEST(!parse("a?", rep01));
-            BOOST_TEST(!parse("1?", rep01));
-            BOOST_TEST(!parse("11?", rep01));
-            BOOST_TEST(!parse("aa?", rep01));
-            BOOST_TEST(parse("?", rep01));
-            BOOST_TEST(parse("a1?", rep01));
+            CHECK(!parse("abcdefg?", rep01));
+            CHECK(!parse("a?", rep01));
+            CHECK(!parse("1?", rep01));
+            CHECK(!parse("11?", rep01));
+            CHECK(!parse("aa?", rep01));
+            CHECK(parse("?", rep01));
+            CHECK(parse("a1?", rep01));
         }
     }
 
     {
-        BOOST_TEST(parse(" a a aaa aa", repeat(7)[char_], space));
-        BOOST_TEST(parse("12345 678 9", repeat(9)[digit], space));
+        CHECK(parse(" a a aaa aa", repeat(7)[char_], space));
+        CHECK(parse("12345 678 9", repeat(9)[digit], space));
     }
 
     {
         std::vector<std::string> v;
-        BOOST_TEST(parse("a b c d", repeat(4)[lexeme[+alpha]], space, v) && 4 == v.size() &&
-            v[0] == "a" && v[1] == "b" && v[2] == "c" &&  v[3] == "d");
+        REQUIRE(parse("a b c", repeat(3)[lexeme[+alpha]], space, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == "a");
+        CHECK(v[1] == "b");
+        CHECK(v[2] == "c");
     }
-    {
-        BOOST_TEST(parse("1 2 3", int_ >> repeat(2)[int_], space));
-        BOOST_TEST(!parse("1 2", int_ >> repeat(2)[int_], space));
-    }
+
+    CHECK(parse("1 2 3", int_ >> repeat(2)[int_], space));
+    CHECK(!parse("1 2", int_ >> repeat(2)[int_], space));
 
     {
         std::vector<int> v;
-        BOOST_TEST(parse("1 2 3", int_ >> repeat(2)[int_], space, v));
-        BOOST_TEST(v.size() == 3 && v[0] == 1 && v[1] == 2 && v[2] == 3);
+        REQUIRE(parse("1 2 3", int_ >> repeat(2)[int_], space, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 1);
+        CHECK(v[1] == 2);
+        CHECK(v[2] == 3);
 
-        BOOST_TEST(!parse("1 2", int_ >> repeat(2)[int_], space));
+        CHECK(!parse("1 2", int_ >> repeat(2)[int_], space));
     }
 
     {
          // test move only types
         std::vector<spirit_test::move_only> v;
-        BOOST_TEST(parse("sss", repeat(3)[spirit_test::synth_move_only], v));
-        BOOST_TEST_EQ(v.size(), 3);
+        REQUIRE(parse("sss", repeat(3)[spirit_test::synth_move_only], v));
+        CHECK(v.size() == 3);
     }
-
-    return boost::report_errors();
 }

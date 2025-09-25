@@ -104,7 +104,7 @@ struct unary_parser : parser<Derived>
         : subject(std::forward<SubjectT>(subject))
     {}
 
-    BOOST_SPIRIT_NO_UNIQUE_ADDRESS Subject subject;
+    Subject subject;
 };
 
 template<class Left, class Right, class Derived>
@@ -125,8 +125,9 @@ struct binary_parser : parser<Derived>
         , right(std::forward<RightT>(right))
     {}
 
-    BOOST_SPIRIT_NO_UNIQUE_ADDRESS Left left;
-    BOOST_SPIRIT_NO_UNIQUE_ADDRESS Right right;
+    // TODO: [MSVC 2022 BUG] "overruns" in constexpr, test case in `lit.cpp`
+    /*BOOST_SPIRIT_NO_UNIQUE_ADDRESS*/ Left left;
+    /*BOOST_SPIRIT_NO_UNIQUE_ADDRESS*/ Right right;
 };
 
 // as_parser: convert a type, T, into a parser.

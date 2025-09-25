@@ -17,7 +17,7 @@
 #include <boost/spirit/x4/operator/plus.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 
-int main()
+TEST_CASE("no_skip")
 {
     using x4::standard::space;
     using x4::standard::char_;
@@ -29,26 +29,24 @@ int main()
     // without skipping no_skip is equivalent to lexeme
     {
         std::string str;
-        BOOST_TEST(parse("'  abc '", '\'' >> no_skip[+~char_('\'')] >> '\'', str));
-        BOOST_TEST(str == "  abc ");
+        REQUIRE(parse("'  abc '", '\'' >> no_skip[+~char_('\'')] >> '\'', str));
+        CHECK(str == "  abc ");
     }
     {
         std::string str;
-        BOOST_TEST(parse("'  abc '", '\'' >> lexeme[+~char_('\'')] >> '\'', str));
-        BOOST_TEST(str == "  abc ");
+        REQUIRE(parse("'  abc '", '\'' >> lexeme[+~char_('\'')] >> '\'', str));
+        CHECK(str == "  abc ");
     }
 
     // with skipping, no_skip allows to match a leading skipper
     {
         std::string str;
-        BOOST_TEST(parse("'  abc '", '\'' >> no_skip[+~char_('\'')] >> '\'', space, str));
-        BOOST_TEST(str == "  abc ");
+        REQUIRE(parse("'  abc '", '\'' >> no_skip[+~char_('\'')] >> '\'', space, str));
+        CHECK(str == "  abc ");
     }
     {
         std::string str;
-        BOOST_TEST(parse("'  abc '", '\'' >> lexeme[+~char_('\'')] >> '\'', space, str));
-        BOOST_TEST(str == "abc ");
+        REQUIRE(parse("'  abc '", '\'' >> lexeme[+~char_('\'')] >> '\'', space, str));
+        CHECK(str == "abc ");
     }
-
-    return boost::report_errors();
 }

@@ -29,10 +29,11 @@
 #include <boost/fusion/include/deque.hpp>
 #include <boost/fusion/include/comparison.hpp>
 
+#include <concepts>
 #include <optional>
 #include <string>
 
-int main()
+TEST_CASE("sequence")
 {
     namespace traits = x4::traits;
 
@@ -49,6 +50,7 @@ int main()
     using x4::no_case;
     using x4::rule;
     using x4::_attr;
+    using x4::eps;
 
     using traits::attribute_of_t;
 
@@ -58,102 +60,76 @@ int main()
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(char_ >> char_);
 
-    {
-        BOOST_TEST(parse("aa", char_ >> char_));
-        BOOST_TEST(parse("aa", char_ >> 'a'));
-        BOOST_TEST(parse("aaa", char_ >> char_ >> char_('a')));
-        BOOST_TEST(parse("xi", char_('x') >> char_('i')));
-        BOOST_TEST(!parse("xi", char_('x') >> char_('o')));
-        BOOST_TEST(parse("xin", char_('x') >> char_('i') >> char_('n')));
-    }
+    CHECK(parse("aa", char_ >> char_));
+    CHECK(parse("aa", char_ >> 'a'));
+    CHECK(parse("aaa", char_ >> char_ >> char_('a')));
+    CHECK(parse("xi", char_('x') >> char_('i')));
+    CHECK(!parse("xi", char_('x') >> char_('o')));
+    CHECK(parse("xin", char_('x') >> char_('i') >> char_('n')));
 
-#ifdef BOOST_SPIRIT_COMPILE_ERROR_CHECK
-    {
-        // Compile check only
-        struct x {};
-        char_ >> x(); // this should give a reasonable error message
-    }
-#endif
+    CHECK(parse(" a a", char_ >> char_, space));
+    CHECK(parse(" x i", char_('x') >> char_('i'), space));
+    CHECK(!parse(" x i", char_('x') >> char_('o'), space));
 
-    {
-        BOOST_TEST(parse(" a a", char_ >> char_, space));
-        BOOST_TEST(parse(" x i", char_('x') >> char_('i'), space));
-        BOOST_TEST(!parse(" x i", char_('x') >> char_('o'), space));
-    }
-
-
-    {
-        BOOST_TEST(parse(" Hello, World", lit("Hello") >> ',' >> "World", space));
-    }
-
+    CHECK(parse(" Hello, World", lit("Hello") >> ',' >> "World", space));
 
     {
         vector<char, char> vec;
-        BOOST_TEST(parse("ab", char_ >> char_, vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
-        BOOST_TEST((at_c<1>(vec) == 'b'));
+        REQUIRE(parse("ab", char_ >> char_, vec));
+        CHECK(at_c<0>(vec) == 'a');
+        CHECK(at_c<1>(vec) == 'b');
     }
-
-#ifdef BOOST_SPIRIT_COMPILE_ERROR_CHECK
-    {
-        // Compile check only
-        vector<char, char> attr;
-
-        // error: attr does not have enough elements
-        parse("abc", char_ >> char_ >> char_, attr);
-    }
-#endif
 
     {
         vector<char, char, char> vec;
-        BOOST_TEST(parse(" a\n  b\n  c", char_ >> char_ >> char_, space, vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
-        BOOST_TEST((at_c<1>(vec) == 'b'));
-        BOOST_TEST((at_c<2>(vec) == 'c'));
+        REQUIRE(parse(" a\n  b\n  c", char_ >> char_ >> char_, space, vec));
+        CHECK(at_c<0>(vec) == 'a');
+        CHECK(at_c<1>(vec) == 'b');
+        CHECK(at_c<2>(vec) == 'c');
     }
 
     {
         // 'b' has an unused_type. unused attributes are not part of the sequence
         vector<char, char> vec;
-        BOOST_TEST(parse("abc", char_ >> 'b' >> char_, vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
-        BOOST_TEST((at_c<1>(vec) == 'c'));
+        REQUIRE(parse("abc", char_ >> 'b' >> char_, vec));
+        CHECK(at_c<0>(vec) == 'a');
+        CHECK(at_c<1>(vec) == 'c');
     }
 
     {
         // 'b' has an unused_type. unused attributes are not part of the sequence
         vector<char, char> vec;
-        BOOST_TEST(parse("acb", char_ >> char_ >> 'b', vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
-        BOOST_TEST((at_c<1>(vec) == 'c'));
+        REQUIRE(parse("acb", char_ >> char_ >> 'b', vec));
+        CHECK(at_c<0>(vec) == 'a');
+        CHECK(at_c<1>(vec) == 'c');
     }
 
     {
         // "hello" has an unused_type. unused attributes are not part of the sequence
         vector<char, char> vec;
-        BOOST_TEST(parse("a hello c", char_ >> "hello" >> char_, space, vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
-        BOOST_TEST((at_c<1>(vec) == 'c'));
+        REQUIRE(parse("a hello c", char_ >> "hello" >> char_, space, vec));
+        CHECK(at_c<0>(vec) == 'a');
+        CHECK(at_c<1>(vec) == 'c');
     }
 
     {
         // a single element
-        char c;
-        BOOST_TEST(parse("ab", char_ >> 'b', c));
-        BOOST_TEST((c == 'a'));
+        char c{};
+        REQUIRE(parse("ab", char_ >> 'b', c));
+        CHECK(c == 'a');
     }
 
     {
         // a single element fusion sequence
         vector<char> vec;
-        BOOST_TEST(parse("ab", char_ >> 'b', vec));
-        BOOST_TEST((at_c<0>(vec) == 'a'));
+        REQUIRE(parse("ab", char_ >> 'b', vec));
+        CHECK(at_c<0>(vec) == 'a');
     }
 
     {
-        // make sure single element tuples get passed through if the rhs
+        // Make sure single element tuples get passed through if the rhs
         // has a single element tuple as its attribute. Edit JDG 2014:
-        // actually he issue here is that if the rhs in this case a rule
+        // actually the issue here is that if the rhs in this case a rule
         // (r), it should get it (i.e. the sequence parser should not
         // unwrap it). It's odd that the RHS (r) does not really have a
         // single element tuple (it's a deque<char, int>), so the original
@@ -164,8 +140,8 @@ int main()
 
         auto r = rule<class r_id, attr_type>{} = char_ >> ',' >> int_;
 
-        BOOST_TEST((parse("test:x,1", "test:" >> r, fv) &&
-            fv == attr_type('x', 1)));
+        REQUIRE(parse("test:x,1", "test:" >> r, fv));
+        CHECK((fv == attr_type('x', 1)));
     }
 
     {
@@ -178,153 +154,117 @@ int main()
 
         auto r = rule<class r_id, attr_type>{} = int_;
 
-        BOOST_TEST((parse("test:1", "test:" >> r, fv) &&
-            fv == attr_type(1)));
+        REQUIRE(parse("test:1", "test:" >> r, fv));
+        CHECK((fv == attr_type(1)));
     }
 
-    {
-        // unused means we don't care about the attribute
-        BOOST_TEST(parse("abc", char_ >> 'b' >> char_, unused));
-    }
+    // unused means we don't care about the attribute
+    CHECK(parse("abc", char_ >> 'b' >> char_, unused));
 
-    {
-        BOOST_TEST(parse("aA", no_case[char_('a') >> 'a']));
-        BOOST_TEST(parse("BEGIN END", no_case[lit("begin") >> "end"], space));
-        BOOST_TEST(!parse("BEGIN END", no_case[lit("begin") >> "nend"], space));
-    }
+    CHECK(parse("aA", no_case[char_('a') >> 'a']));
+    CHECK(parse("BEGIN END", no_case[lit("begin") >> "end"], space));
+    CHECK(!parse("BEGIN END", no_case[lit("begin") >> "nend"], space));
 
+    // check attribute is passed through unary to another sequence
     {
-        // check attribute is passed through unary to another sequence
-        using x4::eps;
         std::string s;
-        BOOST_TEST(parse("ab", eps >> no_case[char_ >> char_], s));
-        BOOST_TEST("ab" == s);
-        s.clear();
-        BOOST_TEST(parse("ab", no_case[char_ >> char_] >> eps, s));
-        BOOST_TEST("ab" == s);
-        s.clear();
-        BOOST_TEST(parse("abc", char_ >> no_case[char_ >> char_], s));
-        BOOST_TEST("abc" == s);
-        s.clear();
-        BOOST_TEST(parse("abc", no_case[char_ >> char_] >> char_, s));
-        BOOST_TEST("abc" == s);
+        REQUIRE(parse("ab", eps >> no_case[char_ >> char_], s));
+        CHECK("ab" == s);
     }
-
     {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-
-        std::vector<char> v;
-        BOOST_TEST(parse("abc", char_ >> char_ >> char_, v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-    }
-
-    {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-
-        std::vector<char> v;
-        BOOST_TEST(parse("a,b,c", char_ >> *(',' >> char_), v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-    }
-
-    {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-
-        std::vector<char> v;
-        BOOST_TEST(parse("abc", char_ >> *char_, v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-    }
-
-    {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-        //~ using x4::hold;
-
-        std::vector<char> v;
-        BOOST_TEST(parse("abc", char_ >> *(char_ >> char_), v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-
-        v.clear();
-        BOOST_TEST(!parse("abcd", char_ >> *(char_ >> char_), v));
-
-        // $$$ hold not yet implemented $$$
-        //~ v.clear();
-        //~ BOOST_TEST(parse("abcdef", char_ >> *hold[char_ >> char_] >> char_, v));
-        //~ BOOST_TEST(v.size() == 6);
-        //~ BOOST_TEST(v[0] == 'a');
-        //~ BOOST_TEST(v[1] == 'b');
-        //~ BOOST_TEST(v[2] == 'c');
-        //~ BOOST_TEST(v[3] == 'd');
-        //~ BOOST_TEST(v[4] == 'e');
-        //~ BOOST_TEST(v[5] == 'f');
-
-        v.clear();
-        BOOST_TEST(parse("abc", char_ >> +(char_ >> char_), v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-    }
-
-    {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-
-        std::vector<char> v;
-        BOOST_TEST(parse("abc", char_ >> -(+char_), v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
-        BOOST_TEST(v[2] == 'c');
-    }
-
-    {
-        // alternative forms of attributes. Allow sequences to take in
-        // stl containers.
-
         std::string s;
-        BOOST_TEST(parse("foobar", string("foo") >> string("bar"), s));
-        BOOST_TEST(s == "foobar");
+        REQUIRE(parse("ab", no_case[char_ >> char_] >> eps, s));
+        CHECK("ab" == s);
+    }
+    {
+        std::string s;
+        REQUIRE(parse("abc", char_ >> no_case[char_ >> char_], s));
+        CHECK("abc" == s);
+    }
+    {
+        std::string s;
+        REQUIRE(parse("abc", no_case[char_ >> char_] >> char_, s));
+        CHECK("abc" == s);
+    }
 
-        s.clear();
+    // Alternative forms of attributes. Allow sequences to take in
+    // STL containers.
+    {
 
-        // $$$ hold not yet implemented $$$
-        //~ using x4::hold;
-
-        //~ rule<char const*, std::string()> word = +char_("abc");
-        //~ BOOST_TEST(parse("ab.bc.ca", *hold[word >> string(".")] >> word, s));
-        //~ BOOST_TEST(s == "ab.bc.ca");
+        std::vector<char> v;
+        REQUIRE(parse("abc", char_ >> char_ >> char_, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("a,b,c", char_ >> *(',' >> char_), v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("abc", char_ >> *char_, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("abc", char_ >> *(char_ >> char_), v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::vector<char> v;
+        CHECK(!parse("abcd", char_ >> *(char_ >> char_), v));
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("abc", char_ >> +(char_ >> char_), v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("abc", char_ >> -(+char_), v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+        CHECK(v[2] == 'c');
+    }
+    {
+        std::string s;
+        REQUIRE(parse("foobar", string("foo") >> string("bar"), s));
+        CHECK(s == "foobar");
     }
 
     // Make sure get_sequence_types works for sequences of sequences.
     {
         std::vector<char> v;
-        BOOST_TEST(parse(" a b", (' ' >> char_) >> (' ' >> char_), v));
-        BOOST_TEST(v.size() == 2);
-        BOOST_TEST(v[0] == 'a');
-        BOOST_TEST(v[1] == 'b');
+        REQUIRE(parse(" a b", (' ' >> char_) >> (' ' >> char_), v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
     }
 
     // alternative forms of attributes. Allow sequences to take in
     // stl containers of stl containers.
     {
         std::vector<std::string> v;
-        BOOST_TEST(parse("abc1,abc2", *~char_(',') >> *(',' >> *~char_(',')), v));
-        BOOST_TEST(v.size() == 2 && v[0] == "abc1" && v[1] == "abc2");
+        REQUIRE(parse("abc1,abc2", *~char_(',') >> *(',' >> *~char_(',')), v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == "abc1");
+        CHECK(v[1] == "abc2");
     }
 
     {
@@ -333,18 +273,18 @@ int main()
         auto e = rule<class e_id, std::string>{} = *~char_(',');
         auto l = rule<class l_id, std::vector<std::string>>{} = e >> *(',' >> e);
 
-        BOOST_TEST(parse("abc1,abc2,abc3", l, v));
-        BOOST_TEST(v.size() == 3);
-        BOOST_TEST(v[0] == "abc1");
-        BOOST_TEST(v[1] == "abc2");
-        BOOST_TEST(v[2] == "abc3");
+        REQUIRE(parse("abc1,abc2,abc3", l, v));
+        REQUIRE(v.size() == 3);
+        CHECK(v[0] == "abc1");
+        CHECK(v[1] == "abc2");
+        CHECK(v[2] == "abc3");
     }
 
     // do the same with a plain string object
     {
         std::string s;
-        BOOST_TEST(parse("abc1,abc2", *~char_(',') >> *(',' >> *~char_(',')), s));
-        BOOST_TEST(s == "abc1abc2");
+        REQUIRE(parse("abc1,abc2", *~char_(',') >> *(',' >> *~char_(',')), s));
+        CHECK(s == "abc1abc2");
     }
 
     {
@@ -352,109 +292,123 @@ int main()
         auto e = rule<class e_id, std::string>{} = *~char_(',');
         auto l = rule<class l_id, std::string>{} = e >> *(',' >> e);
 
-        BOOST_TEST(parse("abc1,abc2,abc3", l, s));
-        BOOST_TEST(s == "abc1abc2abc3");
+        REQUIRE(parse("abc1,abc2,abc3", l, s));
+        CHECK(s == "abc1abc2abc3");
     }
 
     {
         std::vector<char> v;
-        BOOST_TEST(parse("ab", char_ >> -char_, v));
-        BOOST_TEST(v.size() == 2 && v[0] == 'a' && v[1] == 'b');
-
-        v.clear();
-        BOOST_TEST(parse("a", char_ >> -char_, v));
-        BOOST_TEST(v.size() == 1 && v[0] == 'a');
-
-        // $$$ should this be allowed? I don't think so... $$$
-        //~ v.clear();
-        //~ BOOST_TEST(parse("a", char_, v));
-        //~ BOOST_TEST(v.size() == 1 && v[0] == 'a');
+        REQUIRE(parse("ab", char_ >> -char_, v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+    }
+    {
+        std::vector<char> v;
+        REQUIRE(parse("a", char_ >> -char_, v));
+        REQUIRE(v.size() == 1);
+        CHECK(v[0] == 'a');
+    }
+    {
+        // We don't think this should be allowed
+        // std::vector<char> v;
+        // REQUIRE(parse("a", char_, v));
+        // REQUIRE(v.size() == 1);
+        // CHECK(v[0] == 'a');
     }
 
     {
         std::vector<std::optional<char>> v;
-        BOOST_TEST(parse("ab", char_ >> -char_, v));
-        BOOST_TEST(v.size() == 2 && v[0] == 'a' && v[1] == 'b');
-
-        v.clear();
-        BOOST_TEST(parse("a", char_ >> -char_, v));
-        BOOST_TEST(v.size() == 2 && v[0] == 'a' && !v[1]);
-
-        // $$$ should this be allowed? I don't think so... $$$
-        //~ v.clear();
-        //~ BOOST_TEST(parse("a", char_, v));
-        //~ BOOST_TEST(v.size() == 1 && v[0] == 'a');
+        REQUIRE(parse("ab", char_ >> -char_, v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 'a');
+        CHECK(v[1] == 'b');
+    }
+    {
+        std::vector<std::optional<char>> v;
+        REQUIRE(parse("a", char_ >> -char_, v));
+        REQUIRE(v.size() == 2);
+        CHECK(v[0] == 'a');
+        CHECK(!v[1].has_value());
+    }
+    {
+        // We don't think this should be allowed
+        //std::vector<std::optional<char>> v;
+        // REQUIRE(parse("a", char_, v));
+        // REQUIRE(v.size() == 1);
+        // CHECK(v[0] == 'a');
     }
 
-    // test from spirit mailing list
+    // Test from spirit mailing list
     // "Error with container within sequence"
     {
         using attr_type = vector<std::string>;
         attr_type vec;
 
-        auto r = *alnum;
+        constexpr auto r = *alnum;
 
-        BOOST_TEST(parse("abcdef", r, vec));
-        BOOST_TEST(at_c<0>(vec) == "abcdef");
+        REQUIRE(parse("abcdef", r, vec));
+        CHECK(at_c<0>(vec) == "abcdef");
     }
-
-    // test from spirit mailing list (variation of above)
-    // "Error with container within sequence"
     {
         using attr_type = vector<std::vector<int>>;
         attr_type vec;
 
-        auto r = *int_;
+        constexpr auto r = *int_;
 
-        BOOST_TEST(parse("123 456", r, space, vec));
-        BOOST_TEST(at_c<0>(vec).size() == 2);
-        BOOST_TEST(at_c<0>(vec)[0] == 123);
-        BOOST_TEST(at_c<0>(vec)[1] == 456);
+        REQUIRE(parse("123 456", r, space, vec));
+        REQUIRE(at_c<0>(vec).size() == 2);
+        CHECK(at_c<0>(vec)[0] == 123);
+        CHECK(at_c<0>(vec)[1] == 456);
     }
 
     {
-        // non-flat optional
+        // Non-flat optional
         vector<int, std::optional<vector<int, int>>> v;
-        auto const p = int_ >> -(':' >> int_ >> '-' >> int_);
-        BOOST_TEST(parse("1:2-3", p, v))
-            && BOOST_TEST(at_c<1>(v)) && BOOST_TEST_EQ(at_c<0>(*at_c<1>(v)), 2);
+        constexpr auto p = int_ >> -(':' >> int_ >> '-' >> int_);
+        REQUIRE(parse("1:2-3", p, v));
+        REQUIRE(at_c<1>(v).has_value());
+        CHECK(at_c<0>(*at_c<1>(v)) == 2);
     }
 
+    // optional with container attribute
     {
-        // optional with container attribute
-        vector<char, std::optional<std::string>> v;
-        auto const p = char_ >> -(':' >> +char_);
-        BOOST_TEST(parse("x", p, v))
-            && BOOST_TEST(!at_c<1>(v));
-        v = {};
-        BOOST_TEST(parse("x:abc", p, v))
-            && BOOST_TEST(at_c<1>(v)) && BOOST_TEST(*at_c<1>(v) == "abc");
+        constexpr auto p = char_ >> -(':' >> +char_);
+
+        {
+            vector<char, std::optional<std::string>> v;
+            REQUIRE(parse("x", p, v));
+            CHECK(!at_c<1>(v).has_value());
+        }
+        {
+            vector<char, std::optional<std::string>> v;
+            REQUIRE(parse("x:abc", p, v));
+            REQUIRE(at_c<1>(v).has_value());
+            CHECK(*at_c<1>(v) == "abc");
+        }
     }
 
     {
         using Attr = boost::variant<int, float>;
-        auto const term = rule<class term_id, Attr>("term") = int_ | float_;
-        auto const expr = rule<class expr_id, Attr>("expr") = term | ('(' > term > ')');
+        constexpr auto term = rule<class term_id, Attr>("term") = int_ | float_;
+        constexpr auto expr = rule<class expr_id, Attr>("expr") = term | ('(' > term > ')');
         Attr var;
-        BOOST_TEST(parse("(1)", expr, space, var));
+        CHECK(parse("(1)", expr, space, var));
     }
 
-    // test that failing sequence leaves attribute consistent
+    // Test that failing sequence leaves attribute consistent
     {
         std::string str;
         //no need to use omit[], but lit() is buggy ATM
-        BOOST_TEST(parse("A\nB\nC", *(char_ >> omit[lit("\n")]), str).is_partial_match());
-        BOOST_TEST(str == "AB");
+        REQUIRE(parse("A\nB\nC", *(char_ >> omit[lit("\n")]), str).is_partial_match());
+        CHECK(str == "AB");
     }
 
-    // test that sequence with only one parser producing attribute
-    // makes it unwrapped
-    {
-        BOOST_TEST((std::is_same_v<
-            attribute_of_t<decltype(lit("abc") >> attr(long())), unused_type>,
-            long
-        >));
-    }
+    // Test that sequence with only one parser producing attribute makes it unwrapped
+    STATIC_CHECK(std::same_as<
+        attribute_of_t<decltype(lit("abc") >> attr(long())), unused_type>,
+        long
+    >);
 
     {
         // test action
@@ -466,9 +420,9 @@ int main()
             n = at_c<1>(_attr(ctx));
         };
 
-        BOOST_TEST(parse("x123\"a string\"", (char_ >> int_ >> "\"a string\"")[f]));
-        BOOST_TEST(c == 'x');
-        BOOST_TEST(n == 123);
+        REQUIRE(parse("x123\"a string\"", (char_ >> int_ >> "\"a string\"")[f]));
+        CHECK(c == 'x');
+        CHECK(n == 123);
     }
 
     {
@@ -480,39 +434,37 @@ int main()
             n = at_c<1>(_attr(ctx));
         };
 
-        BOOST_TEST(parse("x 123 \"a string\"", (char_ >> int_ >> "\"a string\"")[f], space));
-        BOOST_TEST(c == 'x');
-        BOOST_TEST(n == 123);
+        REQUIRE(parse("x 123 \"a string\"", (char_ >> int_ >> "\"a string\"")[f], space));
+        CHECK(c == 'x');
+        CHECK(n == 123);
     }
 
     {
-        // test move only types
-        using x4::eps;
-        std::vector<spirit_test::move_only> v;
+        // Test move only type
 
         using T = std::vector<spirit_test::move_only>;
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             typename T::value_type;
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             traits::begin(c);
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             requires std::forward_iterator<decltype(traits::begin(c))>;
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             traits::end(c);
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             requires std::sentinel_for<decltype(traits::end(c)), decltype(traits::begin(c))>;
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             traits::is_empty(c);
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             traits::push_back(c, std::declval<typename T::value_type>());
         });
-        static_assert(requires(T& c) {
+        STATIC_CHECK(requires(T& c) {
             traits::append(
                 c,
                 std::declval<decltype(std::make_move_iterator(traits::begin(c)))>(),
@@ -520,11 +472,11 @@ int main()
             );
         });
 
-        static_assert(traits::is_container_v<std::vector<spirit_test::move_only>>);
-        // static_assert(traits::CategorizedAttr<std::vector<move_only>, traits::container_attribute>);
-        BOOST_TEST(parse("ssszs", *spirit_test::synth_move_only >> 'z' >> spirit_test::synth_move_only, v));
-        BOOST_TEST_EQ(v.size(), 4);
-    }
+        STATIC_CHECK(traits::is_container_v<std::vector<spirit_test::move_only>>);
+        STATIC_CHECK(traits::CategorizedAttr<std::vector<spirit_test::move_only>, x4::traits::container_attr>);
 
-    return boost::report_errors();
+        std::vector<spirit_test::move_only> v;
+        REQUIRE(parse("ssszs", *spirit_test::synth_move_only >> 'z' >> spirit_test::synth_move_only, v));
+        CHECK(v.size() == 4);
+    }
 }

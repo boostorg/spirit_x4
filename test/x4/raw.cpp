@@ -40,7 +40,7 @@ BOOST_SPIRIT_X4_DEFINE(indirect_rule)
 
 } // anonymous
 
-int main()
+TEST_CASE("raw")
 {
     using namespace x4::standard;
     using x4::raw;
@@ -54,84 +54,82 @@ int main()
 
     {
         std::ranges::subrange<std::string_view::const_iterator> range;
+        REQUIRE(parse("spirit_test_123", raw[alpha >> *(alnum | '_')], range));
+        CHECK(std::string(range.begin(), range.end()) == "spirit_test_123");
+    }
+    {
+        std::ranges::subrange<std::string_view::const_iterator> range;
+        REQUIRE(parse("  spirit", raw[*alpha], space, range));
+        CHECK(std::string(range.begin(), range.end()) == "spirit");
+    }
+
+    {
         std::string str;
-        BOOST_TEST(parse("spirit_test_123", raw[alpha >> *(alnum | '_')], range));
-        BOOST_TEST((std::string(range.begin(), range.end()) == "spirit_test_123"));
-        BOOST_TEST(parse("  spirit", raw[*alpha], space, range));
-        BOOST_TEST((range.size() == 6));
+        REQUIRE(parse("spirit_test_123", raw[alpha >> *(alnum | '_')], str));
+        CHECK(str == "spirit_test_123");
     }
-
     {
         std::string str;
-        BOOST_TEST(parse("spirit_test_123", raw[alpha >> *(alnum | '_')], str));
-        BOOST_TEST((str == "spirit_test_123"));
-
-        str.clear();
-        BOOST_TEST((parse("x123", alpha >> raw[+alnum], str)))
-          && BOOST_TEST_EQ(str, "x123");
+        REQUIRE(parse("x123", alpha >> raw[+alnum], str));
+        CHECK(str == "x123");
     }
 
     {
         std::ranges::subrange<std::string_view::const_iterator> range;
-        BOOST_TEST(parse("x", raw[alpha]));
-        BOOST_TEST(parse("x", raw[alpha], range));
-        BOOST_TEST(parse("x", raw[alpha] >> eps, range));
+        CHECK(parse("x", raw[alpha]));
+        CHECK(parse("x", raw[alpha], range));
+        CHECK(parse("x", raw[alpha] >> eps, range));
     }
 
     {
         std::ranges::subrange<std::string_view::const_iterator> range;
-        BOOST_TEST(parse("x", raw[alpha][ ([&](auto& ctx){ range = _attr(ctx); }) ]));
-        BOOST_TEST(range.size() == 1 && *range.begin() == 'x');
+        REQUIRE(parse("x", raw[alpha][ ([&](auto& ctx){ range = _attr(ctx); }) ]));
+        REQUIRE(range.size() == 1);
+        CHECK(*range.begin() == 'x');
     }
 
     {
         std::ranges::subrange<std::string_view::const_iterator> range;
-        BOOST_TEST(parse("x123x", lit('x') >> raw[+digit] >> lit('x')));
-        BOOST_TEST(parse("x123x", lit('x') >> raw[+digit] >> lit('x'), range));
-        BOOST_TEST((std::string(range.begin(), range.end()) == "123"));
+        CHECK(parse("x123x", lit('x') >> raw[+digit] >> lit('x')));
+        CHECK(parse("x123x", lit('x') >> raw[+digit] >> lit('x'), range));
+        CHECK(std::string(range.begin(), range.end()) == "123");
     }
 
     {
-        using range = std::ranges::subrange<std::string::iterator>;
+        using range = std::ranges::subrange<std::string_view::const_iterator>;
         boost::variant<int, range> attr;
 
-        std::string str("test");
-        (void)parse(str.begin(), str.end(), (int_ | raw[*char_]), attr);
-
-        auto rng = boost::get<range>(attr);
-        BOOST_TEST(std::string(rng.begin(), rng.end()) == "test");
+        REQUIRE(parse("test", (int_ | raw[*char_]), attr));
+        auto const& rng = boost::get<range>(attr);
+        CHECK(std::string(rng.begin(), rng.end()) == "test");
     }
 
     {
-        std::vector<std::ranges::subrange<std::string::iterator>> attr;
-        std::string str("123abcd");
-        (void)parse(str.begin(), str.end(), raw[int_] >> raw[*char_], attr);
-        BOOST_TEST(attr.size() == 2);
-        BOOST_TEST(std::string(attr[0].begin(), attr[0].end()) == "123");
-        BOOST_TEST(std::string(attr[1].begin(), attr[1].end()) == "abcd");
+        std::vector<std::ranges::subrange<std::string_view::const_iterator>> attr;
+        REQUIRE(parse("123abcd", raw[int_] >> raw[*char_], attr));
+        CHECK(attr.size() == 2);
+        CHECK(std::string(attr[0].begin(), attr[0].end()) == "123");
+        CHECK(std::string(attr[1].begin(), attr[1].end()) == "abcd");
     }
 
     {
-        std::pair<int, std::ranges::subrange<std::string::iterator>> attr;
-        std::string str("123abcd");
-        (void)parse(str.begin(), str.end(), int_ >> raw[*char_], attr);
-        BOOST_TEST(attr.first == 123);
-        BOOST_TEST(std::string(attr.second.begin(), attr.second.end()) == "abcd");
+        std::pair<int, std::ranges::subrange<std::string_view::const_iterator>> attr;
+        REQUIRE(parse("123abcd", int_ >> raw[*char_], attr));
+        CHECK(attr.first == 123);
+        CHECK(std::string(attr.second.begin(), attr.second.end()) == "abcd");
     }
 
     {
         // test with simple rule
         std::ranges::subrange<std::string_view::const_iterator> range;
-        BOOST_TEST(parse("123", raw[direct_rule], range));
-        BOOST_TEST((std::string(range.begin(), range.end()) == "123"));
+        REQUIRE(parse("123", raw[direct_rule], range));
+        CHECK(std::string(range.begin(), range.end()) == "123");
     }
 
     {
         // test with complex rule
         std::ranges::subrange<std::string_view::const_iterator> range;
-        BOOST_TEST(parse("123", raw[indirect_rule], range));
-        BOOST_TEST((std::string(range.begin(), range.end()) == "123"));
+        REQUIRE(parse("123", raw[indirect_rule], range));
+        CHECK(std::string(range.begin(), range.end()) == "123");
     }
-
-    return boost::report_errors();
 }

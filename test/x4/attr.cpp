@@ -21,7 +21,7 @@
 #include <type_traits>
 #include <concepts>
 
-int main()
+TEST_CASE("attr")
 {
     using namespace std::string_literals;
     using namespace std::string_view_literals;
@@ -74,45 +74,54 @@ int main()
 
     {
         int d = 0;
-        BOOST_TEST(parse("", attr(1), d) && d == 1);
+        REQUIRE(parse("", attr(1), d));
+        CHECK(d == 1);
     }
     {
         int d = 0;
         int d1 = 1;
-        BOOST_TEST(parse("", attr(d1), d) && d == 1);
+        REQUIRE(parse("", attr(d1), d));
+        CHECK(d == 1);
     }
     {
         std::pair<int, int> p;
-        BOOST_TEST(parse("1", int_ >> attr(1), p) && p.first == 1 && p.second == 1);
+        REQUIRE(parse("1", int_ >> attr(2), p));
+        CHECK(p.first == 1);
+        CHECK(p.second == 2);
     }
     {
         char c = '\0';
-        BOOST_TEST(parse("", attr('a'), c) && c == 'a');
+        REQUIRE(parse("", attr('a'), c));
+        CHECK(c == 'a');
     }
     {
         std::string str;
-        BOOST_TEST(parse("", attr("test"), str) && str == "test");
+        REQUIRE(parse("", attr("test"), str));
+        CHECK(str == "test");
     }
     {
         std::string str;
-        BOOST_TEST(parse("", attr(std::string("test")), str)) && BOOST_TEST_EQ(str, "test");
+        REQUIRE(parse("", attr(std::string("test")), str));
+        CHECK(str == "test");
     }
     {
         std::vector<int> array = {0, 1, 2};
         std::vector<int> vec;
-        BOOST_TEST(parse("", attr(array), vec) && vec.size() == 3 && vec[0] == 0 && vec[1] == 1 && vec[2] == 2);
+        REQUIRE(parse("", attr(array), vec));
+        REQUIRE(vec.size() == 3);
+        CHECK(vec[0] == 0);
+        CHECK(vec[1] == 1);
+        CHECK(vec[2] == 2);
     }
 
     {
         std::string s;
-        BOOST_TEST(parse("s", "s" >> attr(std::string("123")), s) && s == "123");
+        REQUIRE(parse("s", "s" >> attr(std::string("123")), s));
+        CHECK(s == "123");
     }
-
     {
         std::string s;
-        BOOST_TEST(parse("", attr(std::string("123")) >> attr(std::string("456")), s))
-          && BOOST_TEST_EQ(s, "123456");
+        REQUIRE(parse("", attr(std::string("123")) >> attr(std::string("456")), s));
+        CHECK(s == "123456");
     }
-
-    return boost::report_errors();
 }

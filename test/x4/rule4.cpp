@@ -62,7 +62,7 @@ struct on_success_gets_preskipped_iterator
 
 } // anonymous
 
-int main()
+TEST_CASE("rule4")
 {
     using namespace x4::standard;
     using x4::rule;
@@ -73,19 +73,26 @@ int main()
     {
         rule<class a, int> ra;
         rule<class b, int> rb;
-        int attr;
 
         auto ra_def = ra %= int_;
-        BOOST_TEST(parse("123", ra_def, attr));
-        BOOST_TEST(attr == 123);
-
         auto rb_def = rb %= ra_def;
-        BOOST_TEST(parse("123", rb_def, attr));
-        BOOST_TEST(attr == 123);
 
-        auto rb_def2 = rb = ra_def;
-        BOOST_TEST(parse("123", rb_def2, attr));
-        BOOST_TEST(attr == 123);
+        {
+            int attr = 0;
+            REQUIRE(parse("123", ra_def, attr));
+            CHECK(attr == 123);
+        }
+        {
+            int attr = 0;
+            REQUIRE(parse("123", rb_def, attr));
+            CHECK(attr == 123);
+        }
+        {
+            int attr = 0;
+            auto rb_def2 = rb = ra_def;
+            REQUIRE(parse("123", rb_def2, attr));
+            CHECK(attr == 123);
+        }
     }
 
     // show that ra %= rb works as expected with semantic actions
@@ -93,18 +100,21 @@ int main()
         rule<class a, int> ra;
         rule<class b, int> rb;
         (void)rb;
-        int attr = 0;
-
         auto f = [](auto&) {};
         auto ra_def = ra %= int_[f];
-        BOOST_TEST(parse("123", ra_def, attr));
-        BOOST_TEST(attr == 123);
-
         auto ra_def2 = (rb = (ra %= int_[f]));
-        BOOST_TEST(parse("123", ra_def2, attr));
-        BOOST_TEST(attr == 123);
-    }
 
+        {
+            int attr = 0;
+            REQUIRE(parse("123", ra_def, attr));
+            CHECK(attr == 123);
+        }
+        {
+            int attr = 0;
+            REQUIRE(parse("123", ra_def2, attr));
+            CHECK(attr == 123);
+        }
+    }
 
     // std::string as container attribute with auto rules
     {
@@ -115,9 +125,8 @@ int main()
         auto text = rule<class text_id, std::string>{}
             = +(!char_(')') >> !char_('>') >> char_);
 
-        attr.clear();
-        BOOST_TEST(parse("x", text, attr));
-        BOOST_TEST(attr == "x");
+        REQUIRE(parse("x", text, attr));
+        CHECK(attr == "x");
     }
 
     // error handling
@@ -125,33 +134,36 @@ int main()
         auto r = rule<my_rule_class, char const*>{}
             = '(' > int_ > ',' > int_ > ')';
 
-        BOOST_TEST(parse("(123,456)", r));
-        BOOST_TEST(!parse("(abc,def)", r));
-        BOOST_TEST(!parse("(123,456]", r));
-        BOOST_TEST(!parse("(123;456)", r));
-        BOOST_TEST(!parse("[123,456]", r));
+        CHECK(parse("(123,456)", r));
+        CHECK(!parse("(abc,def)", r));
+        CHECK(!parse("(123,456]", r));
+        CHECK(!parse("(123;456)", r));
+        CHECK(!parse("[123,456]", r));
 
-        BOOST_TEST(got_it == 1);
+        CHECK(got_it == 1);
     }
 
     // on_success gets pre-skipped iterator
     {
-        auto r = rule<on_success_gets_preskipped_iterator, char const*>{}
-            = lit("b");
-        BOOST_TEST(parse("a b", 'a' >> r, lit(' ')));
-        BOOST_TEST(on_success_gets_preskipped_iterator::ok);
+        auto r = rule<on_success_gets_preskipped_iterator, char const*>{} = lit("b");
+        REQUIRE(parse("a b", 'a' >> r, lit(' ')));
+        CHECK(on_success_gets_preskipped_iterator::ok);
     }
 
     {
         using v_type = boost::variant<double, int>;
         auto r1 = rule<class r1_id, v_type>{} = int_;
         v_type v;
-        BOOST_TEST(parse("1", r1, v) && v.which() == 1 && boost::get<int>(v) == 1);
+        REQUIRE(parse("1", r1, v));
+        REQUIRE(v.which() == 1);
+        CHECK(boost::get<int>(v) == 1);
 
         using ov_type = std::optional<int>;
         auto r2 = rule<class r2_id, ov_type>{} = int_;
         ov_type ov;
-        BOOST_TEST(parse("1", r2, ov) && ov && *ov == 1);
+        REQUIRE(parse("1", r2, ov));
+        REQUIRE(ov.has_value());
+        CHECK(*ov == 1);
     }
 
     // test handling of single element fusion sequences
@@ -161,24 +173,25 @@ int main()
         auto r = rule<class r_id, vector<int>>{} = int_;
 
         vector<int> v(0);
-        BOOST_TEST(parse("1", r, v) && at_c<0>(v) == 1);
+        REQUIRE(parse("1", r, v));
+        CHECK(at_c<0>(v) == 1);
     }
 
     // attribute compatibility test
     {
         constexpr auto expr = int_;
-
         long long i = 0;
-        BOOST_TEST(parse("1", expr, i) && i == 1);
-
+        REQUIRE(parse("1", expr, i));
+        CHECK(i == 1);
+    }
+    {
         constexpr rule<class int_rule, int> int_rule("int_rule");
         (void)int_rule;
         constexpr auto int_rule_def = int_;
         constexpr auto start = int_rule = int_rule_def;
 
         long long j = 0;
-        BOOST_TEST(parse("1", start, j) && j == 1);
+        REQUIRE(parse("1", start, j));
+        CHECK(j == 1);
     }
-
-    return boost::report_errors();
 }

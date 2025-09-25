@@ -10,10 +10,7 @@
 #include "test.hpp"
 #include "grammar.hpp"
 
-int main()
+TEST_CASE("grammar")
 {
-    char const* s = "123", *e = s + std::strlen(s);
-    BOOST_TEST(parse(s, e, grammar));
-
-    return boost::report_errors();
+    CHECK(parse("123", grammar));
 }

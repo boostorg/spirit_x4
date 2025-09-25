@@ -12,7 +12,7 @@
 #include <boost/spirit/x4/char/char.hpp>
 #include <boost/spirit/x4/directive/matches.hpp>
 
-int main()
+TEST_CASE("matches")
 {
     using x4::matches;
     using x4::char_;
@@ -20,19 +20,23 @@ int main()
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(matches['x']);
 
     {
-        BOOST_TEST(parse("x", matches[char_]));
+        CHECK(parse("x", matches[char_]));
         bool result = false;
-        BOOST_TEST(parse("x", matches[char_], result) && result);
+        REQUIRE(parse("x", matches[char_], result));
+        CHECK(result == true);
     }
+
+    CHECK(!parse("y", matches[char_('x')]));
+    CHECK(!parse("y", matches['x']));
 
     {
-        BOOST_TEST(!parse("y", matches[char_('x')]));
-        BOOST_TEST(!parse("y", matches['x']));
         bool result = true;
-        BOOST_TEST(parse("y", matches[char_('x')], result).is_partial_match() && !result);
-        result = true;
-        BOOST_TEST(parse("y", matches['x'], result).is_partial_match() && !result);
+        REQUIRE(parse("y", matches[char_('x')], result).is_partial_match());
+        CHECK(result == false);
     }
-
-    return boost::report_errors();
+    {
+        bool result = true;
+        REQUIRE(parse("y", matches['x'], result).is_partial_match());
+        CHECK(result == false);
+    }
 }

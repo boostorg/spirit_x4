@@ -38,7 +38,7 @@ struct backwards_bool_policies : x4::bool_policies<>
 
 } // anonymous
 
-int main()
+TEST_CASE("bool")
 {
     using x4::bool_;
     using x4::true_;
@@ -54,33 +54,39 @@ int main()
     {
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(bool_);
 
-        BOOST_TEST(parse("true", bool_));
-        BOOST_TEST(parse("false", bool_));
-        BOOST_TEST(!parse("fasle", bool_));
+        CHECK(parse("true", bool_));
+        CHECK(parse("false", bool_));
+        CHECK(!parse("fasle", bool_));
     }
 
     {
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(true_);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(false_);
 
-        BOOST_TEST(parse("true", true_));
-        BOOST_TEST(!parse("true", false_));
-        BOOST_TEST(parse("false", false_));
-        BOOST_TEST(!parse("false", true_));
+        CHECK(parse("true", true_));
+        CHECK(!parse("true", false_));
+        CHECK(parse("false", false_));
+        CHECK(!parse("false", true_));
     }
 
     {
-        BOOST_TEST(parse("True", no_case[bool_]));
-        BOOST_TEST(parse("False", no_case[bool_]));
-        BOOST_TEST(parse("True", no_case[true_]));
-        BOOST_TEST(parse("False", no_case[false_]));
+        CHECK(parse("True", no_case[bool_]));
+        CHECK(parse("False", no_case[bool_]));
+        CHECK(parse("True", no_case[true_]));
+        CHECK(parse("False", no_case[false_]));
     }
 
     {
         bool b = false;
-        BOOST_TEST(parse("true", bool_, b) && b);
-        BOOST_TEST(parse("false", bool_, b) && !b);
-        BOOST_TEST(!parse("fasle", bool_, b));
+        REQUIRE(parse("true", bool_, b));
+        CHECK(b == true);
+    }
+    {
+        bool b = true;
+        REQUIRE(parse("false", bool_, b));
+        CHECK(b == false);
+
+        CHECK(!parse("fasle", bool_, unused));
     }
 
     {
@@ -89,16 +95,23 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(backwards_bool);
 
-        BOOST_TEST(parse("true", backwards_bool));
-        BOOST_TEST(parse("eurt", backwards_bool));
-        BOOST_TEST(!parse("false", backwards_bool));
-        BOOST_TEST(!parse("fasle", backwards_bool));
+        CHECK(parse("true", backwards_bool));
+        CHECK(parse("eurt", backwards_bool));
+        CHECK(!parse("false", backwards_bool));
+        CHECK(!parse("fasle", backwards_bool));
 
-        bool b = false;
-        BOOST_TEST(parse("true", backwards_bool, b) && b);
-        BOOST_TEST(parse("eurt", backwards_bool, b) && !b);
-        BOOST_TEST(!parse("false", backwards_bool, b));
-        BOOST_TEST(!parse("fasle", backwards_bool, b));
+        {
+            bool b = false;
+            REQUIRE(parse("true", backwards_bool, b));
+            CHECK(b == true);
+        }
+        {
+            bool b = true;
+            REQUIRE(parse("eurt", backwards_bool, b));
+            CHECK(b == false);
+        }
+        CHECK(!parse("false", backwards_bool, unused));
+        CHECK(!parse("fasle", backwards_bool, unused));
     }
 
     {
@@ -115,15 +128,20 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(test_bool);
 
-        BOOST_TEST(parse("true", test_bool));
-        BOOST_TEST(parse("false", test_bool));
-        BOOST_TEST(!parse("fasle", test_bool));
+        CHECK(parse("true", test_bool));
+        CHECK(parse("false", test_bool));
+        CHECK(!parse("fasle", test_bool));
 
-        test_bool_type b = false;
-        BOOST_TEST(parse("true", test_bool, b) && b.b);
-        BOOST_TEST(parse("false", test_bool, b) && !b.b);
-        BOOST_TEST(!parse("fasle", test_bool, b));
+        {
+            test_bool_type b = false;
+            REQUIRE(parse("true", test_bool, b));
+            CHECK(b.b == true);
+        }
+        {
+            test_bool_type b = true;
+            REQUIRE(parse("false", test_bool, b));
+            CHECK(b.b == false);
+        }
+        CHECK(!parse("fasle", test_bool, unused));
     }
-
-    return boost::report_errors();
 }

@@ -9,7 +9,7 @@
 
 #include "real.hpp"
 
-int main()
+TEST_CASE("real3")
 {
     // strict real number tests
     {
@@ -23,34 +23,37 @@ int main()
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(strict_udouble);
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(strict_double);
 
-        BOOST_TEST(!parse("1234", strict_udouble));
+        CHECK(!parse("1234", strict_udouble));
         {
             double d = 0;
-            BOOST_TEST(!parse("1234", strict_udouble, d));
+            CHECK(!parse("1234", strict_udouble, d));
         }
 
-        BOOST_TEST(parse("1.2", strict_udouble));
+        CHECK(parse("1.2", strict_udouble));
         {
             double d = 0;
-            BOOST_TEST(parse("1.2", strict_udouble, d) && compare(d, 1.2));
+            REQUIRE(parse("1.2", strict_udouble, d));
+            CHECK(compare(d, 1.2));
         }
 
-        BOOST_TEST(!parse("-1234", strict_double));
+        CHECK(!parse("-1234", strict_double));
         {
             double d = 0;
-            BOOST_TEST(!parse("-1234", strict_double, d));
+            CHECK(!parse("-1234", strict_double, d));
         }
 
-        BOOST_TEST(parse("123.", strict_double));
+        CHECK(parse("123.", strict_double));
         {
             double d = 0;
-            BOOST_TEST(parse("123.", strict_double, d) && compare(d, 123));
+            REQUIRE(parse("123.", strict_double, d));
+            CHECK(compare(d, 123));
         }
 
-        BOOST_TEST(parse("3.E6", strict_double));
+        CHECK(parse("3.E6", strict_double));
         {
             double d = 0;
-            BOOST_TEST(parse("3.E6", strict_double, d) && compare(d, 3e6));
+            REQUIRE(parse("3.E6", strict_double, d));
+            CHECK(compare(d, 3e6));
         }
 
         {
@@ -60,8 +63,8 @@ int main()
             BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(notrdot_real);
             BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(nolddot_real);
 
-            BOOST_TEST(!parse("1234.", notrdot_real)); // Bad trailing dot
-            BOOST_TEST(!parse(".1234", nolddot_real)); // Bad leading dot
+            CHECK(!parse("1234.", notrdot_real)); // Bad trailing dot
+            CHECK(!parse(".1234", nolddot_real)); // Bad leading dot
         }
     }
 
@@ -72,35 +75,37 @@ int main()
 
         BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(ts_real);
 
-        BOOST_TEST(parse("123.01", ts_real));
+        CHECK(parse("123.01", ts_real));
         {
             double d = 0;
-            BOOST_TEST(parse("123.01", ts_real, d) && compare(d, 123.01));
+            REQUIRE(parse("123.01", ts_real, d));
+            CHECK(compare(d, 123.01));
         }
 
-        BOOST_TEST(parse("123,456,789.01", ts_real));
+        CHECK(parse("123,456,789.01", ts_real));
         {
             double d = 0;
-            BOOST_TEST(parse("123,456,789.01", ts_real, d) && compare(d, 123456789.01));
+            REQUIRE(parse("123,456,789.01", ts_real, d));
+            CHECK(compare(d, 123456789.01));
         }
 
-        BOOST_TEST(parse("12,345,678.90", ts_real));
+        CHECK(parse("12,345,678.90", ts_real));
         {
             double d = 0;
-            BOOST_TEST(parse("12,345,678.90", ts_real, d) && compare(d, 12345678.90));
+            REQUIRE(parse("12,345,678.90", ts_real, d));
+            CHECK(compare(d, 12345678.90));
         }
 
-        BOOST_TEST(parse("1,234,567.89", ts_real));
+        CHECK(parse("1,234,567.89", ts_real));
         {
             double d = 0;
-            BOOST_TEST(parse("1,234,567.89", ts_real, d) && compare(d, 1234567.89));
+            REQUIRE(parse("1,234,567.89", ts_real, d));
+            CHECK(compare(d, 1234567.89));
         }
 
-        BOOST_TEST(!parse("1234,567,890", ts_real));
-        BOOST_TEST(!parse("1,234,5678,9", ts_real));
-        BOOST_TEST(!parse("1,234,567.89e6", ts_real));
-        BOOST_TEST(!parse("1,66", ts_real));
+        CHECK(!parse("1234,567,890", ts_real));
+        CHECK(!parse("1,234,5678,9", ts_real));
+        CHECK(!parse("1,234,567.89e6", ts_real));
+        CHECK(!parse("1,66", ts_real));
     }
-
-    return boost::report_errors();
 }
