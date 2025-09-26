@@ -67,6 +67,11 @@ jobs:
         compiler:
           - name: GCC
             toolset: gcc
+            version: 13
+            executable: g++-13
+            cxxflags: -fdiagnostics-color=always
+          - name: GCC
+            toolset: gcc
             version: 14
             executable: g++-14
             cxxflags: -fdiagnostics-color=always
