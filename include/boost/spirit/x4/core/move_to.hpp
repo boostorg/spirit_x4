@@ -263,6 +263,11 @@ move_to(Source&& src, Dest& dest)
     x4::move_to(std::forward<Source>(src), fusion::front(dest));
 }
 
+template<class Source, class Dest>
+concept X4Movable = requires {
+    x4::move_to(std::declval<Source>(), std::declval<Dest&>());
+};
+
 } // boost::spirit::x4
 
 #endif

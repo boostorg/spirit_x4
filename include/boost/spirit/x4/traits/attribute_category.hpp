@@ -79,7 +79,8 @@ struct attribute_category<unused_container_type>
 
 template<class T, typename AttrCategoryTag>
 concept CategorizedAttr =
-    std::same_as<typename attribute_category<std::remove_cvref_t<T>>::type, AttrCategoryTag>;
+    // Don't use `std::same_as` here, it bloats the compilation error.
+    std::is_same_v<typename attribute_category<std::remove_cvref_t<T>>::type, AttrCategoryTag>;
 
 template<class T>
 concept NonUnusedAttr = !CategorizedAttr<T, unused_attr>;

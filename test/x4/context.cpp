@@ -94,12 +94,12 @@ TEST_CASE("context")
 
         {
             auto&& removed_ctx = x4::remove_first_context<existent_tag>(ctx);
-            STATIC_CHECK(std::same_as<decltype(removed_ctx), x4::detail::monostate_context&&>);
+            STATIC_CHECK(std::same_as<decltype(removed_ctx), unused_type&&>);
 
             // monostate tests
             {
                 auto&& mono_removed_ctx = x4::remove_first_context<non_existent_tag>(removed_ctx);
-                STATIC_CHECK(std::same_as<decltype(mono_removed_ctx), x4::detail::monostate_context const&>);
+                STATIC_CHECK(std::same_as<decltype(mono_removed_ctx), unused_type const&>);
                 (void)mono_removed_ctx;
             }
             {
@@ -193,11 +193,11 @@ TEST_CASE("context")
             }
             {
                 auto&& removed_ctx = x4::remove_first_context<existent_tag>(replaced_ctx);
-                STATIC_CHECK(std::same_as<decltype(removed_ctx), x4::detail::monostate_context&&>);
+                STATIC_CHECK(std::same_as<decltype(removed_ctx), unused_type&&>);
 
                 {
                     [[maybe_unused]] auto&& removed_removed_ctx = x4::remove_first_context<existent_tag>(removed_ctx);
-                    STATIC_CHECK(std::same_as<decltype(removed_removed_ctx), x4::detail::monostate_context const&>);
+                    STATIC_CHECK(std::same_as<decltype(removed_removed_ctx), unused_type const&>);
                 }
                 {
                     [[maybe_unused]] auto&& new_ctx = x4::make_context<existent_tag>(i, removed_ctx);

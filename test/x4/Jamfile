@@ -96,6 +96,7 @@ run omit.cpp catch2 ;
 run optional.cpp catch2 ;
 run plus.cpp catch2 ;
 run with.cpp catch2 ;
+run as.cpp catch2 ;
 
 run raw.cpp catch2 ;
 run real1.cpp catch2 ;

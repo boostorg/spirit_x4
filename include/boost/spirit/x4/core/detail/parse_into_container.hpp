@@ -270,8 +270,8 @@ struct parse_into_container_impl<Parser, Context>
         Context const& ctx, Attr& attr
     ) // never noexcept (requires container insertion)
     {
-        static_assert(!std::is_same_v<std::remove_const_t<Attr>, unused_type>);
-        static_assert(!std::is_same_v<std::remove_const_t<Attr>, unused_container_type>);
+        static_assert(!std::same_as<std::remove_const_t<Attr>, unused_type>);
+        static_assert(!std::same_as<std::remove_const_t<Attr>, unused_container_type>);
 
         static_assert(Parsable<Parser, It, Se, Context, Attr>);
 
@@ -284,8 +284,8 @@ struct parse_into_container_impl<Parser, Context>
 
         traits::append(
             attr,
-            std::make_move_iterator(std::ranges::begin(rest)),
-            std::make_move_iterator(std::ranges::end(rest))
+            std::make_move_iterator(traits::begin(rest)),
+            std::make_move_iterator(traits::end(rest))
         );
         return true;
     }

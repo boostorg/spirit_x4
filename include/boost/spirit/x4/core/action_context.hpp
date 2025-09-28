@@ -23,7 +23,19 @@ struct parse_pass
 };
 
 // _val
+// Refers to the attribute of `x4::rule`.
+// This always points to the *innermost* attribute for the (potentially recursive) invocation of `x4::rule`.
+// Note: we currently provide no method to obtain the outer attribute, as it is discouraged for maintainability.
+//
+// This does NOT point to the attribute variable created by `x4::as<T>(...)`.
 struct rule_val
+{
+    static constexpr bool is_unique = true;
+};
+
+// _as_val
+// Refers to the attribute of `x4::as<T>(...)`.
+struct as_val
 {
     static constexpr bool is_unique = true;
 };
@@ -76,6 +88,19 @@ struct _val_fn
     static void operator()(Context const&&) = delete; // dangling
 };
 
+struct _as_val_fn
+{
+    template<class Context>
+    [[nodiscard]] static constexpr auto&&
+    operator()(Context const& ctx BOOST_SPIRIT_LIFETIMEBOUND) noexcept
+    {
+        return x4::get<contexts::as_val>(ctx);
+    }
+
+    template<class Context>
+    static void operator()(Context const&&) = delete; // dangling
+};
+
 struct _where_fn
 {
     template<class Context>
@@ -108,6 +133,7 @@ inline namespace cpos {
 
 inline constexpr detail::_pass_fn _pass{};
 inline constexpr detail::_val_fn _val{};
+inline constexpr detail::_as_val_fn _as_val{};
 inline constexpr detail::_where_fn _where{};
 inline constexpr detail::_attr_fn _attr{};
 

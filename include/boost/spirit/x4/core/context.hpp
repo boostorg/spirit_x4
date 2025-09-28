@@ -23,13 +23,6 @@ namespace boost::spirit::x4 {
 template<class ID, class T, class Next>
 struct context;
 
-namespace detail {
-
-struct monostate_context_tag;
-using monostate_context = context<monostate_context_tag, void, unused_type>;
-
-} // detail
-
 
 template<class Context, class ID_To_Search>
 struct has_context;
@@ -298,7 +291,6 @@ private:
         !std::same_as<std::remove_cvref_t<Next>, unused_type> || std::same_as<Next, unused_type>,
         "Next cannot be a reference to `unused_type`; use plain type instead"
     );
-    static_assert(!std::same_as<std::remove_cvref_t<Next>, detail::monostate_context>);
 
     using storage_type = detail::context_storage<ID, T, Next>;
 
@@ -312,22 +304,9 @@ public:
     // TODO: ^^^ Why is clang-tidy complaining about `Rvalue reference parameter "" is never moved`?
 };
 
-// Empty context specialization. Materialized when `remove_context` removed everything.
-template<class T>
-struct context<detail::monostate_context_tag, T>
-{
-    static_assert(std::is_void_v<T>, "monostate_context's value type must be void");
-
-    using value_type = void;
-    using next_type = unused_type;
-
-    void get(auto const&) = delete;
-};
-
 template<class ID, class T, class Next>
     requires
-        (!std::same_as<std::remove_cvref_t<Next>, unused_type>) &&
-        (!std::same_as<std::remove_cvref_t<Next>, detail::monostate_context>)
+        (!std::same_as<std::remove_cvref_t<Next>, unused_type>)
 [[nodiscard]] constexpr context<ID, T, detail::canonical_context_t<Next>>
 make_context(T& val, Next&& next)
     noexcept(std::is_nothrow_constructible_v<detail::canonical_context_t<Next>, Next>)
@@ -344,13 +323,6 @@ make_context(T& val, Next&& next)
 template<class ID, class T>
 [[nodiscard]] constexpr context<ID, T>
 make_context(T& val, unused_type const&) noexcept
-{
-    return context<ID, T>{val};
-}
-
-template<class ID, class T>
-[[nodiscard]] constexpr context<ID, T>
-make_context(T& val, detail::monostate_context const&) noexcept
 {
     return context<ID, T>{val};
 }
@@ -374,8 +346,6 @@ template<class ID_To_Remove, class ID, class T, class Next>
 [[nodiscard]] constexpr decltype(auto) // may return existing reference in some cases
 remove_first_context(context<ID, T, Next> const& ctx) noexcept
 {
-    static_assert(!std::same_as<ID_To_Remove, detail::monostate_context_tag>);
-
     // It does not make sense to remove the "first" context of non-unique ID,
     // because if you do so, you just can't determine the meaning of the remaining
     // (duplicate) entries.
@@ -414,7 +384,7 @@ remove_first_context(context<ID, T, Next> const& ctx) noexcept
         if constexpr (std::same_as<Next, unused_type>) {
             // Existing context found; removing it will result in an
             // empty context, so create a monostate placeholder.
-            return detail::monostate_context{};
+            return unused_type{};
 
         } else {
             // Existing context found; remove it and end the search.
@@ -422,7 +392,7 @@ remove_first_context(context<ID, T, Next> const& ctx) noexcept
         }
 
     } else { // No match
-        if constexpr (std::same_as<ID, detail::monostate_context_tag> || std::same_as<Next, unused_type>) {
+        if constexpr (std::same_as<Next, unused_type>) {
             // No match at all. Return as-is.
             return ctx;
 
@@ -437,7 +407,7 @@ remove_first_context(context<ID, T, Next> const& ctx) noexcept
             } else {
                 // If the recursive replacement resulted in a monostate context,
                 // prevent appending it; return the context without `next`.
-                if constexpr (std::same_as<std::remove_cvref_t<NewNext>, detail::monostate_context>) {
+                if constexpr (std::same_as<std::remove_cvref_t<NewNext>, unused_type>) {
                     return context<ID, T>{ctx.val};
 
                 } else if constexpr (std::is_reference_v<NewNext>) {
@@ -488,7 +458,6 @@ replace_first_context(
 ) noexcept
 {
     static_assert(!is_ttp_specialization_of_v<std::remove_const_t<NewVal>, context>, "context's value type cannot be context");
-    static_assert(!std::same_as<ID_To_Replace, detail::monostate_context_tag>);
 
     if constexpr (
         detail::UniqueContextID<ID_To_Replace> &&
@@ -518,11 +487,7 @@ replace_first_context(
             }
 
         } else { // No match
-            if constexpr (std::same_as<ID, detail::monostate_context_tag>) {
-                // No match at all. Create a brand-new context.
-                return context<ID_To_Replace, NewVal>{new_val};
-
-            } else if constexpr (std::same_as<Next, unused_type>) {
+            if constexpr (std::same_as<Next, unused_type>) {
                 // No match at all. Append a new one and return.
                 // Since we're doing the search from left to right,
                 // this branch means there was no existing context
@@ -549,7 +514,6 @@ replace_first_context(
 ) noexcept
 {
     static_assert(!is_ttp_specialization_of_v<std::remove_const_t<NewVal>, context>, "context's value type cannot be context");
-    static_assert(!std::same_as<ID_To_Replace, detail::monostate_context_tag>);
 
     if constexpr (
         detail::UniqueContextID<ID_To_Replace> &&

@@ -52,6 +52,7 @@ x4_define_tests(
     actions
     alternative
     and_predicate
+    as
     attr
     attribute
     attribute_type_check

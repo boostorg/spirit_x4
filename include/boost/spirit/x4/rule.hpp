@@ -234,8 +234,12 @@ struct rule_impl
             //
             auto&& rcontext = x4::replace_first_context<contexts::rule_val>(ctx, attr_);
 
-            // The existence of semantic action inhibits attribute materialization
-            // _unless_ it is explicitly required by the user (primarily via `%=`).
+            // The existence of semantic action inhibits attribute materialization _unless_ it is
+            // explicitly required by the user (primarily via `%=`).
+            //
+            // Note: `x4::as<T>(...)` explicitly unsets `has_action` even if the underlying subject
+            // has semantic action, so it will be dispatched to the latter branch (unless the
+            // `as_directive` itself has semantic action).
             if constexpr (RHS::has_action && !ForceAttr) {
                 parse_ok = rule_impl::parse_rhs(rhs, first, last, rcontext, unused);
 
@@ -252,17 +256,17 @@ struct rule_impl
     }
 };
 
-template<class RuleID, X4Subject RHS, X4Attribute Attr, bool ForceAttr, bool SkipDefinitionInjection = false>
-struct rule_definition : parser<rule_definition<RuleID, RHS, Attr, ForceAttr, SkipDefinitionInjection>>
+template<class RuleID, X4Subject RHS, X4Attribute RuleDefAttr, bool ForceAttr, bool SkipDefinitionInjection = false>
+struct rule_definition : parser<rule_definition<RuleID, RHS, RuleDefAttr, ForceAttr, SkipDefinitionInjection>>
 {
     using this_type = rule_definition;
     using id = RuleID;
+    using lhs_type = rule<RuleID, RuleDefAttr, ForceAttr>;
     using rhs_type = RHS;
-    using lhs_type = rule<RuleID, Attr, ForceAttr>;
-    using attribute_type = Attr;
+    using attribute_type = RuleDefAttr;
 
-    static constexpr bool has_attribute = !std::same_as<Attr, unused_type>;
-    static constexpr bool handles_container = traits::is_container<Attr>::value;
+    static constexpr bool has_attribute = !std::same_as<RuleDefAttr, unused_type>;
+    static constexpr bool handles_container = traits::is_container<RuleDefAttr>::value;
     static constexpr bool force_attribute = ForceAttr;
 
     template<class RHS_T>
@@ -273,9 +277,9 @@ struct rule_definition : parser<rule_definition<RuleID, RHS, Attr, ForceAttr, Sk
         , name(name)
     {}
 
-    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr_>
+    template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     [[nodiscard]] constexpr bool
-    parse(It& first, Se const& last, Context const& ctx, Attr_& attr) const
+    parse(It& first, Se const& last, Context const& ctx, Attr& attr) const
         // never noexcept; requires very complex implementation details
     {
         return rule_impl<RuleID, attribute_type, SkipDefinitionInjection>
@@ -378,7 +382,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
         // which resets the `_val` context to the appropriate reference.
         auto&& rule_agnostic_ctx = x4::remove_first_context<contexts::rule_val>(ctx);
 
-        using detail::parse_rule;
+        using detail::parse_rule; // ADL
 
         if constexpr (std::same_as<std::remove_const_t<Exposed>, RuleAttr>) {
             return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, exposed_attr));
@@ -393,8 +397,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
                 return false;
             }
 
-            // X3's behavior
-            // x4::move_to(std::move(rule_attr), exposed_attr);
+            // x4::move_to(std::move(rule_attr), exposed_attr); // X3's behavior
             exposed_attr = std::move(rule_attr);
             return true;
         }
@@ -419,8 +422,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
         // See the comments on the primary overload of `rule::parse(...)`
         auto&& rule_agnostic_ctx = x4::remove_first_context<contexts::rule_val>(ctx);
 
-        // ADL
-        using detail::parse_rule;
+        using detail::parse_rule; // ADL
         return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, no_attr));
     }
 
@@ -456,6 +458,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
     // that's why the rule definition injection into a parser context can be skipped.
     // This optimization has a huge impact on compile times because immediate rules are commonly
     // used to cast an attribute like `as`/`attr_cast` does in Qi.
+
     template<X4Subject RHS>
     [[nodiscard]] constexpr detail::rule_definition<RuleID, as_parser_plain_t<RHS>, RuleAttr, ForceAttr, true>  // NOLINT(misc-unconventional-assign-operator)
     operator=(RHS&& rhs) const&&
