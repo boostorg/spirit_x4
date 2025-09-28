@@ -136,7 +136,9 @@ struct rule_impl
             ok = rhs.parse(first, last, rule_id_context, attr);
         }
 
-        constexpr bool rhs_has_on_error = has_on_error<RuleID, It, Se, RContext>::value;
+        constexpr bool need_on_error =
+            has_context_v<RContext, contexts::expectation_failure> &&
+            has_on_error<RuleID, It, Se, RContext>::value;
 
         // Note: this check uses `It, It` because the value is actually iterator-iterator pair
         if constexpr (has_on_success<RuleID, It, It, RContext, Exposed>::value) {
@@ -146,7 +148,7 @@ struct rule_impl
                 return true;
             }
 
-            if constexpr (rhs_has_on_error) {
+            if constexpr (need_on_error) {
                 if (x4::has_expectation_failure(rcontext)) {
                     auto const& x = x4::get_expectation_failure(rcontext);
                     static_assert(
@@ -159,7 +161,7 @@ struct rule_impl
             return false;
 
         } else { // does not have `on_success`
-            if constexpr (rhs_has_on_error) {
+            if constexpr (need_on_error) {
                 if (ok) return true;
 
                 if (x4::has_expectation_failure(rcontext)) {
@@ -230,7 +232,7 @@ struct rule_impl
             //   You have discovered the deepest wizardry of X4...
             //   You win!!
             //
-            auto const rcontext = x4::replace_first_context<contexts::rule_val>(ctx, attr_);
+            auto&& rcontext = x4::replace_first_context<contexts::rule_val>(ctx, attr_);
 
             // The existence of semantic action inhibits attribute materialization
             // _unless_ it is explicitly required by the user (primarily via `%=`).

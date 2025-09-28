@@ -41,6 +41,13 @@ struct expect_directive : unary_parser<Subject, expect_directive<Subject>>
     parse(It& first, Se const& last, Context const& ctx, Attr& attr) const
         // never noexcept; expectation failure requires construction of debug information
     {
+        static_assert(
+            has_context_v<Context, contexts::expectation_failure>,
+            "Context type was not specified for `x4::contexts::expectation_failure`. "
+            "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
+            "Note that you must also bind the context to your skipper."
+        );
+
         bool const r = this->subject.parse(first, last, ctx, attr);
 
         // only the first failure is needed
@@ -89,6 +96,13 @@ struct parse_into_container_impl<expect_directive<Subject>, Context>
         It& first, Se const& last, Context const& ctx, Attr& attr
     ) // never noexcept; expectation failure requires construction of debug information
     {
+        static_assert(
+            has_context_v<Context, contexts::expectation_failure>,
+            "Context type was not specified for `x4::contexts::expectation_failure`. "
+            "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
+            "Note that you must also bind the context to your skipper."
+        );
+
         bool const r = detail::parse_into_container(parser.subject, first, last, ctx, attr);
 
         // only the first error is needed

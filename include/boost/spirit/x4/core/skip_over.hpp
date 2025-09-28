@@ -108,7 +108,7 @@ template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Su
 constexpr void skip_over(It& first, Se const& last, Context const& ctx, Skipper const& skipper)
     noexcept(is_nothrow_parsable_v<Skipper, It, Se, typename skip_over_context<Context>::type, unused_type>)
 {
-    if constexpr (std::is_same_v<expectation_failure_t<Context>, unused_type>) {
+    if constexpr (!has_context_v<Context, contexts::expectation_failure>) {
         // The context given by parent was truly `unused_type`.
         // There exists only one such case in core; that is
         // `x4::phrase_parse(...)` which creates a fresh context
@@ -143,7 +143,7 @@ constexpr void skip_over(It& first, Se const& last, Context const& ctx, Skipper 
         //
         // Since the reference bound to `x4::contexts::expectation_failure` is
         // provided by the user in the first place, if we do forget it
-        // then it will be impossible to resurrect the value afterwards.
+        // then it will be impossible to resurrect the value afterward.
         // It will also be problematic for `skip_over` itself because the
         // underlying skipper may (or may not) raise an expectation failure.
         // In traditional mode, the error was thrown by a C++ exception.

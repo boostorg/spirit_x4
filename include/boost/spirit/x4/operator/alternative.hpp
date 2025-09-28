@@ -47,9 +47,13 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
             is_nothrow_parsable_v<Right, It, Se, Context, unused_type>
         )
     {
-        return this->left.parse(first, last, ctx, unused)
-            || (!x4::has_expectation_failure(ctx)
-                && this->right.parse(first, last, ctx, unused));
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return this->left.parse(first, last, ctx, unused) ||
+                (!x4::has_expectation_failure(ctx) && this->right.parse(first, last, ctx, unused));
+        } else {
+            return this->left.parse(first, last, ctx, unused) ||
+                this->right.parse(first, last, ctx, unused);
+        }
     }
 
     // If you're changing these semantics, you should:
@@ -74,7 +78,9 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
             x4::move_to(std::move(attr_temp), attr);
             return true;
         }
-        if (x4::has_expectation_failure(ctx)) return false;
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            if (x4::has_expectation_failure(ctx)) return false;
+        }
 
         if (Attr attr_temp; detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {
             x4::move_to(std::move(attr_temp), attr);
@@ -109,7 +115,10 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
                 return true;
             }
             traits::clear(attr); // Make sure we don't propagate observable side effect
-            if (x4::has_expectation_failure(ctx)) return false;
+
+            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+                if (x4::has_expectation_failure(ctx)) return false;
+            }
 
             if (detail::parse_alternative(this->right, first, last, ctx, attr)) {
                 return true;
@@ -129,7 +138,10 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
                 x4::move_to(std::move(attr_temp), attr);
                 return true;
             }
-            if (x4::has_expectation_failure(ctx)) return false;
+
+            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+                if (x4::has_expectation_failure(ctx)) return false;
+            }
             traits::clear(attr_temp); // Reuse the buffer
 
             if (detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {
@@ -146,7 +158,10 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
                 x4::move_to(std::move(attr_temp), attr);
                 return true;
             }
-            if (x4::has_expectation_failure(ctx)) return false;
+
+            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+                if (x4::has_expectation_failure(ctx)) return false;
+            }
             traits::clear(attr_temp); // Reuse the buffer
 
             if (detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {

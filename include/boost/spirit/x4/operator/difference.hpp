@@ -47,14 +47,16 @@ struct difference : binary_parser<Left, Right, difference<Left, Right>>
             return false;
         }
 
-        // In case of `Left - expect[r]`,
-        // if Right yielded expectation error,
-        // the whole difference expression (*this) should also yield error.
-        // In other words, when the THROW macro was 1 (i.e. traditional behavior),
-        // Right should already have thrown an exception.
-        if (x4::has_expectation_failure(ctx)) {
-            // don't rollback iterator (mimicking exception-like behavior)
-            return false;
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            // In case of `Left - expect[r]`,
+            // if Right yielded expectation error,
+            // the whole difference expression (*this) should also yield error.
+            // In other words, when the THROW macro was 1 (i.e. traditional behavior),
+            // Right should already have thrown an exception.
+            if (x4::has_expectation_failure(ctx)) {
+                // don't rollback iterator (mimicking exception-like behavior)
+                return false;
+            }
         }
 
         // Right fails, now try Left

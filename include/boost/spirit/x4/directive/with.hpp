@@ -144,7 +144,19 @@ template<class ID, class T>
 struct [[nodiscard]] with_gen
 {
     static_assert(!std::is_rvalue_reference_v<T>);
+
+private:
     T val;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+
+public:
+    template<class U>
+        requires
+            (!std::is_same_v<std::remove_cvref_t<U>, with_gen>) &&
+            std::is_constructible_v<T, U>
+    constexpr with_gen(U&& val)
+        noexcept(std::is_nothrow_constructible_v<T, U>)
+        : val(std::forward<U>(val))
+    {}
 
     template<X4Subject Subject>
     [[nodiscard]] constexpr with_directive<as_parser_plain_t<Subject>, ID, T>
@@ -190,10 +202,7 @@ struct with_fn
 {
     template<class T>
     static constexpr with_gen<ID, T> operator()(T&& val)
-        noexcept(
-            std::is_lvalue_reference_v<T> ||
-            std::is_nothrow_move_constructible_v<T>
-        )
+        noexcept(std::is_nothrow_constructible_v<with_gen<ID, T>, T>)
     {
         return {std::forward<T>(val)};
     }

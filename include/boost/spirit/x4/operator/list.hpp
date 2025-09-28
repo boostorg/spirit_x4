@@ -62,7 +62,11 @@ struct list : binary_parser<Left, Right, list<Left, Right>>
             first = last_parse_it;
         }
 
-        return !x4::has_expectation_failure(ctx);
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 };
 

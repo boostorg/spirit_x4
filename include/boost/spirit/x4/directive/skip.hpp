@@ -65,6 +65,15 @@ public:
     parse(It& first, Se const& last, Context const& ctx, Attr& attr) const
         noexcept(is_nothrow_parsable_v<Subject, It, Se, context_t<Context>, Attr>)
     {
+        static_assert(
+            has_context_v<Context, contexts::skipper>,
+            "`reskip[...]` has no effect when the outer grammar has no skipper."
+        );
+        static_assert(
+            detail::is_unused_skipper<get_context_plain_t<contexts::skipper, Context>>::value,
+            "`reskip[...]` has no effect when the outer grammar has no inhibited skipper."
+        );
+
         // This logic is heavily related to the instantiation chain;
         // see `x4::skip_over` for details.
         auto const& skipper = detail::get_unused_skipper(x4::get<contexts::skipper>(ctx));
@@ -92,13 +101,6 @@ struct skip_directive : unary_parser<Subject, skip_directive<Subject, Skipper>>
     parse(It& first, Se const& last, Context const& ctx, Attr& attr) const
         noexcept(is_nothrow_parsable_v<Subject, It, Se, context<contexts::skipper, Skipper, Context>, Attr>)
     {
-        static_assert(
-            !std::same_as<expectation_failure_t<Context>, unused_type>,
-            "Context type was not specified for `x4::contexts::expectation_failure`. "
-            "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
-            "Note that you must also bind the context to your skipper."
-        );
-
         // This logic is heavily related to the instantiation chain;
         // see `x4::skip_over` for details.
         return this->subject.parse(first, last, x4::make_context<contexts::skipper>(skipper_, ctx), attr);

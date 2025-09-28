@@ -110,9 +110,8 @@ template<class Context>
 [[nodiscard]]
 constexpr bool has_expectation_failure(Context const& ctx) noexcept
 {
-    using T = expectation_failure_t<Context>;
     static_assert(
-        !std::same_as<unused_type, T>,
+        has_context_v<Context, contexts::expectation_failure>,
         "Context type was not specified for `x4::contexts::expectation_failure`. "
         "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
@@ -132,9 +131,8 @@ constexpr void set_expectation_failure(
 )
     noexcept(noexcept(x4::get<contexts::expectation_failure>(ctx).emplace(std::move(where), x4::what(subject))))
 {
-    using T = expectation_failure_t<Context>;
     static_assert(
-        !std::same_as<unused_type, T>,
+        has_context_v<Context, contexts::expectation_failure>,
         "Context type was not specified for `x4::contexts::expectation_failure`. "
         "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
@@ -146,9 +144,8 @@ template<class Context>
 [[nodiscard]]
 constexpr decltype(auto) get_expectation_failure(Context const& ctx) noexcept
 {
-    using T = expectation_failure_t<Context>;
     static_assert(
-        !std::same_as<T, unused_type>,
+        has_context_v<Context, contexts::expectation_failure>,
         "Context type was not specified for `x4::contexts::expectation_failure`. "
         "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."
@@ -160,9 +157,8 @@ constexpr decltype(auto) get_expectation_failure(Context const& ctx) noexcept
 template<class Context>
 constexpr void clear_expectation_failure(Context const& ctx) noexcept
 {
-    using T = expectation_failure_t<Context>;
     static_assert(
-        !std::same_as<T, unused_type>,
+        has_context_v<Context, contexts::expectation_failure>,
         "Context type was not specified for `x4::contexts::expectation_failure`. "
         "You probably forgot: `x4::with<x4::contexts::expectation_failure>(failure)[p]`. "
         "Note that you must also bind the context to your skipper."

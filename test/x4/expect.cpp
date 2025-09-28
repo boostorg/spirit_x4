@@ -15,9 +15,11 @@
 #include "test.hpp"
 
 #include <boost/spirit/x4/char/char.hpp>
+#include <boost/spirit/x4/char/negated_char.hpp>
 #include <boost/spirit/x4/string/string.hpp>
 #include <boost/spirit/x4/symbols.hpp>
 #include <boost/spirit/x4/binary.hpp>
+#include <boost/spirit/x4/rule.hpp>
 #include <boost/spirit/x4/auxiliary/attr.hpp>
 #include <boost/spirit/x4/auxiliary/eoi.hpp>
 #include <boost/spirit/x4/auxiliary/eol.hpp>
@@ -51,6 +53,8 @@
 #include <boost/preprocessor/facilities/overload.hpp>
 #include <boost/preprocessor/facilities/expand.hpp>
 
+#include <optional>
+#include <vector>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -133,6 +137,153 @@
         CHECK(!"remove DEBUG_PRINT before commit!"); \
     } while (false)
 
+
+TEST_CASE("expectation_failure_context_uninstantiated_in_expect_less_parse")
+{
+    using x4::int_;
+    using x4::eoi;
+    using x4::eol;
+    using x4::eps;
+    using x4::attr;
+    using x4::lit;
+    using x4::string;
+    using x4::char_;
+    using x4::standard::space;
+
+    using x4::confix;
+    using x4::expect;
+    using x4::lexeme;
+    using x4::matches;
+    using x4::no_case;
+    using x4::no_skip;
+    using x4::omit;
+    using x4::raw;
+    using x4::repeat;
+    using x4::seek;
+    using x4::skip;
+    using x4::reskip;
+    using x4::with;
+
+    using It = std::string_view::const_iterator;
+    using Se = It;
+    std::string_view const input;
+    It first = input.begin();
+    Se const last = input.end();
+
+    int dummy_int = 0;
+    std::vector<int> dummy_ints;
+    std::optional<int> dummy_optional_int;
+    std::optional<std::vector<int>> dummy_optional_ints;
+
+    bool dummy_bool = false;
+
+    (void)eps[([]{})].parse(first, last, unused, unused); // action
+    (void)int_[([]{})].parse(first, last, unused, dummy_int); // action
+    (void)(int_ >> int_)[([]{})].parse(first, last, unused, dummy_ints); // action
+
+    (void)attr(42).parse(first, last, unused, unused);
+    (void)eoi.parse(first, last, unused, unused);
+    (void)eol.parse(first, last, unused, unused);
+    (void)eps.parse(first, last, unused, unused);
+    (void)eps(true).parse(first, last, unused, unused);
+    (void)eps([]{ return true; }).parse(first, last, unused, unused);
+
+    (void)char_.parse(first, last, unused, unused); // NOLINT(readability-static-accessed-through-instance)
+    (void)char_('a').parse(first, last, unused, unused);
+    (void)char_('a', 'z').parse(first, last, unused, unused);
+    (void)char_("a-z").parse(first, last, unused, unused);
+    (void)(~char_).parse(first, last, unused, unused);
+    (void)lit('a').parse(first, last, unused, unused);
+    (void)lit("foo").parse(first, last, unused, unused);
+    (void)string("foo").parse(first, last, unused, unused);
+
+    (void)confix(eps, eps)[eps].parse(first, last, unused, unused);
+    (void)confix(eps, eps)[int_].parse(first, last, unused, dummy_int);
+    (void)confix(eps, eps)[int_ >> int_].parse(first, last, unused, dummy_ints);
+
+    //(void)expect[eps].parse(first, last, unused, unused); // context required
+    {
+        x4::expectation_failure<It> failure;
+        auto const ctx = x4::make_context<x4::contexts::expectation_failure>(failure);
+        (void)expect[eps].parse(first, last, ctx, unused);
+        (void)expect[int_].parse(first, last, ctx, dummy_int);
+        (void)expect[int_ >> int_].parse(first, last, ctx, dummy_ints);
+    }
+
+    (void)lexeme[eps].parse(first, last, unused, unused);
+    (void)lexeme[int_].parse(first, last, unused, dummy_int);
+    (void)lexeme[int_ >> int_].parse(first, last, unused, dummy_ints);
+
+    (void)matches[eps].parse(first, last, unused, unused);
+    (void)matches[int_].parse(first, last, unused, dummy_bool);
+
+    (void)no_case[eps].parse(first, last, unused, unused);
+    (void)no_case[int_].parse(first, last, unused, dummy_int);
+    (void)no_case[int_ >> int_].parse(first, last, unused, dummy_ints);
+
+    (void)no_skip[eps].parse(first, last, unused, unused);
+    (void)no_skip[int_].parse(first, last, unused, dummy_int);
+    (void)no_skip[int_ >> int_].parse(first, last, unused, dummy_ints);
+
+    (void)omit[eps].parse(first, last, unused, unused);
+    (void)raw[eps].parse(first, last, unused, unused);
+    (void)repeat(1)[eps].parse(first, last, unused, unused);
+    (void)seek[eps].parse(first, last, unused, unused);
+    (void)skip(space)[eps].parse(first, last, x4::make_context<x4::contexts::skipper>(space), unused);
+    (void)reskip[eps].parse(first, last, x4::make_context<x4::contexts::skipper>(space), unused);
+    (void)with<struct with_id_>(input)[eps].parse(first, last, unused, unused);
+
+    // `numeric/*` do not need to be tested, as they do not contain expectation failure related calls
+
+    // NOLINTBEGIN(misc-redundant-expression)
+    (void)(eps | eps).parse(first, last, unused, unused);
+    (void)(int_ | int_).parse(first, last, unused, dummy_int);
+    (void)(int_ >> int_ | int_ >> int_).parse(first, last, unused, dummy_ints);
+
+    (void)(&eps).parse(first, last, unused, unused);
+    (void)(&int_).parse(first, last, unused, unused);
+    (void)(&(int_ >> int_)).parse(first, last, unused, unused);
+
+    (void)(eps - eps).parse(first, last, unused, unused);
+    (void)(int_ - eps).parse(first, last, unused, dummy_int);
+    (void)((int_ >> int_) - eps).parse(first, last, unused, dummy_ints);
+
+    (void)(*eps(false)).parse(first, last, unused, unused);
+    (void)(*int_).parse(first, last, unused, dummy_ints);
+
+    (void)(eps % eps(false)).parse(first, last, unused, unused);
+    (void)(int_ % eps(false)).parse(first, last, unused, dummy_ints);
+
+    (void)(!eps).parse(first, last, unused, unused);
+    (void)(!int_).parse(first, last, unused, unused);
+    (void)(!(int_ >> int_)).parse(first, last, unused, unused);
+
+    (void)(-eps).parse(first, last, unused, unused);
+    (void)(-int_).parse(first, last, unused, dummy_optional_int);
+    (void)(-(int_ >> int_)).parse(first, last, unused, dummy_optional_ints);
+
+    (void)(+eps(false)).parse(first, last, unused, unused);
+    (void)(+int_).parse(first, last, unused, dummy_int);
+
+    (void)(eps >> eps).parse(first, last, unused, unused);
+    (void)(int_ >> int_).parse(first, last, unused, dummy_ints);
+
+    // `string/*` do not need to be tested, as they do not contain expectation failure related calls
+
+    // rule
+    {
+        constexpr x4::rule<struct _, unused_type> r("r");
+        constexpr auto p = r = x4::lit('a') >> r;
+        (void)p.parse(first, last, unused, unused);
+    }
+    {
+        constexpr x4::rule<struct _, unused_type> r("r");
+        constexpr auto p = r %= x4::lit('a') >> r;
+        (void)p.parse(first, last, unused, unused);
+    }
+
+    // NOLINTEND(misc-redundant-expression)
+}
 
 TEST_CASE("expect")
 {

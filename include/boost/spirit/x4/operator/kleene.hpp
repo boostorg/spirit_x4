@@ -48,7 +48,11 @@ struct kleene : unary_parser<Subject, kleene<Subject>>
         while (detail::parse_into_container(this->subject, first, last, ctx, x4::assume_container(attr)))
             /* loop */;
 
-        return !x4::has_expectation_failure(ctx);
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 };
 

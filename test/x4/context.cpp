@@ -14,17 +14,70 @@
 #include <type_traits>
 #include <utility>
 
+// Don't place these in anonymous namespace; they make debug harder
+
+template<class T>
+struct ref_holder
+{
+    T& ref;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+};
+
+struct existent_tag;
+struct non_existent_tag;
+struct next_tag;
+
 TEST_CASE("context")
 {
     using x4::context;
-    struct existent_tag;
-    struct non_existent_tag;
+
+    {
+        using NextContext = context<next_tag, double>;
+        using Context = context<existent_tag, int, NextContext>;
+        STATIC_CHECK(sizeof(NextContext) == sizeof(ref_holder<double>));
+        STATIC_CHECK(sizeof(Context) == sizeof(ref_holder<int>) + sizeof(NextContext));
+    }
+    {
+        using NextContext = context<next_tag, double>;
+        using Context = context<existent_tag, int, NextContext const&>;
+        STATIC_CHECK(sizeof(NextContext) == sizeof(ref_holder<double>));
+        STATIC_CHECK(sizeof(Context) == sizeof(ref_holder<int>) + sizeof(ref_holder<NextContext>));
+    }
 
     {
         struct IntRef { int& ref; };  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         STATIC_CHECK(sizeof(context<struct i_, int>) == sizeof(IntRef));
         STATIC_CHECK(sizeof(context<struct i_, int, context<struct d_, double>>) == sizeof(IntRef) * 2);
         STATIC_CHECK(sizeof(context<struct i_, int, context<struct d_, double> const&>) == sizeof(IntRef) * 2);
+    }
+
+    {
+        // Replace the first context of `context<..., non-owning>`
+        {
+            double j = 3.14;
+            auto next_ctx = x4::make_context<next_tag>(j);
+
+            int i = 42;
+            auto ctx = x4::make_context<existent_tag>(i, next_ctx);
+            STATIC_CHECK(std::same_as<decltype(ctx), context<existent_tag, int, context<next_tag, double> const&>>);
+
+            int replaced_i = 43;
+            auto&& replaced_ctx = x4::replace_first_context<existent_tag>(ctx, replaced_i);
+
+            STATIC_CHECK(std::same_as<decltype(replaced_ctx), context<existent_tag, int, context<next_tag, double> const&>&&>);
+        }
+        // Replace the first context of `context<..., owning>`
+        {
+            double j = 3.14;
+
+            int i = 42;
+            auto ctx = x4::make_context<existent_tag>(i, x4::make_context<next_tag>(j));
+            STATIC_CHECK(std::same_as<decltype(ctx), context<existent_tag, int, context<next_tag, double>>>);
+
+            int replaced_i = 43;
+            auto&& replaced_ctx = x4::replace_first_context<existent_tag>(ctx, replaced_i); // Should not create copy of `Next`
+
+            STATIC_CHECK(std::same_as<decltype(replaced_ctx), context<existent_tag, int, context<next_tag, double> /* not reference */>&&>);
+        }
     }
 
     {

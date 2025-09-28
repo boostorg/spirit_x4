@@ -212,11 +212,10 @@ struct context_storage<ID, T, Next>
 };
 
 #define BOOST_SPIRIT_X4_UNUSED_CONTEXT_VALUE_TYPE_ERROR \
-    "Assigning `unused` to a unique context does not make sense because " \
+    "Assigning `unused` to a unique context is prohibited for maintainability because " \
     "unique context is binary: it either holds a value or is empty. Introducing " \
-    "`unused` makes it tri-state, which is prohibited for maintainability. If you " \
-    "want to propagate `unused` as a placeholder (e.g. for debug QoL purpose), " \
-    "mark the tag with `allow_unused = true`."
+    "`unused` makes it tri-state. If you want to propagate `unused` as a placeholder " \
+    "(e.g. for debug QoL purpose), mark the tag with `allow_unused = true`."
 
 template<class ID, class T, class Next>
     requires std::same_as<std::remove_const_t<T>, unused_type>
@@ -459,6 +458,13 @@ remove_first_context(context<ID, T, Next> const& ctx) noexcept
     }
 }
 
+template<class ID_To_Remove>
+[[nodiscard]] constexpr unused_type const&
+remove_first_context(unused_type const&) noexcept
+{
+    return unused;
+}
+
 template<class ID_To_Remove, class ID, class T, class Next>
 void remove_first_context(context<ID, T, Next> const&&) = delete; // dangling
 
@@ -501,8 +507,13 @@ replace_first_context(
             } else {
                 // Existing context found; replace it and end the search.
                 //
-                // This implementation does not replace succeeding (duplicate) entries,
-                // because it is `replace_*first*_context`.
+                // Current implementation does not replace succeeding (duplicate) entries,
+                // because it is essentially `replace_*first*_context`.
+
+                // Copy construction of `Next` itself is always cheap, as it holds only the
+                // reference. So we simply copy `Next` here, instead of `decltype((ctx.next))`.
+                static_assert(std::is_nothrow_copy_constructible_v<Next>);
+
                 return context<ID, NewVal, Next>{new_val, ctx.next};
             }
 
@@ -527,6 +538,29 @@ replace_first_context(
                 };
             }
         }
+    }
+}
+
+template<class ID_To_Replace, class NewVal>
+[[nodiscard]] constexpr decltype(auto)
+replace_first_context(
+    unused_type const&,
+    NewVal& new_val BOOST_SPIRIT_LIFETIMEBOUND
+) noexcept
+{
+    static_assert(!is_ttp_specialization_of_v<std::remove_const_t<NewVal>, context>, "context's value type cannot be context");
+    static_assert(!std::same_as<ID_To_Replace, detail::monostate_context_tag>);
+
+    if constexpr (
+        detail::UniqueContextID<ID_To_Replace> &&
+        !detail::AllowUnusedContextID<ID_To_Replace> &&
+        std::same_as<std::remove_const_t<NewVal>, unused_type>
+    ) {
+        (void)new_val; // == unused
+        return unused;
+
+    } else {
+        return context<ID_To_Replace, NewVal>{new_val};
     }
 }
 

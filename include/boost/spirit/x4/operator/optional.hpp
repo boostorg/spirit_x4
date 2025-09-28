@@ -55,7 +55,12 @@ struct optional : unary_parser<Subject, optional<Subject>>
 
         // discard [[nodiscard]]
         (void)this->subject.parse(first, last, ctx, attr);
-        return !x4::has_expectation_failure(ctx);
+
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 
     // container attribute
@@ -69,7 +74,12 @@ struct optional : unary_parser<Subject, optional<Subject>>
     {
         // discard [[nodiscard]]
         (void)detail::parse_into_container(this->subject, first, last, ctx, attr);
-        return !x4::has_expectation_failure(ctx);
+
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 
     // optional attribute
@@ -95,7 +105,11 @@ struct optional : unary_parser<Subject, optional<Subject>>
             return true;
         }
 
-        return !x4::has_expectation_failure(ctx);
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 };
 

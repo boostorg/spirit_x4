@@ -47,8 +47,10 @@ struct seek_directive : unary_parser<Subject, seek_directive<Subject>>
                 return true;
             }
 
-            if (x4::has_expectation_failure(ctx)) {
-                return false;
+            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+                if (x4::has_expectation_failure(ctx)) {
+                    return false;
+                }
             }
 
             // fail only after subject fails & no input

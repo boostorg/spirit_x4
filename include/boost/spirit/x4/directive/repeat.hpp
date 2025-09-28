@@ -118,7 +118,11 @@ struct repeat_directive : unary_parser<Subject, repeat_directive<Subject, Bounds
             }
         }
 
-        return !x4::has_expectation_failure(ctx);
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            return !x4::has_expectation_failure(ctx);
+        } else {
+            return true;
+        }
     }
 
 private:

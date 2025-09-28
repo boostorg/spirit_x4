@@ -63,9 +63,11 @@ struct confix_directive
               this->subject.parse(first, last, ctx, attr) &&
               postfix_.parse(first, last, ctx, unused))
         ) {
-            if (x4::has_expectation_failure(ctx)) {
-                // don't rollback iterator (mimicking exception-like behavior)
-                return false;
+            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+                if (x4::has_expectation_failure(ctx)) {
+                    // don't rollback iterator (mimicking exception-like behavior)
+                    return false;
+                }
             }
 
             first = saved_first;

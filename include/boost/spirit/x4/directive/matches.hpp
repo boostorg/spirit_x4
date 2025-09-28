@@ -48,7 +48,10 @@ struct matches_directive : unary_parser<Subject, matches_directive<Subject>>
         )
     {
         bool const matched = this->subject.parse(first, last, ctx, unused);
-        if (x4::has_expectation_failure(ctx)) return false;
+
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            if (x4::has_expectation_failure(ctx)) return false;
+        }
 
         x4::move_to(matched, attr);
         return true;
