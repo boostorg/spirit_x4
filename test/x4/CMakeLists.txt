@@ -70,7 +70,6 @@ x4_define_tests(
     error_handler
     expect
     extract_int
-    fusion_map
     int
     iterator_check
     kleene

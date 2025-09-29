@@ -33,7 +33,6 @@ struct unused_attr {};
 struct plain_attr {};
 struct container_attr {};
 struct tuple_attr {};
-struct assoc_attr {};
 struct variant_attr {};
 struct optional_attr {};
 struct subrange_attr {};
@@ -86,17 +85,7 @@ concept NonUnusedAttr = !CategorizedAttr<T, unused_attr>;
 
 template<class T>
     requires
-        fusion::traits::is_sequence<std::remove_cvref_t<T>>::value &&
-        fusion::traits::is_associative<std::remove_cvref_t<T>>::value
-struct attribute_category<T>
-{
-    using type = assoc_attr;
-};
-
-template<class T>
-    requires
-        fusion::traits::is_sequence<std::remove_cvref_t<T>>::value &&
-        (!fusion::traits::is_associative<std::remove_cvref_t<T>>::value)
+        fusion::traits::is_sequence<std::remove_cvref_t<T>>::value
 struct attribute_category<T>
 {
     using type = tuple_attr;

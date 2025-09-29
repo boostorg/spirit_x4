@@ -339,67 +339,6 @@ parse_sequence(
     return false;
 }
 
-// We can come here in 2 cases:
-//
-// 1) When sequence is key >> value and therefore must
-//    be parsed with tuple synthesized attribute and then
-//    that tuple is used to save into associative attribute provided here.
-//    Example: key >> value;
-//
-// 2) When either this->left or this->right provides full key-value
-//    pair (like in case 1) and another one provides nothing.
-//    Example: eps >> rule<class x; fusion::map<...>>
-//
-// The first case must be parsed as whole.
-// The second one should be parsed separately for left and right.
-template<class Parser, class Context>
-constexpr bool assoc_sequence_should_split =
-    std::is_same_v<traits::attribute_of_t<decltype(std::declval<Parser>().left), Context>, unused_type> ||
-    std::is_same_v<traits::attribute_of_t<decltype(std::declval<Parser>().right), Context>, unused_type>;
-
-template<
-    class Parser,
-    std::forward_iterator It, std::sentinel_for<It> Se,
-    class Context
->
-    requires (!assoc_sequence_should_split<Parser, Context>)
-[[nodiscard]] constexpr bool
-parse_sequence(
-    Parser const& parser,
-    It& first, Se const& last,
-    Context const& ctx, traits::CategorizedAttr<traits::assoc_attr> auto& attr
-) noexcept(noexcept(detail::parse_into_container(parser, first, last, ctx, attr)))
-{
-    return detail::parse_into_container(parser, first, last, ctx, attr);
-}
-
-template<
-    class Parser,
-    std::forward_iterator It, std::sentinel_for<It> Se,
-    class Context
->
-    requires assoc_sequence_should_split<Parser, Context>
-[[nodiscard]] constexpr bool
-parse_sequence(
-    Parser const& parser,
-    It& first, Se const& last,
-    Context const& ctx, traits::CategorizedAttr<traits::assoc_attr> auto& attr
-) noexcept(
-    std::is_nothrow_copy_assignable_v<It> &&
-    noexcept(parser.left.parse(first, last, ctx, attr)) &&
-    noexcept(parser.right.parse(first, last, ctx, attr))
-)
-{
-    It const first_saved = first;
-    if (parser.left.parse(first, last, ctx, attr) &&
-        parser.right.parse(first, last, ctx, attr)
-    ) {
-        return true;
-    }
-    first = first_saved;
-    return false;
-}
-
 template<class Left, class Right, class Context>
 struct parse_into_container_impl<sequence<Left, Right>, Context>
 {
@@ -434,15 +373,6 @@ struct parse_into_container_impl<sequence<Left, Right>, Context>
         Context const& ctx, Attr& attr
     ) // never noexcept (requires container insertion)
     {
-        // inform user what went wrong if we jumped here in attempt to
-        // parse incompatible sequence into fusion::map
-        static_assert(
-            !std::is_same_v<traits::attribute_category_t<Attr>, traits::assoc_attr>,
-            "To parse directly into fusion::map sequence must produce tuple attribute "
-            "where type of first element is existing key in fusion::map and second element "
-            "is value to be stored under that key"
-        );
-
         static_assert(
             std::same_as<traits::attribute_category_t<Attr>, traits::container_attr> ||
             std::same_as<traits::attribute_category_t<Attr>, traits::unused_attr>

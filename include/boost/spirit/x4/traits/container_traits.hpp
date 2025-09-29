@@ -82,19 +82,6 @@ using container_value_t = typename container_value<Container>::type;
 template<class Container>
 struct container_value<Container const> : container_value<Container> {};
 
-// There is no single container value for fusion maps, but because output
-// of this metafunc is used to check wheter parser's attribute can be
-// saved to container, we simply return whole fusion::map as is
-// so that check can be done in traits::is_substitute specialisation
-template<class T>
-    requires
-        fusion::traits::is_sequence<T>::value &&
-        fusion::traits::is_associative<T>::value
-struct container_value<T>
-{
-    using type = T;
-};
-
 template<>
 struct container_value<unused_container_type>
 {

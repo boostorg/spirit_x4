@@ -117,51 +117,6 @@ struct has_fusion_kv_in_map<Key, Value, Map> : is_substitute<
 
 } // detail
 
-// 2 element mpl tuple is compatible with fusion::map if:
-// - it's first element type is existing key in map
-// - it second element type is compatible to type stored at the key in map
-template<class T, X4Attribute Attr>
-    requires std::conjunction_v<
-        fusion::traits::is_sequence<T>,
-        fusion::traits::is_sequence<Attr>,
-        traits::has_size<T, 2>,
-        fusion::traits::is_associative<Attr>
-    >
-struct is_substitute<T, Attr>
-{
-    // Checking that "p_key >> p_value" parser can
-    // store its result in fusion::map attribute
-    using p_key = typename mpl::at_c<T, 0>::type;
-    using p_value = typename mpl::at_c<T, 1>::type;
-
-    // For simple `p_key` type we just check that
-    // such key can be found in attr and that value under that key
-    // matches `p_value`.
-
-    // Otherwise, if p_key is variant over multiple types (as a result of
-    // "(key1|key2|key3) >> p_value" parser), check that all
-    // keys are found in `fusion::map` attribute and that values
-    // under these keys match `p_value`.
-    template<class Variant>
-    struct variant_kv
-        : mpl::equal_to<
-            mpl::size<typename Variant::types>,
-            mpl::size<
-                mpl::filter_view<
-                    typename Variant::types,
-                    detail::has_fusion_kv_in_map<mpl::_1, p_value, Attr>
-                >
-            >
-        >
-    {};
-
-    static constexpr bool value = std::conditional_t<
-        is_variant<p_key>::value,
-        variant_kv<p_key>,
-        detail::has_fusion_kv_in_map<p_key, p_value, Attr>
-    >::value;
-};
-
 template<class T, X4Attribute Attr>
 struct is_substitute<std::optional<T>, std::optional<Attr>>
     : is_substitute<T, Attr>
