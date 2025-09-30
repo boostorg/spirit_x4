@@ -54,6 +54,8 @@ jobs:
             version: 24.04
           - name: windows
             version: 2022
+          - name: windows
+            version: 2025
         build_type:
           - name: Debug
             lowercase: debug
