@@ -7,14 +7,6 @@
 
 require-b2 5.2 ;
 
-import feature ;
-
-if ! [ feature.valid known-warnings ] {
-    feature.feature known-warnings : hide show : incidental propagated ;
-}
-
-local 9.0-14.0 = 9.0 10.0 11.0 12.0 14.0 ;
-
 constant boost_dependencies :
     /boost/assert//boost_assert
     /boost/config//boost_config

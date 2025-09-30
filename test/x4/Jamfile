@@ -10,8 +10,6 @@
 
 import-search /boost/config/checks ;
 import config : requires ;
-import modules ;
-import feature ;
 import testing ;
 
 project spirit-x4
