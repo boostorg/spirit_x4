@@ -29,13 +29,13 @@ jobs:
         with:
           filters: |
             x4:
-              - '!**/Jamfile'
               - '.github/workflows/*.yml'
               - 'CMakeLists.txt'
               - 'test/CMakeLists.txt'
               - 'include/boost/spirit/x4/**/*'
               - 'include/boost/spirit/x4.hpp'
               - 'test/x4/**/*'
+              - '!**/Jamfile'
 
   build:
     name: "[${{ matrix.cpp_version.name }}] ${{ matrix.spirit_component }} | ${{ matrix.compiler.toolset }}-${{ matrix.compiler.version }} (${{ matrix.build_type.name }}) @ ${{ matrix.os.name }}-${{ matrix.os.version }}"
