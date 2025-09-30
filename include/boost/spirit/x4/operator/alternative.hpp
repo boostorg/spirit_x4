@@ -67,12 +67,17 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
         noexcept(
             noexcept(detail::parse_alternative(this->left, first, last, ctx, attr)) &&
             noexcept(detail::parse_alternative(this->right, first, last, ctx, attr)) &&
-            noexcept(x4::move_to(std::declval<Attr>(), attr)) &&
-            std::is_nothrow_default_constructible_v<Attr>
+            std::is_nothrow_default_constructible_v<Attr> &&
+            noexcept(x4::move_to(std::declval<Attr>(), attr))
         )
     {
         static_assert(!std::same_as<std::remove_const_t<Attr>, unused_type>);
         static_assert(!std::same_as<std::remove_const_t<Attr>, unused_container_type>);
+
+        static_assert(
+            std::default_initializable<Attr>,
+            "Attribute needs to be default-initializable to support rollback on failed parse attempt."
+        );
 
         if (Attr attr_temp; detail::parse_alternative(this->left, first, last, ctx, attr_temp)) {
             x4::move_to(std::move(attr_temp), attr);
@@ -131,45 +136,23 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
         // Non-empty container
         // Since the attribute is a container, we can reuse the buffer when the `left` fails
         //
-        if consteval {
-            ContainerAttr attr_temp;
+        ContainerAttr attr_temp;
 
-            if (detail::parse_alternative(this->left, first, last, ctx, attr_temp)) {
-                x4::move_to(std::move(attr_temp), attr);
-                return true;
-            }
-
-            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
-                if (x4::has_expectation_failure(ctx)) return false;
-            }
-            traits::clear(attr_temp); // Reuse the buffer
-
-            if (detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {
-                x4::move_to(std::move(attr_temp), attr);
-                return true;
-            }
-            return false; // `attr` is untouched
-
-        } else { // not consteval
-            thread_local ContainerAttr attr_temp;
-            traits::clear(attr_temp);
-
-            if (detail::parse_alternative(this->left, first, last, ctx, attr_temp)) {
-                x4::move_to(std::move(attr_temp), attr);
-                return true;
-            }
-
-            if constexpr (has_context_v<Context, contexts::expectation_failure>) {
-                if (x4::has_expectation_failure(ctx)) return false;
-            }
-            traits::clear(attr_temp); // Reuse the buffer
-
-            if (detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {
-                x4::move_to(std::move(attr_temp), attr);
-                return true;
-            }
-            return false; // `attr` is untouched
+        if (detail::parse_alternative(this->left, first, last, ctx, attr_temp)) {
+            x4::move_to(std::move(attr_temp), attr);
+            return true;
         }
+
+        if constexpr (has_context_v<Context, contexts::expectation_failure>) {
+            if (x4::has_expectation_failure(ctx)) return false;
+        }
+        traits::clear(attr_temp); // Reuse the buffer
+
+        if (detail::parse_alternative(this->right, first, last, ctx, attr_temp)) {
+            x4::move_to(std::move(attr_temp), attr);
+            return true;
+        }
+        return false; // `attr` is untouched
     }
 };
 
