@@ -14,8 +14,6 @@
 #include <boost/spirit/x4/traits/tuple_traits.hpp>
 
 #include <boost/fusion/include/is_sequence.hpp>
-#include <boost/fusion/include/map.hpp>
-#include <boost/fusion/include/value_at_key.hpp>
 
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/equal.hpp>
@@ -102,20 +100,6 @@ template<class T, X4Attribute Attr>
 struct is_substitute<T, Attr&>
     : is_substitute<T, Attr>
 {};
-
-namespace detail {
-
-template<class Key, class Value, class Map>
-struct has_fusion_kv_in_map : std::false_type {};
-
-template<class Key, class Value, class Map>
-    requires fusion::result_of::has_key<Map, Key>::value
-struct has_fusion_kv_in_map<Key, Value, Map> : is_substitute<
-    typename fusion::result_of::value_at_key<Map, Key>::type,
-    Value
-> {};
-
-} // detail
 
 template<class T, X4Attribute Attr>
 struct is_substitute<std::optional<T>, std::optional<Attr>>
