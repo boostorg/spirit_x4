@@ -15,7 +15,9 @@
 #include <boost/spirit/x4/operator/plus.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 
+#include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/vector.hpp>
+
 #include <boost/variant.hpp>
 
 #include <iterator>

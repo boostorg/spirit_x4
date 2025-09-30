@@ -49,7 +49,9 @@
 #include <boost/spirit/x4/operator/not_predicate.hpp>
 #include <boost/spirit/x4/operator/optional.hpp>
 
+#include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/vector.hpp>
+
 #include <boost/preprocessor/facilities/overload.hpp>
 #include <boost/preprocessor/facilities/expand.hpp>
 

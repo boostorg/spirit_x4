@@ -25,6 +25,7 @@
 #include <boost/spirit/x4/operator/optional.hpp>
 #include <boost/spirit/x4/operator/alternative.hpp>
 
+#include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/deque.hpp>
 #include <boost/fusion/include/comparison.hpp>

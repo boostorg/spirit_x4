@@ -13,6 +13,7 @@
 #include <boost/spirit/x4/char/char_class.hpp>
 #include <boost/spirit/x4/numeric/int.hpp>
 
+#include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/vector.hpp>
 
 #include <string_view>

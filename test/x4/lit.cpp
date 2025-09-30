@@ -15,6 +15,7 @@
 #include <boost/spirit/x4/string/string.hpp>
 #include <boost/spirit/x4/operator/sequence.hpp>
 
+#include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/vector.hpp>
 
 #include <string>
