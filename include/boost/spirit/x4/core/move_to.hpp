@@ -237,6 +237,20 @@ move_to(It first, Se last, Dest& dest)
     x4::move_to(first, last, fusion::front(dest));
 }
 
+// Move non-container `src` into container `dest`.
+// e.g. Source=std::string_view, Dest=std::string (used in `attr_parser`)
+template<traits::NonUnusedAttr Source, traits::CategorizedAttr<traits::container_attr> Dest>
+    requires
+        (!traits::X4Container<Source>) &&
+        (!std::same_as<std::remove_const_t<Dest>, unused_container_type>)
+constexpr void
+move_to(Source&& src, Dest& dest)
+    noexcept(std::is_nothrow_assignable_v<Dest&, Source&&>)
+{
+    static_assert(std::is_assignable_v<Dest&, Source>);
+    dest = std::forward<Source>(src);
+}
+
 template<traits::X4Container Source, traits::CategorizedAttr<traits::container_attr> Dest>
 constexpr void
 move_to(Source&& src, Dest& dest)

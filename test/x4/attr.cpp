@@ -31,37 +31,59 @@ TEST_CASE("attr")
 
     {
         [[maybe_unused]] constexpr auto attr_p = attr(1);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<int>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<int>>);
     }
     {
         [[maybe_unused]] constexpr auto attr_p = attr(3.14);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<double>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<double>>);
     }
 
     {
-        [[maybe_unused]] /*constexpr*/ auto attr_p = attr("foo");
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char>>>);
+        constexpr auto attr_p = attr("foo");
+        STATIC_REQUIRE(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char>, std::basic_string_view<char>>>);
+
+        // Make sure `attr(std::string_view)` is parsable into std::string
+        {
+            constexpr auto result = [&](std::string_view expected_str) consteval {
+                std::string str;
+                std::string_view const input;
+                auto it = input.begin();
+                auto const se = input.end();
+                bool const ok = attr_p.parse(it, se, unused, str);
+                return std::make_pair(ok, str == expected_str);
+            }("foo");
+            STATIC_REQUIRE(result.first == true);
+            STATIC_CHECK(result.second == true);
+        }
+        {
+            std::string str;
+            std::string_view const input;
+            auto it = input.begin();
+            auto const se = input.end();
+            REQUIRE(attr_p.parse(it, se, unused, str));
+            CHECK(str == "foo");
+        }
     }
     {
         [[maybe_unused]] /*constexpr*/ auto attr_p = attr("foo"s);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char>>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char>>>);
     }
     {
         [[maybe_unused]] constexpr auto attr_p = attr("foo"sv);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string_view<char>>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string_view<char>>>);
     }
 
     {
-        [[maybe_unused]] /*constexpr*/ auto attr_p = attr(U"foo");
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char32_t>>>);
+        [[maybe_unused]] constexpr auto attr_p = attr(U"foo");
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char32_t>, std::basic_string_view<char32_t>>>);
     }
     {
         [[maybe_unused]] /*constexpr*/ auto attr_p = attr(U"foo"s);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char32_t>>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string<char32_t>>>);
     }
     {
         [[maybe_unused]] constexpr auto attr_p = attr(U"foo"sv);
-        static_assert(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string_view<char32_t>>>);
+        STATIC_CHECK(std::same_as<std::remove_const_t<decltype(attr_p)>, x4::attr_parser<std::basic_string_view<char32_t>>>);
     }
 
     BOOST_SPIRIT_X4_ASSERT_CONSTEXPR_CTORS(attr(1));
