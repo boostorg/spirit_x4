@@ -111,6 +111,13 @@ jobs:
         run: |
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
+      - name: Setup Windows Dev Drive
+        if: matrix.os.name == 'windows'
+        uses: samypr100/setup-dev-drive@v3
+        with:
+          drive-size: 4GB
+          drive-format: ReFS
+
       - name: Initialize Ubuntu
         if: matrix.os.name == 'ubuntu'
         run: |
@@ -142,7 +149,7 @@ jobs:
           echo "BOOST_RELEASE_VERSION_NAME=$BOOST_RELEASE_VERSION_NAME" >> "$GITHUB_OUTPUT"
 
           if [ "${{ matrix.os.name }}" = "windows" ]; then
-            export BOOST_ROOT=$(cygpath -w $HOME/boost)
+            export BOOST_ROOT=${{ env.DEV_DRIVE }}\\boost
           else
             export BOOST_ROOT=$HOME/boost
           fi
