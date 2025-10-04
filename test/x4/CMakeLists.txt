@@ -60,7 +60,6 @@ x4_define_tests(
     bool
     char
     char_class
-    confix
     container_support
     context
     debug

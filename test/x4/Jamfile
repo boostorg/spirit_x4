@@ -114,7 +114,6 @@ run tst.cpp catch2 ;
 run uint.cpp catch2 ;
 run uint_radix.cpp catch2 ;
 
-run confix.cpp catch2 ;
 run repeat.cpp catch2 ;
 run seek.cpp catch2 ;
 

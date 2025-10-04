@@ -27,7 +27,6 @@
 #include <boost/spirit/x4/char/char_class.hpp>
 #include <boost/spirit/x4/directive/with.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
-#include <boost/spirit/x4/directive/confix.hpp>
 #include <boost/spirit/x4/directive/expect.hpp>
 #include <boost/spirit/x4/directive/lexeme.hpp>
 #include <boost/spirit/x4/directive/matches.hpp>
@@ -152,7 +151,6 @@ TEST_CASE("expectation_failure_context_uninstantiated_in_expect_less_parse")
     using x4::char_;
     using x4::standard::space;
 
-    using x4::confix;
     using x4::expect;
     using x4::lexeme;
     using x4::matches;
@@ -198,10 +196,6 @@ TEST_CASE("expectation_failure_context_uninstantiated_in_expect_less_parse")
     (void)lit('a').parse(first, last, unused, unused);
     (void)lit("foo").parse(first, last, unused, unused);
     (void)string("foo").parse(first, last, unused, unused);
-
-    (void)confix(eps, eps)[eps].parse(first, last, unused, unused);
-    (void)confix(eps, eps)[int_].parse(first, last, unused, dummy_int);
-    (void)confix(eps, eps)[int_ >> int_].parse(first, last, unused, dummy_ints);
 
     //(void)expect[eps].parse(first, last, unused, unused); // context required
     {
@@ -318,7 +312,6 @@ TEST_CASE("expect")
     using x4::dword;
     using x4::int_;
     using x4::shared_symbols;
-    using x4::confix;
     using x4::with;
 
     using boost::fusion::vector;
@@ -562,15 +555,6 @@ TEST_CASE("expect")
         TEST_SUCCESS_PASS("12cat", +digit > s);
         TEST_FAILURE("12dog", +digit > s, {
             CHECK(where == "dog"sv);
-        });
-    }
-
-    // confix
-    {
-        TEST_SUCCESS_PASS("[12cat]", confix('[', ']')[+digit > lit("cat")]);
-        TEST_FAILURE("[12dog]", confix('[', ']')[+digit > lit("cat")], {
-            CHECK(which == "\"cat\""sv);
-            CHECK(where == "dog]"sv);
         });
     }
 
