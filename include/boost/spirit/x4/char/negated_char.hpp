@@ -27,7 +27,7 @@ struct negated_char_parser : char_parser<typename Positive::encoding_type, negat
         requires
             (!std::is_same_v<std::remove_cvref_t<PositiveT>, negated_char_parser>) &&
             std::is_constructible_v<Positive, PositiveT>
-    constexpr negated_char_parser(PositiveT&& positive)
+    constexpr explicit negated_char_parser(PositiveT&& positive)
         noexcept(std::is_nothrow_constructible_v<Positive, PositiveT>)
         : positive_(std::forward<PositiveT>(positive))
     {}
@@ -54,7 +54,7 @@ template<class Encoding, class Positive>
 operator~(char_parser<Encoding, Positive> const& cp)
     noexcept(std::is_nothrow_constructible_v<negated_char_parser<Positive>, Positive const&>)
 {
-    return {cp.derived()};
+    return negated_char_parser<Positive>{cp.derived()};
 }
 
 template<class Positive>

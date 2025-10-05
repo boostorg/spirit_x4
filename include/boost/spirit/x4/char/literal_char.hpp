@@ -28,8 +28,6 @@ struct literal_char : char_parser<Encoding, literal_char<Encoding, Attr>>
 
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
 
-    literal_char() = delete; // Empty `literal_char` matches infinite times, leading to stack overflow
-
     template<class Char>
         requires
             (!std::is_same_v<std::remove_cvref_t<Char>, literal_char>) &&

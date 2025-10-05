@@ -139,7 +139,7 @@ struct literal_bool_parser : parser<literal_bool_parser<T, Encoding, Policy>>
         requires
             (!std::is_same_v<std::remove_cvref_t<U>, literal_bool_parser>) &&
             std::is_constructible_v<T, U>
-    constexpr literal_bool_parser(U&& expected_bool)
+    constexpr explicit literal_bool_parser(U&& expected_bool)
         noexcept(std::is_nothrow_constructible_v<T, U>)
         : expected_bool_(std::forward<U>(expected_bool))
     {}

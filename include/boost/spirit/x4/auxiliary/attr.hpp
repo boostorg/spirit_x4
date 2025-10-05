@@ -50,7 +50,7 @@ struct attr_parser : parser<attr_parser<T, HeldValueT>>
         requires
             (!std::is_same_v<std::remove_cvref_t<U>, attr_parser>) &&
             std::is_constructible_v<HeldValueT, U>
-    constexpr attr_parser(U&& value)
+    constexpr explicit attr_parser(U&& value)
         noexcept(std::is_nothrow_constructible_v<HeldValueT, U>)
         : held_value_(std::forward<U>(value))
     {}
@@ -69,11 +69,18 @@ private:
     HeldValueT held_value_;
 };
 
+namespace detail {
+
 template<traits::CharArray R>
-attr_parser(R const&) -> attr_parser<
+using string_array_attr_parser_t = attr_parser<
     std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>,
     std::basic_string_view<std::remove_extent_t<std::remove_cvref_t<R>>>
 >;
+
+} // detail
+
+template<traits::CharArray R>
+attr_parser(R const&) -> detail::string_array_attr_parser_t<R>;
 
 template<class T, class HeldValueT>
 struct get_info<attr_parser<T, HeldValueT>>
@@ -95,24 +102,15 @@ struct attr_gen
     operator()(T&& value)
         noexcept(std::is_nothrow_constructible_v<attr_parser<std::remove_cvref_t<T>>, T>)
     {
-        return {std::forward<T>(value)};
+        return attr_parser<std::remove_cvref_t<T>>{std::forward<T>(value)};
     }
 
     template<traits::CharArray R>
-    [[nodiscard]] static constexpr attr_parser<
-        std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>,
-        std::basic_string_view<std::remove_extent_t<std::remove_cvref_t<R>>>
-    >
+    [[nodiscard]] static constexpr string_array_attr_parser_t<R>
     operator()(R&& value)
-        noexcept(std::is_nothrow_constructible_v<
-            attr_parser<
-                std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>,
-                std::basic_string_view<std::remove_extent_t<std::remove_cvref_t<R>>>
-            >,
-            R
-        >)
+        noexcept(std::is_nothrow_constructible_v<string_array_attr_parser_t<R>, R>)
     {
-        return {std::forward<R>(value)};
+        return string_array_attr_parser_t<R>{std::forward<R>(value)};
     }
 };
 

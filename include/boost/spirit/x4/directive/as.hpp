@@ -41,7 +41,6 @@ struct as_directive : unary_parser<Subject, as_directive<T, Subject>>
 
     static_assert(std::default_initializable<T>);
 
-    using base_type = unary_parser<Subject, as_directive>;
     using attribute_type = T;
     using subject_type = Subject;
 
@@ -52,15 +51,6 @@ private:
     static constexpr bool need_as_val = Subject::has_action;
 
 public:
-    template<class SubjectT>
-        requires
-            (!std::is_same_v<std::remove_cvref_t<SubjectT>, as_directive>) &&
-            std::is_constructible_v<base_type, SubjectT>
-    constexpr as_directive(SubjectT&& subject)
-        noexcept(std::is_nothrow_constructible_v<base_type, SubjectT>)
-        : base_type(std::forward<SubjectT>(subject))
-    {}
-
     // `as<T>(as<T>(subject))` forwards the outer `T&` for `subject`
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute OuterAttr>
         requires std::same_as<std::remove_const_t<OuterAttr>, T>

@@ -24,16 +24,9 @@ namespace boost::spirit::x4 {
 template<class Left, class Right>
 struct difference : binary_parser<Left, Right, difference<Left, Right>>
 {
-    using base_type = binary_parser<Left, Right, difference>;
-
     static constexpr bool handles_container = Left::handles_container;
 
-    template<class LeftT, class RightT>
-        requires std::is_constructible_v<base_type, LeftT, RightT>
-    constexpr difference(LeftT&& left, RightT&& right)
-        noexcept(std::is_nothrow_constructible_v<base_type, LeftT, RightT>)
-        : base_type(std::forward<LeftT>(left), std::forward<RightT>(right))
-    {}
+    using binary_parser<Left, Right, difference>::binary_parser;
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     [[nodiscard]] constexpr bool

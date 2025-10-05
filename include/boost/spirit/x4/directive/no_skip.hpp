@@ -25,19 +25,8 @@ namespace boost::spirit::x4 {
 template<class Subject>
 struct no_skip_directive : unary_parser<Subject, no_skip_directive<Subject>>
 {
-    using base_type = unary_parser<Subject, no_skip_directive<Subject>>;
-
     static constexpr bool is_pass_through_unary = true;
     static constexpr bool handles_container = Subject::handles_container;
-
-    template<class SubjectT>
-        requires
-            (!std::is_same_v<std::remove_cvref_t<SubjectT>, no_skip_directive>) &&
-            std::is_constructible_v<base_type, SubjectT>
-    constexpr no_skip_directive(SubjectT&& subject)
-        noexcept(std::is_nothrow_constructible_v<base_type, SubjectT>)
-        : base_type(std::forward<SubjectT>(subject))
-    {}
 
 private:
     template<class Context>

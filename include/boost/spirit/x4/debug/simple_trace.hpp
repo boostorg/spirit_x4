@@ -16,6 +16,7 @@
 #include <boost/spirit/x4/debug/print_attribute.hpp>
 #include <boost/spirit/x4/debug/debug_handler_state.hpp>
 
+#include <string_view>
 #include <concepts>
 #include <iostream>
 
@@ -63,7 +64,7 @@ struct simple_trace
     }
 
     template<std::forward_iterator It, std::sentinel_for<It> Se>
-    void print_some(char const* tag, It first, Se last) const
+    void print_some(std::string_view tag, It first, Se last) const
     {
         simple_trace::print_indent(indent);
 
@@ -83,7 +84,7 @@ struct simple_trace
         Se last,
         Attr const& attr,
         debug_handler_state const state,
-        std::string const& rule_name
+        std::string_view rule_name
     ) const
     {
         using enum debug_handler_state;
@@ -142,7 +143,7 @@ struct [[nodiscard]] scoped_rule_debug
     static_assert(X4Attribute<std::remove_reference_t<Attr>>);
 
     scoped_rule_debug(
-        char const* rule_name,
+        std::string_view rule_name,
         It const& first, Se const& last,
         Attr const& attr,
         bool const* parse_ok
@@ -168,7 +169,7 @@ struct [[nodiscard]] scoped_rule_debug
     }
 
     bool const* parse_ok = nullptr;
-    char const* rule_name = nullptr;
+    std::string_view rule_name;
     It const& first;
     Se const& last;
     Attr const& attr;

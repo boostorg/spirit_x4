@@ -41,8 +41,6 @@ struct literal_string : parser<literal_string<String, Encoding, Attr>>
     static constexpr bool has_attribute = !std::is_same_v<unused_type, attribute_type>;
     static constexpr bool handles_container = has_attribute;
 
-    literal_string() = delete; // Empty `literal_string` matches infinite times, leading to stack overflow
-
     template<class T, class... Rest>
         requires
             (!std::is_same_v<std::remove_cvref_t<T>, literal_string>) &&

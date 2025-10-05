@@ -22,24 +22,16 @@ namespace boost::spirit::x4 {
 template<class Subject>
 struct lexeme_directive : unary_parser<Subject, lexeme_directive<Subject>>
 {
-    using base_type = unary_parser<Subject, lexeme_directive<Subject>>;
     static constexpr bool is_pass_through_unary = true;
     static constexpr bool handles_container = Subject::handles_container;
 
-    template<class SubjectT>
-        requires
-            (!std::is_same_v<std::remove_cvref_t<SubjectT>, lexeme_directive>) &&
-            std::is_constructible_v<base_type, SubjectT>
-    constexpr lexeme_directive(SubjectT&& subject)
-        noexcept(std::is_nothrow_constructible_v<base_type, SubjectT>)
-        : base_type(std::forward<SubjectT>(subject))
-    {}
-
+private:
     template<class Context>
     using pre_skip_context_t = std::remove_cvref_t<decltype(
         x4::make_context<contexts::skipper>(std::declval<unused_skipper_t<Context>&>(), std::declval<Context const&>())
     )>;
 
+public:
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
         requires has_skipper_v<Context>
     [[nodiscard]] constexpr bool

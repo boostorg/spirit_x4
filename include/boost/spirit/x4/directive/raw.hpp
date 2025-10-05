@@ -34,20 +34,10 @@ struct raw_attribute_t {};
 template<class Subject>
 struct raw_directive : unary_parser<Subject, raw_directive<Subject>>
 {
-    using base_type = unary_parser<Subject, raw_directive<Subject>>;
     using attribute_type = detail::raw_attribute_t;
     using subject_type = Subject;
 
     static constexpr bool handles_container = true;
-
-    template<class SubjectT>
-        requires
-            (!std::is_same_v<std::remove_cvref_t<SubjectT>, raw_directive>) &&
-            std::is_constructible_v<base_type, SubjectT>
-    constexpr raw_directive(SubjectT&& subject)
-        noexcept(std::is_nothrow_constructible_v<base_type, SubjectT>)
-        : base_type(std::forward<SubjectT>(subject))
-    {}
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
     [[nodiscard]] constexpr bool

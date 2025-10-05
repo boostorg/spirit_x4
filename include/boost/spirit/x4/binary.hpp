@@ -38,7 +38,7 @@ struct binary_lit_parser : parser<binary_lit_parser<T, endian, bits>>
         requires
             (!std::is_same_v<std::remove_cvref_t<U>, binary_lit_parser>) &&
             std::is_constructible_v<T, U>
-    constexpr explicit binary_lit_parser(U n)
+    constexpr explicit binary_lit_parser(U&& n)
         noexcept(std::is_nothrow_constructible_v<T, U>)
         : n_(std::forward<U>(n))
     {}

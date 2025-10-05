@@ -30,14 +30,7 @@ namespace boost::spirit::x4 {
 template<class Left, class Right>
 struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
 {
-    using base_type = binary_parser<Left, Right, alternative>;
-
-    template<class LeftT, class RightT>
-        requires std::is_constructible_v<base_type, LeftT, RightT>
-    constexpr alternative(LeftT&& left, RightT&& right)
-        noexcept(std::is_nothrow_constructible_v<base_type, LeftT, RightT>)
-        : base_type(std::forward<LeftT>(left), std::forward<RightT>(right))
-    {}
+    using binary_parser<Left, Right, alternative>::binary_parser;
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context>
     [[nodiscard]] constexpr bool
@@ -170,7 +163,10 @@ operator|(Left&& left, Right&& right)
         >
     )
 {
-    return {as_parser(std::forward<Left>(left)), as_parser(std::forward<Right>(right))};
+    return alternative<as_parser_plain_t<Left>, as_parser_plain_t<Right>>{
+        as_parser(std::forward<Left>(left)),
+        as_parser(std::forward<Right>(right))
+    };
 }
 
 } // boost::spirit::x4

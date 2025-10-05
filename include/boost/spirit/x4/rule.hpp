@@ -31,14 +31,11 @@
 #include <boost/preprocessor/variadic/to_seq.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 
+#include <string_view>
 #include <concepts>
 #include <iterator>
 #include <type_traits>
 #include <utility>
-
-#ifndef BOOST_SPIRIT_X4_NO_RTTI
-# include <typeinfo>
-#endif
 
 #include <cassert>
 
@@ -252,7 +249,7 @@ public:
     >
     [[nodiscard]] static constexpr bool
     call_rule_definition(
-        RHS const& rhs, char const* rule_name,
+        RHS const& rhs, std::string_view rule_name,
         It& first, Se const& last,
         Context const& ctx, Exposed& exposed_attr
     )
@@ -332,10 +329,10 @@ struct rule_definition : parser<rule_definition<RuleID, RHS, RuleDefAttr, ForceA
 
     template<class RHS_T>
         requires std::is_constructible_v<RHS, RHS_T>
-    constexpr rule_definition(RHS_T&& rhs, char const* name)
+    constexpr rule_definition(RHS_T&& rhs, std::string_view name)
         noexcept(std::is_nothrow_constructible_v<RHS, RHS_T>)
         : rhs(std::forward<RHS_T>(rhs))
-        , name(name)
+        , name(std::move(name))
     {}
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Attr>
@@ -350,7 +347,7 @@ struct rule_definition : parser<rule_definition<RuleID, RHS, RuleDefAttr, ForceA
     }
 
     RHS rhs;
-    char const* name = "unnamed";
+    std::string_view name = "unnamed";
 };
 
 template<class Exposed>
@@ -407,26 +404,17 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
     static constexpr bool handles_container = traits::is_container_v<std::remove_const_t<RuleAttr>>;
     static constexpr bool force_attribute = ForceAttr;
 
-    char const* name = "unnamed";
+    std::string_view name = "unnamed";
 
-#ifndef BOOST_SPIRIT_X4_NO_RTTI
-    rule() : name(typeid(rule).name()) {}
-#else
-    constexpr rule() noexcept : name("unnamed") {}
-#endif
+    constexpr rule() = default;
 
-    constexpr rule(char const* name) noexcept
+    constexpr rule(std::string_view name) noexcept
         : name(name)
     {}
 
-    constexpr rule(rule const& r) noexcept
-        : name(r.name)
-    {
-        // Assert that we are not copying an uninitialized static rule. If
-        // the static is in another TU, it may be initialized after we copy
-        // it. If so, its name member will be nullptr.
-        assert(r.name != nullptr && "uninitialized rule"); // static initialization order fiasco
-    }
+    constexpr rule(char const* name)
+        : name(name)
+    {}
 
     // Primary overload
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context, X4Attribute Exposed>
@@ -510,7 +498,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
             is_parser_nothrow_castable_v<RHS> &&
             std::is_nothrow_constructible_v<
                 detail::rule_definition<RuleID, as_parser_plain_t<RHS>, RuleAttr, ForceAttr>,
-                as_parser_t<RHS>, char const*
+                as_parser_t<RHS>, std::string_view
             >
         )
     {
@@ -524,7 +512,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
             is_parser_nothrow_castable_v<RHS> &&
             std::is_nothrow_constructible_v<
                 detail::rule_definition<RuleID, as_parser_plain_t<RHS>, RuleAttr, true>,
-                as_parser_t<RHS>, char const*
+                as_parser_t<RHS>, std::string_view
             >
         )
     {
@@ -543,7 +531,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
             is_parser_nothrow_castable_v<RHS> &&
             std::is_nothrow_constructible_v<
                 detail::rule_definition<RuleID, as_parser_plain_t<RHS>, RuleAttr, ForceAttr, true>,
-                as_parser_t<RHS>, char const*
+                as_parser_t<RHS>, std::string_view
             >
         )
     {
@@ -557,7 +545,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
             is_parser_nothrow_castable_v<RHS> &&
             std::is_nothrow_constructible_v<
                 detail::rule_definition<RuleID, as_parser_plain_t<RHS>, RuleAttr, true, true>,
-                as_parser_t<RHS>, char const*
+                as_parser_t<RHS>, std::string_view
             >
         )
     {
@@ -574,8 +562,7 @@ struct rule_get_info
     template<class RuleT> // `rule` or `rule_definition`
     [[nodiscard]] static std::string operator()(RuleT const& rule_like)
     {
-        assert(rule_like.name != nullptr && "uninitialized rule"); // static initialization order fiasco
-        return rule_like.name ? rule_like.name : "uninitialized";
+        return std::string{rule_like.name};
     }
 };
 

@@ -30,14 +30,7 @@ namespace boost::spirit::x4 {
 template<class Left, class Right>
 struct sequence : binary_parser<Left, Right, sequence<Left, Right>>
 {
-    using base_type = binary_parser<Left, Right, sequence<Left, Right>>;
-
-    template<class LeftT, class RightT>
-        requires std::is_constructible_v<base_type, LeftT, RightT>
-    constexpr sequence(LeftT&& left, RightT&& right)
-        noexcept(std::is_nothrow_constructible_v<base_type, LeftT, RightT>)
-        : base_type(std::forward<LeftT>(left), std::forward<RightT>(right))
-    {}
+    using binary_parser<Left, Right, sequence>::binary_parser;
 
     template<std::forward_iterator It, std::sentinel_for<It> Se, class Context>
     [[nodiscard]] constexpr bool
