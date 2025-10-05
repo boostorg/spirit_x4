@@ -71,7 +71,7 @@ x4_define_tests(
     expect
     extract_int
     int
-    iterator_check
+    iterator
     kleene
     lexeme
     list

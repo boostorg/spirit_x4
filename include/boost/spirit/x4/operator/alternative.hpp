@@ -107,6 +107,7 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
     {
         static_assert(!std::same_as<std::remove_const_t<ContainerAttr>, unused_type>);
         static_assert(!std::same_as<std::remove_const_t<ContainerAttr>, unused_container_type>);
+        static_assert(!std::is_const_v<ContainerAttr>);
 
         // We can (ab)use the exposed attribute as the temporary workspace
         // if and only if the modification or rollback of the exposed attribute
@@ -136,7 +137,7 @@ struct alternative : binary_parser<Left, Right, alternative<Left, Right>>
         // Non-empty container
         // Since the attribute is a container, we can reuse the buffer when the `left` fails
         //
-        ContainerAttr attr_temp;
+        unwrap_container_appender_t<ContainerAttr> attr_temp;
 
         if (detail::parse_alternative(this->left, first, last, ctx, attr_temp)) {
             x4::move_to(std::move(attr_temp), attr);

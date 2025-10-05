@@ -16,6 +16,7 @@
 #include <boost/fusion/include/make_vector.hpp>
 #include <boost/fusion/include/equal_to.hpp>
 
+#include <concepts>
 #include <iterator>
 #include <optional>
 #include <string>
@@ -36,7 +37,7 @@ struct checked_attr_parser : x4::attr_parser<Value>
     [[nodiscard]] constexpr bool
     parse(It& first, Se const& last, Context const& ctx, Attr& attr_) const
     {
-        static_assert(std::is_same_v<Expected, Attr>, "attribute type check failed");
+        static_assert(std::same_as<Expected, x4::unwrap_container_appender_t<Attr>>);
         return base_type::parse(first, last, ctx, attr_);
     }
 };

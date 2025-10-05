@@ -50,7 +50,11 @@ struct build_optional<unused_type>
 
 // Get the optional's value_type. Handles unused_type as well.
 template<class T>
-struct optional_value { using type = typename T::value_type; };
+struct optional_value
+{
+    static_assert(is_optional_v<T>);
+    using type = typename T::value_type;
+};
 
 template<class T>
 using optional_value_t = typename optional_value<T>::type;

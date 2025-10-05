@@ -10,6 +10,7 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
+#include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/unused.hpp>
 
 #include <boost/fusion/support/category_of.hpp>
@@ -22,6 +23,13 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+
+namespace boost::spirit::x4 {
+
+template<class ContainerAttr>
+struct container_appender;
+
+} // boost::spirit::x4
 
 namespace boost::spirit::x4::traits {
 
@@ -185,7 +193,13 @@ namespace detail {
 struct append_fn
 {
     template<class Container, std::forward_iterator It, std::sentinel_for<It> Se>
+    static constexpr bool is_specialized = requires(Container& c, It first, Se last) {
+        append_container<Container>::call(c, first, last);
+    };
+
+    template<class Container, std::forward_iterator It, std::sentinel_for<It> Se>
         requires
+            (!is_specialized<Container, It, Se>) &&
             is_associative_v<Container> &&
             requires(Container& c, It first, Se last) {
                 c.insert(first, last);
@@ -198,6 +212,7 @@ struct append_fn
 
     template<class Container, std::forward_iterator It, std::sentinel_for<It> Se>
         requires
+            (!is_specialized<Container, It, Se>) &&
             (!is_associative_v<Container>) &&
             requires(Container& c, It first, Se last) {
                 c.insert(std::ranges::end(c), first, last);
@@ -209,9 +224,7 @@ struct append_fn
     }
 
     template<class Container, std::forward_iterator It, std::sentinel_for<It> Se>
-        requires requires(Container& c, It first, Se last) {
-            append_container<Container>::call(c, first, last);
-        }
+        requires is_specialized<Container, It, Se>
     static constexpr void operator()(Container& c, It first, Se last)
         noexcept(noexcept(append_container<Container>::call(c, first, last)))
     {
@@ -409,6 +422,11 @@ struct is_container : std::false_type
     static_assert(!std::is_reference_v<T>);
     static_assert(!std::is_const_v<T>);
 };
+
+template<class ContainerAttr>
+struct is_container<container_appender<ContainerAttr>>
+    : is_container<ContainerAttr>
+{};
 
 template<class T>
     requires

@@ -12,6 +12,7 @@
 #include <boost/spirit/config.hpp>
 #include <boost/spirit/x4/core/move_to.hpp>
 #include <boost/spirit/x4/core/parser.hpp>
+#include <boost/spirit/x4/core/container_appender.hpp>
 
 #include <boost/spirit/x4/traits/container_traits.hpp>
 #include <boost/spirit/x4/traits/attribute.hpp>
@@ -195,22 +196,10 @@ struct parse_into_container_impl<Parser, Context>
     {
         static_assert(!std::same_as<std::remove_const_t<Attr>, unused_type>);
         static_assert(!std::same_as<std::remove_const_t<Attr>, unused_container_type>);
-
         static_assert(Parsable<Parser, It, Se, Context, Attr>);
 
-        if (traits::is_empty(attr)) {
-            return parser.parse(first, last, ctx, attr);
-        }
-
-        Attr rest; // default-initialize
-        if (!parser.parse(first, last, ctx, rest)) return false;
-
-        traits::append(
-            attr,
-            std::make_move_iterator(traits::begin(rest)),
-            std::make_move_iterator(traits::end(rest))
-        );
-        return true;
+        auto&& appender = x4::make_container_appender(attr);
+        return parser.parse(first, last, ctx, appender);
     }
 };
 

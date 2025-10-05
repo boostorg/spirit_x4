@@ -41,7 +41,7 @@ namespace boost::spirit::x4::detail {
 template<class Parser, class Context>
 struct sequence_size
 {
-    static constexpr int value = traits::has_attribute_v<Parser, Context>;
+    static constexpr std::size_t value = traits::has_attribute_v<Parser, Context>;
 };
 
 template<class Parser, class Context>
@@ -53,10 +53,14 @@ struct sequence_size<Parser, Context>
 template<class L, class R, class Context>
 struct sequence_size<sequence<L, R>, Context>
 {
-    static constexpr int value =
+    static constexpr std::size_t value =
         sequence_size<L, Context>::value +
         sequence_size<R, Context>::value;
 };
+
+template<class Parser, class Context>
+constexpr bool is_sequence_size_more_than_1 = sequence_size<Parser, Context>::value > 1;
+
 
 struct pass_sequence_attribute_unused
 {
@@ -127,11 +131,11 @@ struct partition_attribute
         "The parser expects tuple-like attribute type"
     );
 
-    static constexpr int l_size = sequence_size<L, Context>::value;
-    static constexpr int r_size = sequence_size<R, Context>::value;
+    static constexpr std::size_t l_size = sequence_size<L, Context>::value;
+    static constexpr std::size_t r_size = sequence_size<R, Context>::value;
 
-    static constexpr int actual_size = fusion::result_of::size<Attr>::value;
-    static constexpr int expected_size = l_size + r_size;
+    static constexpr std::size_t actual_size = static_cast<std::size_t>(fusion::result_of::size<Attr>::value);
+    static constexpr std::size_t expected_size = l_size + r_size;
 
     // If you got an error here, then you are trying to pass
     // a fusion sequence with the wrong number of elements
@@ -243,8 +247,10 @@ parse_sequence(
     It& first, Se const& last,
     Context const& ctx,
     Attr& attr
-)
+) // TODO: noexcept
 {
+    static_assert(X4Attribute<Attr>);
+
     using partition = partition_attribute<
         typename Parser::left_type,
         typename Parser::right_type,
@@ -258,19 +264,19 @@ parse_sequence(
     auto&& l_attr = l_pass::call(l_part);
     auto&& r_attr = r_pass::call(r_part);
 
-    It const first_saved = first;
+    auto&& l_attr_appender = x4::make_container_appender(l_attr);
+    auto&& r_attr_appender = x4::make_container_appender(r_attr);
 
-    if (parser.left.parse(first, last, ctx, l_attr) &&
-        parser.right.parse(first, last, ctx, r_attr)
+    It local_it = first;
+    if (parser.left.parse(local_it, last, ctx, l_attr_appender) &&
+        parser.right.parse(local_it, last, ctx, r_attr_appender)
     ) {
+        first = std::move(local_it);
         return true;
     }
-    first = first_saved;
+
     return false;
 }
-
-template<class Parser, class Context>
-constexpr bool pass_sequence_container_attribute = sequence_size<Parser, Context>::value > 1;
 
 template<
     class Parser,
@@ -278,9 +284,9 @@ template<
     class Context,
     X4Attribute Attr
 >
-    requires pass_sequence_container_attribute<Parser, Context>
+    requires is_sequence_size_more_than_1<Parser, Context>
 [[nodiscard]] constexpr bool
-parse_sequence_container(
+parse_sequence_impl(
     Parser const& parser,
     It& first, Se const& last,
     Context const& ctx,
@@ -292,30 +298,21 @@ parse_sequence_container(
     return parser.parse(first, last, ctx, attr);
 }
 
-template<
-    class Parser,
-    std::forward_iterator It, std::sentinel_for<It> Se,
-    class Context,
-    class Attr // unconstrained
->
-    requires (!pass_sequence_container_attribute<Parser, Context>)
+template<class Parser, std::forward_iterator It, std::sentinel_for<It> Se, class Context>
+    requires (!is_sequence_size_more_than_1<Parser, Context>)
 [[nodiscard]] constexpr bool
-parse_sequence_container(
+parse_sequence_impl(
     Parser const& parser,
     It& first, Se const& last,
     Context const& ctx,
-    Attr& attr
+    X4Attribute auto& attr
 )
     noexcept(noexcept(detail::parse_into_container(parser, first, last, ctx, attr)))
 {
     return detail::parse_into_container(parser, first, last, ctx, attr);
 }
 
-template<
-    class Parser,
-    std::forward_iterator It, std::sentinel_for<It> Se,
-    class Context
->
+template<class Parser, std::forward_iterator It, std::sentinel_for<It> Se, class Context>
 [[nodiscard]] constexpr bool
 parse_sequence(
     Parser const& parser,
@@ -325,17 +322,17 @@ parse_sequence(
 )
     noexcept(
         std::is_nothrow_copy_assignable_v<It> &&
-        noexcept(detail::parse_sequence_container(parser.left, first, last, ctx, attr)) &&
-        noexcept(detail::parse_sequence_container(parser.right, first, last, ctx, attr))
+        noexcept(detail::parse_sequence_impl(parser.left, first, last, ctx, attr)) &&
+        noexcept(detail::parse_sequence_impl(parser.right, first, last, ctx, attr))
     )
 {
-    It const first_saved = first;
-    if (detail::parse_sequence_container(parser.left, first, last, ctx, attr) &&
-        detail::parse_sequence_container(parser.right, first, last, ctx, attr)
+    It local_it = first;
+    if (detail::parse_sequence_impl(parser.left, local_it, last, ctx, attr) &&
+        detail::parse_sequence_impl(parser.right, local_it, last, ctx, attr)
     ) {
+        first = std::move(local_it);
         return true;
     }
-    first = first_saved;
     return false;
 }
 
@@ -379,22 +376,14 @@ struct parse_into_container_impl<sequence<Left, Right>, Context>
         );
 
         if constexpr (
-            std::is_same_v<std::remove_const_t<Attr>, unused_type> ||
-            std::is_same_v<std::remove_const_t<Attr>, unused_container_type>
+            std::same_as<std::remove_const_t<Attr>, unused_type> ||
+            std::same_as<std::remove_const_t<Attr>, unused_container_type>
         ) {
             return detail::parse_sequence(parser, first, last, ctx, x4::assume_container(attr));
 
         } else {
-            Attr attr_;
-            if (!detail::parse_sequence(parser, first, last, ctx, attr_)) {
-                return false;
-            }
-            traits::append(
-                attr,
-                std::make_move_iterator(traits::begin(attr_)),
-                std::make_move_iterator(traits::end(attr_))
-            );
-            return true;
+            auto&& appender = x4::make_container_appender(x4::assume_container(attr));
+            return detail::parse_sequence(parser, first, last, ctx, appender);
         }
     }
 };

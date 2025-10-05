@@ -11,11 +11,14 @@
 ==============================================================================*/
 
 #include <boost/spirit/config.hpp>
+#include <boost/spirit/core/type_traits.hpp>
+
 #include <boost/spirit/x4/core/parser.hpp>
 #include <boost/spirit/x4/core/skip_over.hpp>
 #include <boost/spirit/x4/core/expectation.hpp>
 #include <boost/spirit/x4/core/context.hpp>
 #include <boost/spirit/x4/core/action_context.hpp>
+#include <boost/spirit/x4/core/container_appender.hpp>
 
 #include <boost/spirit/x4/traits/transform_attribute.hpp>
 
@@ -361,34 +364,41 @@ struct narrowing_checker
         requires requires(T&& t) { { Dest{std::forward<T>(t)} }; };
 };
 
-template<class Exposed, typename Attr>
+template<class Exposed, class RuleAttr>
 concept RuleAttrNeedsNarrowingConversion =
-    X4Attribute<Attr> &&
-    !requires { narrowing_checker<std::remove_const_t<Exposed>>::operator()(std::declval<Attr>()); };
+    X4Attribute<RuleAttr> &&
+    !requires {
+        narrowing_checker<
+            unwrap_container_appender_t<std::remove_const_t<Exposed>>
+        >::operator()(std::declval<RuleAttr>());
+    };
 
-// Resolve "The Spirit X3 rule problem" in Boost.Parser's documentation
+// Resolves "The Spirit X3 rule problem" in Boost.Parser's documentation
 // https://www.boost.org/doc/libs/1_89_0/doc/html/boost_parser/this_library_s_relationship_to_boost_spirit.html#boost_parser.this_library_s_relationship_to_boost_spirit.the_spirit_x3_rule_problem
 // https://github.com/boostorg/spirit_x4/issues/38
-template<class Exposed, typename Attr>
+template<class Exposed, class RuleAttr>
 concept RuleAttrTransformable =
     X4Attribute<std::remove_const_t<Exposed>> &&
-    X4Attribute<Attr> &&
-    std::default_initializable<Attr> &&
-    std::is_assignable_v<Exposed&, Attr> &&
-    !RuleAttrNeedsNarrowingConversion<Exposed, Attr>;
+    X4Attribute<RuleAttr> &&
+    std::default_initializable<RuleAttr> &&
+    std::is_assignable_v<unwrap_container_appender_t<std::remove_const_t<Exposed>>&, RuleAttr> &&
+    !RuleAttrNeedsNarrowingConversion<
+        unwrap_container_appender_t<std::remove_const_t<Exposed>>,
+        RuleAttr
+    >;
 
-template<class Exposed, typename Attr>
+template<class Exposed, class RuleAttr>
 concept RuleAttrCompatible =
-    std::same_as<std::remove_const_t<Exposed>, Attr> ||
-    RuleAttrTransformable<Exposed, Attr>;
+    std::same_as<std::remove_const_t<Exposed>, RuleAttr> ||
+    RuleAttrTransformable<Exposed, RuleAttr>;
 
 } // detail
 
 template<class RuleID, X4Attribute RuleAttr, bool ForceAttr>
 struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
 {
-    static_assert(!std::is_reference_v<RuleAttr>, "reference type is not allowed for rule attribute type");
     static_assert(X4Attribute<RuleAttr>);
+    static_assert(X4UnusedAttribute<RuleAttr> || !std::is_const_v<RuleAttr>, "Rule attribute cannot be const qualified");
 
     using id = RuleID;
     using attribute_type = RuleAttr;
@@ -443,20 +453,29 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
         using detail::parse_rule; // ADL
 
         if constexpr (std::same_as<std::remove_const_t<Exposed>, RuleAttr>) {
-            return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, exposed_attr));
+            return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, exposed_attr));  // NOLINT(bugprone-non-zero-enum-to-bool-conversion)
 
         } else {
             static_assert(detail::RuleAttrTransformable<Exposed, RuleAttr>);
-            static_assert(std::is_assignable_v<Exposed&, RuleAttr>);
             static_assert(!detail::RuleAttrNeedsNarrowingConversion<Exposed, RuleAttr>);
 
+            // TODO: specialize `container_appender` case, do not create temporary
+
             RuleAttr rule_attr;
-            if (!static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, rule_attr))) {
+            if (!static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, rule_attr))) {  // NOLINT(bugprone-non-zero-enum-to-bool-conversion)
                 return false;
             }
 
-            // x4::move_to(std::move(rule_attr), exposed_attr); // X3's behavior
-            exposed_attr = std::move(rule_attr);
+            if constexpr (is_ttp_specialization_of_v<std::remove_const_t<Exposed>, container_appender>) {
+                traits::append(
+                    exposed_attr.container,
+                    std::make_move_iterator(traits::begin(rule_attr)),
+                    std::make_move_iterator(traits::end(rule_attr))
+                );
+            } else {
+                static_assert(std::is_assignable_v<Exposed&, RuleAttr>);
+                exposed_attr = std::move(rule_attr);
+            }
             return true;
         }
     }
@@ -481,7 +500,7 @@ struct rule : parser<rule<RuleID, RuleAttr, ForceAttr>>
         auto&& rule_agnostic_ctx = x4::remove_first_context<contexts::rule_val>(ctx);
 
         using detail::parse_rule; // ADL
-        return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, no_attr));
+        return static_cast<bool>(parse_rule(detail::rule_id<RuleID>{}, first, last, rule_agnostic_ctx, no_attr));  // NOLINT(bugprone-non-zero-enum-to-bool-conversion)
     }
 
     template<X4Subject RHS>

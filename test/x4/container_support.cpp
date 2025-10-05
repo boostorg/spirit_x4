@@ -62,10 +62,10 @@ struct is_substitute<T, U>
 namespace check_substitute {
 
 using x4::traits::is_substitute_v;
-static_assert( is_substitute_v<foo<int>, foo<int>>,  "is_substitute problem");
-static_assert(!is_substitute_v<foo<int>, foo<long>>, "is_substitute problem");
-static_assert( is_substitute_v<bar<int>, bar<int>>,  "is_substitute problem");
-static_assert(!is_substitute_v<bar<int>, bar<long>>, "is_substitute problem");
+static_assert( is_substitute_v<foo<int>, foo<int>>);
+static_assert(!is_substitute_v<foo<int>, foo<long>>);
+static_assert( is_substitute_v<bar<int>, bar<int>>);
+static_assert(!is_substitute_v<bar<int>, bar<long>>);
 
 } // check_substitute
 
@@ -74,7 +74,7 @@ namespace {
 constexpr x4::rule<class pair_rule, std::pair<std::string, std::string>> pair_rule("pair");
 constexpr x4::rule<class string_rule, std::string> string_rule("string");
 
-constexpr auto pair_rule_def = string_rule > x4::lit('=') > string_rule;
+constexpr auto pair_rule_def = string_rule >> x4::lit('=') >> string_rule;
 constexpr auto string_rule_def = x4::lexeme[*x4::standard::alnum];
 
 BOOST_SPIRIT_X4_DEFINE(pair_rule)
@@ -228,23 +228,72 @@ void test_string_support()
 
 TEST_CASE("container_support")
 {
+    using x4::traits::is_container_v;
     using x4::traits::is_associative_v;
 
     // ------------------------------------------------------------------
 
-    static_assert(is_associative_v<std::set<int>>, "is_associative problem");
-    static_assert(is_associative_v<std::unordered_set<int>>, "is_associative problem");
-    static_assert(is_associative_v<std::multiset<int>>, "is_associative problem");
-    static_assert(is_associative_v<std::unordered_multiset<int>>, "is_associative problem");
-    static_assert(is_associative_v<std::map<int,int>>, "is_associative problem");
-    static_assert(is_associative_v<std::unordered_map<int,int>>, "is_associative problem");
-    static_assert(is_associative_v<std::multimap<int,int>>, "is_associative problem");
-    static_assert(is_associative_v<std::unordered_multimap<int,int>>, "is_associative problem");
+    STATIC_CHECK(is_container_v<std::string>);
+    STATIC_CHECK(!is_associative_v<std::string>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::string>>);
+    STATIC_CHECK(!is_associative_v<x4::container_appender<std::string>>);
 
-    static_assert(!is_associative_v<std::vector<int>>, "is_associative problem");
-    static_assert(!is_associative_v<std::string>, "is_associative problem");
-    static_assert(!is_associative_v<std::deque<int>>, "is_associative problem");
-    static_assert(!is_associative_v<std::list<int>>, "is_associative problem");
+    STATIC_CHECK(is_container_v<std::vector<int>>);
+    STATIC_CHECK(!is_associative_v<std::vector<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::vector<int>>>);
+    STATIC_CHECK(!is_associative_v<x4::container_appender<std::vector<int>>>);
+
+    STATIC_CHECK(is_container_v<std::deque<int>>);
+    STATIC_CHECK(!is_associative_v<std::deque<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::deque<int>>>);
+    STATIC_CHECK(!is_associative_v<x4::container_appender<std::deque<int>>>);
+
+    STATIC_CHECK(is_container_v<std::list<int>>);
+    STATIC_CHECK(!is_associative_v<std::list<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::list<int>>>);
+    STATIC_CHECK(!is_associative_v<x4::container_appender<std::list<int>>>);
+
+    // ------------------------------------------------------------------
+
+    STATIC_CHECK(is_container_v<std::set<int>>);
+    STATIC_CHECK(is_associative_v<std::set<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::set<int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::set<int>>>);
+
+    STATIC_CHECK(is_container_v<std::unordered_set<int>>);
+    STATIC_CHECK(is_associative_v<std::unordered_set<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::unordered_set<int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::unordered_set<int>>>);
+
+    STATIC_CHECK(is_container_v<std::multiset<int>>);
+    STATIC_CHECK(is_associative_v<std::multiset<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::multiset<int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::multiset<int>>>);
+
+    STATIC_CHECK(is_container_v<std::unordered_multiset<int>>);
+    STATIC_CHECK(is_associative_v<std::unordered_multiset<int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::unordered_multiset<int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::unordered_multiset<int>>>);
+
+    STATIC_CHECK(is_container_v<std::map<int,int>>);
+    STATIC_CHECK(is_associative_v<std::map<int,int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::map<int,int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::map<int,int>>>);
+
+    STATIC_CHECK(is_container_v<std::unordered_map<int,int>>);
+    STATIC_CHECK(is_associative_v<std::unordered_map<int,int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::unordered_map<int,int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::unordered_map<int,int>>>);
+
+    STATIC_CHECK(is_container_v<std::multimap<int,int>>);
+    STATIC_CHECK(is_associative_v<std::multimap<int,int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::multimap<int,int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::multimap<int,int>>>);
+
+    STATIC_CHECK(is_container_v<std::unordered_multimap<int,int>>);
+    STATIC_CHECK(is_associative_v<std::unordered_multimap<int,int>>);
+    STATIC_CHECK(is_container_v<x4::container_appender<std::unordered_multimap<int,int>>>);
+    STATIC_CHECK(is_associative_v<x4::container_appender<std::unordered_multimap<int,int>>>);
 
     // ------------------------------------------------------------------
 

@@ -120,7 +120,7 @@ run seek.cpp catch2 ;
 run unused.cpp catch2 ;
 run attribute_type_check.cpp catch2 ;
 run error_handler.cpp catch2 ;
-run iterator_check.cpp catch2 ;
+run iterator.cpp catch2 ;
 
 run to_utf8.cpp catch2 ;
 

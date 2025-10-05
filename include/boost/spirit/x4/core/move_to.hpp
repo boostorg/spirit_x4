@@ -11,6 +11,8 @@
 =============================================================================*/
 
 #include <boost/spirit/config.hpp>
+#include <boost/spirit/core/type_traits.hpp>
+
 #include <boost/spirit/x4/traits/attribute_category.hpp>
 #include <boost/spirit/x4/traits/tuple_traits.hpp>
 #include <boost/spirit/x4/traits/variant_traits.hpp>
@@ -203,21 +205,29 @@ move_to(Source&& src, Dest& dest)
 
 // Containers -------------------------------------------------
 
+template<class ContainerAttr>
+struct container_appender;
+
 template<std::forward_iterator It, std::sentinel_for<It> Se, traits::CategorizedAttr<traits::container_attr> Dest>
 constexpr void
 move_to(It first, Se last, Dest& dest)
     // never noexcept, requires container insertion
 {
+    static_assert(!std::same_as<std::remove_const_t<Dest>, unused_type>);
     static_assert(!std::same_as<std::remove_const_t<Dest>, unused_container_type>);
 
-    // Be careful, this may lead to converting surprisingly incompatible types,
+    // Be careful, this may result in converting surprisingly incompatible types,
     // for example, `std::vector<int>` and `std::set<int>`. Such types must be
     // handled *before* invoking `move_to`.
 
-    if (traits::is_empty(dest)) {
-        dest = Dest(first, last);
-    } else {
+    if constexpr (is_ttp_specialization_of_v<std::remove_const_t<Dest>, container_appender>) {
         traits::append(dest, first, last);
+
+    } else {
+        if (!traits::is_empty(dest)) {
+            traits::clear(dest);
+        }
+        traits::append(dest, first, last); // try to reuse underlying memory buffer
     }
 }
 
@@ -247,8 +257,13 @@ constexpr void
 move_to(Source&& src, Dest& dest)
     noexcept(std::is_nothrow_assignable_v<Dest&, Source&&>)
 {
-    static_assert(std::is_assignable_v<Dest&, Source>);
-    dest = std::forward<Source>(src);
+    if constexpr (is_ttp_specialization_of_v<std::remove_const_t<Dest>, container_appender>) {
+        static_assert(std::is_assignable_v<typename std::remove_const_t<Dest>::container_type&, Source>);
+        dest.container = std::forward<Source>(src);
+    } else {
+        static_assert(std::is_assignable_v<Dest&, Source>);
+        dest = std::forward<Source>(src);
+    }
 }
 
 template<traits::X4Container Source, traits::CategorizedAttr<traits::container_attr> Dest>

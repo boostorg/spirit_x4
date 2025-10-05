@@ -34,10 +34,10 @@ concept X4NonUnusedAttribute =
     !X4UnusedAttribute<T> &&
     std::is_object_v<T> && // implies not reference
     !std::is_base_of_v<detail::parser_base, std::remove_const_t<T>> &&
-    std::move_constructible<T>;
+    std::move_constructible<std::remove_const_t<T>>;
     // TODO: `fusion::iterator_range` does not satisfy these due to `fusion::vector`'s iterator being a reference type
-    //std::default_initializable<T> &&
-    //std::assignable_from<T&, T>;
+    //std::default_initializable<std::remove_const_t<T>> &&
+    //std::assignable_from<std::remove_const_t<T>&, std::remove_const_t<T>>;
 
 template<class T>
 concept X4Attribute = X4UnusedAttribute<T> || X4NonUnusedAttribute<T>;

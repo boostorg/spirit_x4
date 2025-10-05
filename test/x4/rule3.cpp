@@ -32,15 +32,6 @@
 # pragma warning(disable: 4709) // comma operator within array index expression
 #endif
 
-struct f
-{
-    template<class Context>
-    void operator()(Context const& ctx) const
-    {
-        x4::_val(ctx) += x4::_attr(ctx);
-    }
-};
-
 namespace check_stationary {
 
 x4::rule<class a_r, spirit_test::stationary> const a;
@@ -113,7 +104,9 @@ TEST_CASE("rule3")
         std::string s;
         using rule_type = rule<class r, std::string>;
 
-        auto rdef = rule_type{} = alpha [f()];
+        auto rdef = rule_type{} = alpha[([](auto& ctx) {
+            x4::_val(ctx) += x4::_attr(ctx);
+        })];
 
         REQUIRE(parse("abcdef", +rdef, s));
         CHECK(s == "abcdef");
