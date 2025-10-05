@@ -45,9 +45,9 @@ struct pseudo_attribute
     using attribute_type = Attr;
     using type = Attr;
 
-    [[nodiscard]] static constexpr type&& call(It&, Se const&, Attr&& attr_) noexcept
+    [[nodiscard]] static constexpr type&& call(It&, Se const&, Attr&& attr_) noexcept  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
     {
-        return static_cast<type&&>(attr_);
+        return static_cast<Attr&&>(attr_);
     }
 };
 
@@ -107,7 +107,7 @@ struct has_attribute
     static_assert(requires {
         typename attribute_of<Component, Context>::type;
     });
-    static constexpr bool value = !std::same_as<attribute_of_t<Component, Context>, unused_type>;
+    static constexpr bool value = !std::is_same_v<attribute_of_t<Component, Context>, unused_type>;
 };
 
 template<class Component, class Context>
@@ -115,11 +115,13 @@ constexpr bool has_attribute_v = has_attribute<Component, Context>::value;
 
 template<class Component, class Context>
     requires requires {
-        { Component::has_attribute } -> std::same_as<bool>;
+        Component::has_attribute;
+        requires std::same_as<std::remove_const_t<decltype(Component::has_attribute)>, bool>;
     }
 struct has_attribute<Component, Context>
-    : std::bool_constant<Component::has_Attr>
-{};
+{
+    static constexpr bool value = Component::has_attribute;
+};
 
 template<class Component, class Context>
     requires Component::is_pass_through_unary
@@ -128,7 +130,7 @@ struct has_attribute<Component, Context>
     static_assert(requires {
         typename Component::subject_type;
     });
-    static constexpr bool value = has_attribute_v<typename Component::subject_type, Context>;
+    static constexpr bool value = has_attribute<typename Component::subject_type, Context>::value;
 };
 
 } // boost::spirit::x4::traits
