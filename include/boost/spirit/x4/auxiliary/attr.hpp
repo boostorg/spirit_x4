@@ -80,7 +80,10 @@ using string_array_attr_parser_t = attr_parser<
 } // detail
 
 template<traits::CharArray R>
-attr_parser(R const&) -> detail::string_array_attr_parser_t<R>;
+attr_parser(R const&) -> attr_parser<
+    std::basic_string<std::remove_extent_t<std::remove_cvref_t<R>>>,
+    std::basic_string_view<std::remove_extent_t<std::remove_cvref_t<R>>>
+>;
 
 template<class T, class HeldValueT>
 struct get_info<attr_parser<T, HeldValueT>>
